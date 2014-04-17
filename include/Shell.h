@@ -6,6 +6,11 @@
 #include "LeapListener.h"
 #include "MeshHand.h"
 #include "Render.h"
+#if defined(CINDER_COCOA)
+#include <boost/uuid/sha1.hpp>
+#include <mach-o/getsect.h>
+#include <mach-o/dyld.h>
+#endif
 
 class LeapShell : public ci::app::AppBasic {
 public:

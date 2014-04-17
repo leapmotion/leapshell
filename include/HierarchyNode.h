@@ -26,7 +26,7 @@ public:
   // Uniquely identifies this item in the hierearchy.  This item's ancestry should be derivable from the path.
   virtual std::string path () const = 0;
   // Returns the hierarchy-specific meta
-  virtual ... metadata () const = 0;
+  virtual void metadata () const = 0;
 
   // Provides a way to open/activate/execute a node (e.g. run an executable or open a C++ class source file).
   virtual OpenResult open (std::vector<std::string> const &parameters) const = 0;
