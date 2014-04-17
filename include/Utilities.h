@@ -30,6 +30,10 @@ struct ExponentialFilter {
   float targetFramerate;
 };
 
+inline ci::Vec3f ToVec3f(const Vector3& vec) {
+  return ci::Vec3f(static_cast<float>(vec.x()), static_cast<float>(vec.y()), static_cast<float>(vec.z()));
+}
+
 static const int TIME_STAMP_TICKS_PER_SEC = 1000000;
 static const double TIME_STAMP_SECS_TO_TICKS  = static_cast<double>(TIME_STAMP_TICKS_PER_SEC);
 static const double TIME_STAMP_TICKS_TO_SECS  = 1.0/TIME_STAMP_SECS_TO_TICKS;

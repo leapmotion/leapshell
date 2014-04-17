@@ -5,6 +5,7 @@
 #include "Resources.h"
 #include "LeapListener.h"
 #include "MeshHand.h"
+#include "Render.h"
 
 class LeapShell : public ci::app::AppBasic {
 public:
@@ -26,6 +27,8 @@ public:
   virtual void resize() override;
 
 private:
+
+  void updateGlobals();
 
 #if defined(CINDER_COCOA)
   ci::DataSourceRef loadResource(const std::string& macPath) {
@@ -61,9 +64,9 @@ private:
   LeapListener m_leapListener;
   Leap::Controller m_leapController;
   std::deque<Leap::Frame> m_frames;
-  ci::gl::TextureFontRef m_textureFont;
 
   ci::params::InterfaceGlRef m_params;
+  Render* m_render;
 };
 
 #endif

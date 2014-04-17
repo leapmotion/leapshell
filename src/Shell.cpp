@@ -1,14 +1,18 @@
 // Copyright (c) 2010 - 2014 Leap Motion. All rights reserved. Proprietary and confidential.
 #include "StdAfx.h"
 #include "Shell.h"
+#include "Globals.h"
 
-LeapShell::LeapShell()
+LeapShell::LeapShell() :
+  m_render(nullptr)
 {
   m_leapController.addListener(m_leapListener);
+  m_render = new Render();
 }
 
 LeapShell::~LeapShell()
 {
+  delete m_render;
   m_leapController.removeListener(m_leapListener);
 }
 
@@ -29,7 +33,8 @@ void LeapShell::prepareSettings(Settings* settings)
 
 void LeapShell::setup()
 {
-  m_textureFont = ci::gl::TextureFont::create(ci::Font(loadResource(RES_FONT_FREIGHTSANS_TTF), 36.0f));
+  Globals::fontRegular = ci::gl::TextureFont::create(ci::Font(loadResource(RES_FONT_FREIGHTSANS_TTF), 36.0f));
+  Globals::fontBold = ci::gl::TextureFont::create(ci::Font(loadResource(RES_FONT_FREIGHTSANSBOLD_TTF), 36.0f));
 
   m_params = ci::params::InterfaceGl::create(getWindow(), "App parameters", ci::app::toPixels(ci::Vec2i(200, 400)));
   m_params->minimize();
@@ -72,7 +77,7 @@ void LeapShell::keyUp(ci::app::KeyEvent event)
 
 void LeapShell::update()
 {
-  const double curTimeSeconds = ci::app::getElapsedSeconds();
+  updateGlobals();
 
   std::deque<Leap::Frame> frames = m_leapListener.grabFrames();
 
@@ -88,7 +93,9 @@ void LeapShell::draw()
   ci::gl::clear();
 
   m_params->draw();
+  m_render->draw();
 
+  ci::gl::setMatricesWindow(getWindowSize());
   ci::gl::drawString("FPS: " + ci::toString(getAverageFps()), ci::Vec2f(10.0f, 10.0f), ci::ColorA::white(), ci::Font("Arial", 18));
 }
 
@@ -98,6 +105,14 @@ void LeapShell::resize()
   const GLsizei height = static_cast<GLsizei>(getWindowHeight());
 
   glViewport(0, 0, width, height);
+  updateGlobals();
+}
+
+void LeapShell::updateGlobals() {
+  Globals::curTimeSeconds = ci::app::getElapsedSeconds();
+  Globals::windowHeight = getWindowHeight();
+  Globals::windowWidth = getWindowWidth();
+  Globals::aspectRatio = getWindowAspectRatio();
 }
 
 CINDER_APP_BASIC(LeapShell, ci::app::RendererGl)
