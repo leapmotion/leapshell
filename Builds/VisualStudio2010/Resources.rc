@@ -1,0 +1,8 @@
+#include "../include/Resources.h"
+
+1	ICON	"..\\resources\\cinder_app_icon.ico"
+
+RES_FONT_FREIGHTSANS_TTF
+RES_FONT_FREIGHTSANSBOLD_TTF
+RES_LEFT_HAND_FBX
+RES_RIGHT_HAND_FBX
