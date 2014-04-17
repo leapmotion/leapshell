@@ -1,0 +1,228 @@
+Architecture/design for FileSys3d (or pick your own awesome name)
+
+Minimal feature set
+- No mouse/keyboard use necessary (except maybe to type searches)
+- Opening files/running programs
+- maybe moving/copying/deleting/renaming files
+- Filesystem search function
+
+Modular design
+- filesystem module -- querying the filesystem, opening/moving/copying/deleting files, etc
+- OS integration module -- bringing this app to foreground/background, dealing with focus/activation
+- visualization module -- visual representation of the hierarchy, navigating the hierarchy
+    * navigation submodule (dependent on the visualization module)
+    * layout submodule (dependent on the visualization module)
+- interaction submodule -- activating/grabbing/moving items
+
+Design goals
+
+Filesystem Module (Jon)
+- implementation of abstract hierarchy
+    * hierarchy query
+    * getting metadata
+    * search function
+    * outside update notification
+- opening files
+- moving/copying/deleting/renaming files
+
+OS integration module (Jon)
+- some OS-driven event that brings FileSys3d to front and focuses it
+- way to defocus and minimize FileSys3d
+- way to execute programs
+
+Visualization module (Victor, Raffi, Adrian)
+- works with abstract hierarchy which supplies
+    * a way to query the hierarchy dynamically (instead of the whole thing up front)
+    * a way to synchronize to current state (re-query)
+    * a way to specify the available categories of metadata (probably fixed ahead of time)
+      (e.g. filename, size, type, date, icon, thumbnail, etc)
+    * a way to get hierarchy item metadata (via a dictionary probably)
+    * a way to get the "path" of a given hierarchy item (e.g. filesystem path).
+      this should be a "path" in the sense that it uniquely identifies the item in
+      the hierarchy, and its ancestry should be derivable from the path.
+    * search functionality
+        ~ list of ranked search hits, where each has a hierarchy path so that it can be
+          located in the hierarchy.  should there be a canonical way to spatially organize
+          hierarchy elements, so that an element's position can be calculated canonically?
+    * some way to be notified of outside updates to the hierarchy
+- there is a notion of "current directory", where the contents are laid out visually in a fixed way,
+  though that way can be changed.
+    * the next level or two of the hierarchy is visible from the current level, though with less and
+      less detail (e.g. items are more transparent, and less metadata is visualized)
+    * the level of detail present in the visualization of each hierarchy item will ideally continuously
+      "fade in" as it comes closer to being at the current level.  e.g. fade in from transparent,
+      start with abbrev/truncated filename to presenting more and more metadata detail, etc.
+    * a hierarchy node have a "visualize" method, which takes a "detail" parameter (in the range [0,1])
+      which indicates how much detail to present.  this is dependent on the implementation (e.g.
+      filesystem node, C++ class hierarchy element, etc).
+
+      e.g. for a filesystem hierarchy, the nodes could be visualized like
+
+         <icon>                                                     lowest level
+
+      filename.ext
+         <icon>
+
+      filename.ext
+         <icon>
+      date  / size
+
+      filename.ext
+       <thumbnail>
+      date  / size                                                   highest level
+
+    * a parent node should have the ability to choose how its child nodes are laid out,
+      giving them particular spatial/physical properties that can be used by the interaction 
+      submodule.  the interaction module should be independent of the layout model, because if
+      the particular visualization specifies the physical layout, then the interaction model
+      just uses those physical locations.
+        ~ e.g. in a flat visualization mode, sibling items would be coplanar and probably in
+          a grid, whereas in the spherical visualization mode, sibling items would be on the
+          same concentric sphere.
+- Layout submodule
+    * The items in the hierarchy will have a (more or less) fixed set of metadata types.
+      The layout will be able to sort the child nodes of the current hierarchy node based on
+      a priority list of these metadata types (i.e. dictionary order).
+    * There will be several layout schemes
+        - spiral, where the "first" item is at the center
+        - circle, where the "first" item is at the top
+        - scatter-radial, where the radial direction is the sorting direction, and the angular
+          coordinate is unsorted
+        - radial, where radial is one sorting axis and angle is another sorting axis.
+          this suffers from the fact that both coordinate are effectively bounded (especially the
+          angular coordinate, but also the radial one because of how much space is available)
+        - log-radial, where the radial coordinate is effectively unbounded -- the concentric
+          rings will be geometrically related in radius.  you'll have to zoom in/out to pan along
+          this sorting coordinate.
+        - clustered by category
+            ~ for metadata types that have a relatively small range (e.g. filetypes), clustering
+              based on those distinct metadata values
+            ~ for non-clusterable metadata types (e.g. filesize or filename), we could still do
+              clustering by creating a fixed number of buckets that span the whole range of
+              items (e.g. filename clusters a-g, h-q, r-z)
+    * When layout schemes change, they should do so in a continuous way (the items interpolate
+      between their old and new locations).  This means that the "frame time" needs to be available
+      to the layout method to do the interpolation.
+
+// Abstract Hierarchy
+
+enum class MetaDataType { STRING, INTEGER, DATE, ICON };
+
+class MetaDataDate;
+class MetaDataIcon;
+class MetaDataInteger;
+class MetaDataString;
+
+class MetaData
+{
+public:
+  virtual MetaDataType type () const = 0;
+  Date const &       as_date    () const { return dynamic_cast<MetaDataDate    const *>(this)->value(); }
+  Icon const &       as_icon    () const { return dynamic_cast<MetaDataIcon    const *>(this)->value(); }
+  int                as_integer () const { return dynamic_cast<MetaDataInteger const *>(this)->value(); }
+  std::string const &as_string  () const { return dynamic_cast<MetaDataString  const *>(this)->value(); }
+};
+
+class MetaDataDate : public MetaData
+{
+public:
+  virtual MetaDataType type () const { return MetaDataType::DATE; }
+  Date const &value () const { return m_date; }
+private:
+  Date m_date;  
+};
+
+class MetaDataIcon : public MetaData
+{
+public:
+  virtual MetaDataType type () const { return MetaDataType::ICON; }
+  Icon const &value () const { return m_icon; }
+private:
+  Icon m_icon;
+};
+
+class MetaDataInteger : public MetaData
+{
+public:
+  virtual MetaDataType type () const { return MetaDataType::INTEGER; }
+  int value () const { return m_value; }
+private:
+  int m_value;
+};
+
+class MetaDataString : public MetaData
+{
+public:
+  virtual MetaDataType type () const { return MetaDataType::STRING; }
+  std::string const &value () const { return m_value; }
+private:
+  std::string m_value;
+};
+
+template <typename Key, typename Value>
+class Dictionary
+{
+public:
+    virtual Value const &operator [] (Key const &key) const = 0;
+    virtual std::vector<Key> const &keys () const = 0; // should this use std::set<Key> instead?
+};
+
+
+// use smart_ptr<> instead of ordinary pointers?
+class HierarchyNode
+{
+public:
+    // Returns the parent node if it exists, otherwise nullptr.
+    virtual std::shared_ptr<HierarchyNode> parent () = 0;
+    // Returns a list of the child nodes of this item.
+    virtual std::vector<HierarchyNode *> child_nodes (FilterCriteria const &filter_criteria = FilterCriteria::NONE) = 0;
+
+    // Uniquely identifies this item in the hierearchy.  This item's ancestry should be derivable from the path.
+    virtual std::string path () const = 0;
+    // Returns the hierarchy-specific meta
+    virtual Dictionary<MetaDataType,MetaData> const &metadata () const = 0;
+};
+
+enum class OpenResult { SUCCESS, FAILURE };
+enum class MoveResult { SUCCESS, FAILURE };
+enum class RemoveResult { SUCCESS, FAILURE };
+
+class Hierarchy
+{
+public:
+    // Returns the root node of the hierarchy.
+    virtual std::shared_ptr<HierarchyNode> root_node () = 0;
+    // Returns a specification of the metadata that nodes should be expected to have; key -> type
+    virtual std::map<std::string,MetaDataType> const &metadata () const = 0;
+    // Provides a way to search the hierarchy given some particular search criteria.
+    virtual std::vector<std::shared_ptr<HierarchyNode>> search (SearchCriteria const &search_criteria) = 0;
+    // This is how updates to the hierarchy are indicated.  The provided callback function
+    // should be called when any part of the hierarchy is changed, and the affected nodes
+    // should be passed in.  NOTE: this particular interface method is probably outside of the
+    // scope of the hackathon, so should probably not actually be used.
+    typedef void (*UpdateCallback)(std::shared_ptr<Hierarchy> hierarchy, std::vector<std::shared_ptr<HierarchyNode>> const &updated_nodes);
+    virtual void set_update_callback (UpdateCallback update_callback) = 0;
+
+    // Provides a way to open/activate/execute a node (e.g. run an executable or open a C++
+    // class source file).
+    virtual OpenResult open (HierarchyNode &node, std::vector<std::string> const &parameters) const = 0;
+    // Move a node to a particular parent node.
+    virtual MoveResult move (HierarchyNode &node, HierarchyNode &to_parent) = 0;
+    // Remove a node from its parent.  Should not remove the root node.
+    virtual RemoveResult remove (HierarchyNode &node) = 0;
+};
+
+// Layout submodule is part of the Visualization module
+
+// PositionalData is some to-be-defined class that defines a physical location/size/shape
+// and will be what the interaction model uses in its logic/physics.
+
+class Layout
+{
+    // Given a particular LayoutRegion (which could specify 2d or 3d region), gets the
+    // positional properties of the requested child node.  The current time is passed in
+    // so that interpolation of positions can be done (e.g. when switching sorting modes).
+    virtual PositionalData get_position_of (std::shared_ptr<HierarchyNode const> child, LayoutRegion const &layout_region, Time const &t) const = 0;
+};
+
+
