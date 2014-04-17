@@ -1,7 +1,7 @@
 #ifndef __HIERARCHYNODE_H__
 #define __HIERARCHYNODE_H__
 
-class FilterCriteria
+class FilterCriteria // TEMP fill in
 {
 public:
 
@@ -36,9 +36,11 @@ public:
   virtual RemoveResult remove () = 0;
 
   // Provides a way to search the hierarchy given some particular search criteria.
-  virtual std::vector<std::shared_ptr<HierarchyNode>> recursive_search (SearchCriteria const &search_criteria) = 0;
+  virtual std::vector<std::shared_ptr<HierarchyNode>> recursive_search (FilterCriteria const &filter_criteria) = 0;
 
+  // Provides a way for updates to a hierarchy node to update the state of something else.
   typedef void (*UpdateCallback)(std::shared_ptr<HierarchyNode> updated_node);
+  virtual void set_update_callback (UpdateCallback update_callback) = 0;
 };
 
 #endif
