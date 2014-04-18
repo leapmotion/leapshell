@@ -3,6 +3,7 @@
 
 #include "DataTypes.h"
 #include "View.h"
+#include "Tile.h"
 
 class Render {
 public:

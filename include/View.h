@@ -6,22 +6,11 @@
 
 #include "DataTypes.h"
 #include "Layout.h"
+#include "Tile.h"
 
 class HierarchyNode;
 class Layout;
 class NavigationState;
-
-class Tile {
-public:
-  Tile();
-  ci::gl::TextureRef m_icon;
-  Vector3 m_position;
-  Vector3 m_size;
-  std::string m_name;
-  std::string m_type;
-};
-
-typedef std::vector<Tile, Eigen::aligned_allocator<Tile> > TileVector;
 
 class View {
 public:
@@ -41,7 +30,6 @@ private:
 
 	// TODO: sorting criteria
 	std::vector<std::shared_ptr<HierarchyNode>> m_sortedChildren;
-	std::vector<SceneSpaceVector> m_sortedChildPositions;
 	std::shared_ptr<Layout> m_layout;
   TileVector m_tiles;
 

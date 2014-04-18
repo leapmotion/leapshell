@@ -135,6 +135,7 @@
     <ClInclude Include="..\..\include\Resources.h" />
     <ClInclude Include="..\..\include\Shell.h" />
     <ClInclude Include="..\..\include\StdAfx.h" />
+    <ClInclude Include="..\..\include\Tile.h" />
     <ClInclude Include="..\..\include\Utilities.h" />
     <ClInclude Include="..\..\include\View.h" />
   </ItemGroup>
@@ -151,6 +152,7 @@
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>
     </ClCompile>
+    <ClCompile Include="..\..\src\Tile.cpp" />
     <ClCompile Include="..\..\src\Utilities.cpp" />
     <ClCompile Include="..\..\src\View.cpp" />
   </ItemGroup>
