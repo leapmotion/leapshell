@@ -48,7 +48,7 @@ public:
     m_metadata.HashSet(key, Value(value));
   }
 
-  virtual ci::Surface8u thumbnail() { return ci::Surface8u(); }
+  virtual ci::Surface8u icon() { return ci::Surface8u(); }
 
   // Provides a way to open/activate/execute a node (e.g. run an executable or open a C++ class source file).
   virtual bool open (std::vector<std::string> const &parameters) const = 0;

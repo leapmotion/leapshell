@@ -22,7 +22,7 @@ public:
   // Uniquely identifies this item in the hierarchy.  This item's ancestry should be derivable from the path.
   virtual std::string path() const override;
 
-  virtual ci::Surface8u thumbnail() override;
+  virtual ci::Surface8u icon() override;
 
   // Provides a way to open/activate/execute a node (e.g. run an executable or open a C++ class source file).
   virtual bool open(std::vector<std::string> const& parameters) const override { return false; }

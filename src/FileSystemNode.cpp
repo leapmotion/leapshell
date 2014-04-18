@@ -108,7 +108,7 @@ std::string FileSystemNode::path() const
   return m_path.string();
 }
 
-ci::Surface8u FileSystemNode::thumbnail()
+ci::Surface8u FileSystemNode::icon()
 {
 #if defined(CINDER_COCOA)
   if (!m_surface) {

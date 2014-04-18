@@ -30,13 +30,13 @@ void Render::drawTile(const Tile& tile) const {
   const ci::Rectf rect(-halfWidth, -halfHeight, halfWidth, halfHeight);
 
   if (!tile.m_icon) {
-    ci::Surface8u thumbnail = tile.m_node->thumbnail();
-    if (thumbnail) {
-      tile.m_icon = ci::gl::Texture::create(thumbnail);
+    ci::Surface8u icon = tile.m_node->icon();
+    if (icon) {
+      tile.m_icon = ci::gl::Texture::create(icon);
     }
   }
   if (tile.m_icon) {
-    // draw the thumbnail
+    // draw the icon
     ci::gl::draw(tile.m_icon, rect);
   } else {
     // draw border
