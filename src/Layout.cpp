@@ -11,8 +11,8 @@ Layout::Layout() : m_creationTime(Globals::curTimeSeconds) {
 
 void Layout::animateTilePosition(Tile& tile, int idx, const Vector3& newPosition) const {
   static const float SMOOTH_VARIATION_RADIUS = (1.0f - Tile::POSITION_SMOOTH)/2.0f;
-  const float mult = SmootherStep(std::min(1.0, 2 * (Globals::curTimeSeconds - m_creationTime)));
-  const float smoothVariation = SMOOTH_VARIATION_RADIUS * std::cos(3*Globals::curTimeSeconds + idx);
+  const float mult = SmootherStep(static_cast<float>(std::min(1.0, 2 * (Globals::curTimeSeconds - m_creationTime))));
+  const float smoothVariation = SMOOTH_VARIATION_RADIUS * static_cast<float>(std::cos(3*Globals::curTimeSeconds + idx));
   const float smooth = mult*(Tile::POSITION_SMOOTH + smoothVariation) + (1.0f - mult);
   tile.m_positionSmoother.Update(newPosition, Globals::curTimeSeconds, smooth);
   tile.m_position = tile.m_positionSmoother.value;
