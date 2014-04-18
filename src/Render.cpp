@@ -28,11 +28,13 @@ void Render::drawTile(const Tile& tile) const {
   glTranslated(tile.m_position.x(), tile.m_position.y(), tile.m_position.z());
 
   // draw border
-  const ci::Rectf rect(-tile.m_size.x()/2.0, -tile.m_size.y()/2.0, tile.m_size.x()/2.0, tile.m_size.y()/2.0);
+  const float halfWidth = static_cast<float>(tile.m_size.x()/2.0f);
+  const float halfHeight = static_cast<float>(tile.m_size.y()/2.0f);
+  const ci::Rectf rect(-halfWidth, -halfHeight, halfWidth, halfHeight);
   ci::gl::drawStrokedRoundedRect(rect, 2.0, 10);
 
   // draw text
-  static const double TEXT_SCALE = 0.1;
+  static const double TEXT_SCALE = 0.05;
   glPushMatrix();
   const std::string name = tile.m_node->get_metadata_as<std::string>("name");
   const ci::Vec2f nameSize = Globals::fontRegular->measureString(name);
