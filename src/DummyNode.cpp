@@ -29,13 +29,17 @@ std::shared_ptr<DummyNode> create_dummy_hierarchy (std::string const &root_name,
   // non-leaf children
   unsigned int non_leaf_child_count = (rand() % 3) + 3;
   for (unsigned int i = 0; i < non_leaf_child_count; ++i) {
-    root->appendChildNode(create_dummy_hierarchy(FORMAT("dir" << i), depth-1));
+    std::ostringstream oss;
+    oss << i << ".dir";
+    root->appendChildNode(create_dummy_hierarchy(oss.str(), depth-1));
   }
 
   // leaf children
   unsigned int leaf_child_count = (rand() % 3) + 3;
   for (unsigned int i = 0; i < leaf_child_count; ++i) {
-    root->appendChildNode(std::shared_ptr<DummyNode>(new DummyNode(FORMAT("file" << i), root)));
+    std::ostringstream oss;
+    oss << i << ".file";
+    root->appendChildNode(std::shared_ptr<DummyNode>(new DummyNode(oss.str(), root)));
   }
 
   return root;
