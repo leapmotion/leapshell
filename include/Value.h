@@ -112,6 +112,13 @@ class Value {
     inline Value operator[](const std::string& key) const { return HashGet(key); }
     inline Value operator[](const char* key) const { return HashGet(key); }
 
+    // this method defines a linear ordering on Value types.  It first sorts by
+    // the value type -- defined by m_value.type_info().before(rhs.m_value.type_info()).
+    // see boost::any (specifically the type_info method) and type_info::before.
+    // the return value is negative if *this < rhs, positive if *this > rhs, and 0
+    // if *this == rhs (in the sense defined).
+    int compare(const Value &rhs) const;
+
     static Value FromJSON(const std::string& json) {
       return fromString<Value>(json);
     }

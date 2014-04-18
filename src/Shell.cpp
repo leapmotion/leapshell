@@ -2,6 +2,140 @@
 #include "StdAfx.h"
 #include "Shell.h"
 #include "Globals.h"
+#include "Value.h"
+
+// this doesn't test all possible types, but tests that different types are
+// distinguishable via Value::compare, and that values of the same type are
+// distinguishable via Value::compare.
+void unit_test_Value () {
+  Value v_int_6(int(6));
+  Value v_int_7(int(7));
+  Value v_uint32_t_6(uint32_t(6));
+  Value v_uint32_t_7(uint32_t(7));
+  Value v_double_6(double(6));
+  Value v_double_7(double(7));
+  Value v_string_6(std::string("6"));
+  Value v_string_7(std::string("7"));
+  Value v_bool_false(false);
+  Value v_bool_true(true);
+
+  // value comparisons
+  assert(v_int_6.compare(v_int_6) == 0);
+  assert(v_int_6.compare(v_int_7) < 0);
+  assert(v_int_7.compare(v_int_6) > 0);
+  assert(v_int_7.compare(v_int_7) == 0);
+  
+  assert(v_uint32_t_6.compare(v_uint32_t_6) == 0);
+  assert(v_uint32_t_6.compare(v_uint32_t_7) < 0);
+  assert(v_uint32_t_7.compare(v_uint32_t_6) > 0);
+  assert(v_uint32_t_7.compare(v_uint32_t_7) == 0);
+  
+  assert(v_double_6.compare(v_double_6) == 0);
+  assert(v_double_6.compare(v_double_7) < 0);
+  assert(v_double_7.compare(v_double_6) > 0);
+  assert(v_double_7.compare(v_double_7) == 0);
+  
+  assert(v_string_6.compare(v_string_6) == 0);
+  assert(v_string_6.compare(v_string_7) < 0);
+  assert(v_string_7.compare(v_string_6) > 0);
+  assert(v_string_7.compare(v_string_7) == 0);
+  
+  assert(v_bool_false.compare(v_bool_false) == 0);
+  assert(v_bool_false.compare(v_bool_true) < 0);
+  assert(v_bool_true.compare(v_bool_false) > 0);
+  assert(v_bool_true.compare(v_bool_true) == 0);
+
+  // type comparisons
+  assert(v_int_6.compare(v_uint32_t_6) != 0);
+  assert(v_int_6.compare(v_uint32_t_7) != 0);
+  assert(v_int_6.compare(v_double_6) != 0);
+  assert(v_int_6.compare(v_double_7) != 0);
+  assert(v_int_6.compare(v_string_6) != 0);
+  assert(v_int_6.compare(v_string_7) != 0);
+  assert(v_int_6.compare(v_bool_false) != 0);
+  assert(v_int_6.compare(v_bool_true) != 0);
+
+  assert(v_int_7.compare(v_uint32_t_6) != 0);
+  assert(v_int_7.compare(v_uint32_t_7) != 0);
+  assert(v_int_7.compare(v_double_6) != 0);
+  assert(v_int_7.compare(v_double_7) != 0);
+  assert(v_int_7.compare(v_string_6) != 0);
+  assert(v_int_7.compare(v_string_7) != 0);
+  assert(v_int_7.compare(v_bool_false) != 0);
+  assert(v_int_7.compare(v_bool_true) != 0);
+
+  assert(v_uint32_t_6.compare(v_int_6) != 0);
+  assert(v_uint32_t_6.compare(v_int_7) != 0);
+  assert(v_uint32_t_6.compare(v_double_6) != 0);
+  assert(v_uint32_t_6.compare(v_double_7) != 0);
+  assert(v_uint32_t_6.compare(v_string_6) != 0);
+  assert(v_uint32_t_6.compare(v_string_7) != 0);
+  assert(v_uint32_t_6.compare(v_bool_false) != 0);
+  assert(v_uint32_t_6.compare(v_bool_true) != 0);
+
+  assert(v_uint32_t_7.compare(v_int_6) != 0);
+  assert(v_uint32_t_7.compare(v_int_7) != 0);
+  assert(v_uint32_t_7.compare(v_double_6) != 0);
+  assert(v_uint32_t_7.compare(v_double_7) != 0);
+  assert(v_uint32_t_7.compare(v_string_6) != 0);
+  assert(v_uint32_t_7.compare(v_string_7) != 0);
+  assert(v_uint32_t_7.compare(v_bool_false) != 0);
+  assert(v_uint32_t_7.compare(v_bool_true) != 0);
+
+  assert(v_double_6.compare(v_int_6) != 0);
+  assert(v_double_6.compare(v_int_7) != 0);
+  assert(v_double_6.compare(v_uint32_t_6) != 0);
+  assert(v_double_6.compare(v_uint32_t_7) != 0);
+  assert(v_double_6.compare(v_string_6) != 0);
+  assert(v_double_6.compare(v_string_7) != 0);
+  assert(v_double_6.compare(v_bool_false) != 0);
+  assert(v_double_6.compare(v_bool_true) != 0);
+
+  assert(v_double_7.compare(v_int_6) != 0);
+  assert(v_double_7.compare(v_int_7) != 0);
+  assert(v_double_7.compare(v_uint32_t_6) != 0);
+  assert(v_double_7.compare(v_uint32_t_7) != 0);
+  assert(v_double_7.compare(v_string_6) != 0);
+  assert(v_double_7.compare(v_string_7) != 0);
+  assert(v_double_7.compare(v_bool_false) != 0);
+  assert(v_double_7.compare(v_bool_true) != 0);
+
+  assert(v_string_6.compare(v_int_6) != 0);
+  assert(v_string_6.compare(v_int_7) != 0);
+  assert(v_string_6.compare(v_uint32_t_6) != 0);
+  assert(v_string_6.compare(v_uint32_t_7) != 0);
+  assert(v_string_6.compare(v_double_6) != 0);
+  assert(v_string_6.compare(v_double_7) != 0);
+  assert(v_string_6.compare(v_bool_false) != 0);
+  assert(v_string_6.compare(v_bool_true) != 0);
+
+  assert(v_string_7.compare(v_int_6) != 0);
+  assert(v_string_7.compare(v_int_7) != 0);
+  assert(v_string_7.compare(v_uint32_t_6) != 0);
+  assert(v_string_7.compare(v_uint32_t_7) != 0);
+  assert(v_string_7.compare(v_double_6) != 0);
+  assert(v_string_7.compare(v_double_7) != 0);
+  assert(v_string_7.compare(v_bool_false) != 0);
+  assert(v_string_7.compare(v_bool_true) != 0);
+
+  assert(v_bool_false.compare(v_int_6) != 0);
+  assert(v_bool_false.compare(v_int_7) != 0);
+  assert(v_bool_false.compare(v_uint32_t_6) != 0);
+  assert(v_bool_false.compare(v_uint32_t_7) != 0);
+  assert(v_bool_false.compare(v_double_6) != 0);
+  assert(v_bool_false.compare(v_double_7) != 0);
+  assert(v_bool_false.compare(v_string_6) != 0);
+  assert(v_bool_false.compare(v_string_7) != 0);
+
+  assert(v_bool_true.compare(v_int_6) != 0);
+  assert(v_bool_true.compare(v_int_7) != 0);
+  assert(v_bool_true.compare(v_uint32_t_6) != 0);
+  assert(v_bool_true.compare(v_uint32_t_7) != 0);
+  assert(v_bool_true.compare(v_double_6) != 0);
+  assert(v_bool_true.compare(v_double_7) != 0);
+  assert(v_bool_true.compare(v_string_6) != 0);
+  assert(v_bool_true.compare(v_string_7) != 0);
+}
 
 LeapShell::LeapShell()
   :
@@ -17,6 +151,8 @@ LeapShell::LeapShell()
 
   m_root = create_dummy_hierarchy("root", 3);
   m_state->setCurrentLocation(m_root);
+
+  unit_test_Value(); // TEMP until this is verified to work on all platforms
 }
 
 LeapShell::~LeapShell()

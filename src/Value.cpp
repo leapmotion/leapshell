@@ -23,6 +23,89 @@ std::string Value::ToJSON(bool escapeSlashes, bool prettify) const
   return oss.str();
 }
 
+// std::map<size_t,size_t> inverse_map (std::map<size_t,size_t> const &m) {
+//   std::map<size_t,size_t> retval;
+//   for (auto it = m.begin(), it_end = m.end(); it != it_end; ++it) {
+//     assert(retval.find(it.second) == retval.end() && "this map is not invertible");
+//     retval[it.second] = it.first;
+//   }
+//   return retval;
+// }
+
+namespace Helper {
+
+int compare (Value::Array const &lhs, Value::Array const &rhs) {
+  assert(false && "TODO: implement");
+  return 0;
+}
+
+int compare (Value::Hash const &lhs, Value::Hash const &rhs) {
+  assert(false && "TODO: implement");
+  return 0;
+}
+
+template <typename T>
+int compare (T const &lhs, T const &rhs) { return lhs < rhs ? -1 : (lhs > rhs ? 1 : 0); }
+
+template <typename T>
+int compare_any (boost::any const &lhs, boost::any const &rhs) {
+  return compare(boost::any_cast<T>(lhs), boost::any_cast<T>(rhs));
+}
+
+} // end of namespace Helper
+
+int Value::compare (const Value &rhs) const {
+  // static const size_t TYPE_HASH[] = {
+  //   typeid(bool).hash_code(),
+  //   typeid(int8_t).hash_code(),
+  //   typeid(uint8_t).hash_code(),
+  //   typeid(int16_t).hash_code(),
+  //   typeid(uint16_t).hash_code(),
+  //   typeid(int32_t).hash_code(),
+  //   typeid(uint32_t).hash_code(),
+  //   typeid(int64_t).hash_code(),
+  //   typeid(uint64_t).hash_code(),
+  //   typeid(float).hash_code(),
+  //   typeid(double).hash_code(),
+  //   typeid(long double).hash_code(),
+  //   typeid(std::string).hash_code(),
+  //   typeid(std::wstring).hash_code(),
+  //   typeid(Array).hash_code(),
+  //   typeid(Hash).hash_code()
+  // };
+  // static const size_t TYPE_HASH_COUNT = sizeof(TYPE_HASH) / sizeof(TYPE_HASH[0]);
+
+  const std::type_info &lhs_type_info = m_value.type();
+  const std::type_info &rhs_type_info = rhs.m_value.type();
+  if (lhs_type_info.before(rhs_type_info))
+    return -1;
+  else if (rhs_type_info.before(lhs_type_info))
+    return 1;
+  else { // otherwise compare the values themselves
+    // this is the naive implementation.  TODO: faster method, e.g. using lookup table
+    if      (lhs_type_info == typeid(bool)) { return Helper::compare_any<bool>(m_value, rhs.m_value); }
+    else if (lhs_type_info == typeid(int8_t)) { return Helper::compare_any<int8_t>(m_value, rhs.m_value); }
+    else if (lhs_type_info == typeid(uint8_t)) { return Helper::compare_any<uint8_t>(m_value, rhs.m_value); }
+    else if (lhs_type_info == typeid(int16_t)) { return Helper::compare_any<int16_t>(m_value, rhs.m_value); }
+    else if (lhs_type_info == typeid(uint16_t)) { return Helper::compare_any<uint16_t>(m_value, rhs.m_value); }
+    else if (lhs_type_info == typeid(int32_t)) { return Helper::compare_any<int32_t>(m_value, rhs.m_value); }
+    else if (lhs_type_info == typeid(uint32_t)) { return Helper::compare_any<uint32_t>(m_value, rhs.m_value); }
+    else if (lhs_type_info == typeid(int64_t)) { return Helper::compare_any<int64_t>(m_value, rhs.m_value); }
+    else if (lhs_type_info == typeid(uint64_t)) { return Helper::compare_any<uint64_t>(m_value, rhs.m_value); }
+    else if (lhs_type_info == typeid(float)) { return Helper::compare_any<float>(m_value, rhs.m_value); }
+    else if (lhs_type_info == typeid(double)) { return Helper::compare_any<double>(m_value, rhs.m_value); }
+    else if (lhs_type_info == typeid(long double)) { return Helper::compare_any<long double>(m_value, rhs.m_value); }
+    else if (lhs_type_info == typeid(std::string)) { return Helper::compare_any<std::string>(m_value, rhs.m_value); }
+    else if (lhs_type_info == typeid(std::wstring)) { return Helper::compare_any<std::wstring>(m_value, rhs.m_value); }
+    else if (lhs_type_info == typeid(Array)) { return Helper::compare_any<Array>(m_value, rhs.m_value); }
+    else if (lhs_type_info == typeid(Hash)) { return Helper::compare_any<Hash>(m_value, rhs.m_value); }
+    else {
+      assert(false && "unsupported type");
+      return 0;
+    }
+  }
+}
+
 // Indent the output if streaming JSON data and indent is set an even number.
 // Pack the output otherwise.
 bool Value::toStream(std::ostream& stream, bool asJSON, bool escapeSlashes, int indent) const
@@ -705,3 +788,4 @@ bool Value::toBinaryStream(std::ostream& stream) const
   }
   return true;
 }
+

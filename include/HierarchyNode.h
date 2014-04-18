@@ -32,7 +32,7 @@ public:
   virtual std::string path () const = 0;
 
   // Returns the hierarchy-specific meta
-  Value metadata () const { return m_metadata; }
+  Value const &metadata () const { return m_metadata; }
   // Returns a metadata property
   template<typename T>
   T get_metadata_as(std::string const &key) const {
