@@ -81,7 +81,7 @@ private:
   Render* m_render;
   Interaction* m_interaction;
 
-  std::shared_ptr<DummyNode> m_root;
+  std::shared_ptr<HierarchyNode> m_root;
 };
 
 #endif
