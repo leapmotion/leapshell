@@ -27,4 +27,15 @@ private:
   double m_width;
 };
 
+class RingLayout : public Layout {
+public:
+  RingLayout();
+  virtual void UpdateTiles(const HierarchyNodeVector& nodes, TileVector& tiles) override;
+  virtual Vector2 GetCameraMinBounds() const override;
+  virtual Vector2 GetCameraMaxBounds() const override;
+  void SetRadius(double radius) { m_radius = radius; }
+private:
+  double m_radius;
+};
+
 #endif
