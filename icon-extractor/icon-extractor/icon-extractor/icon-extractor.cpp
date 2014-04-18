@@ -67,6 +67,7 @@ int main(int argc, _TCHAR* argv[])
   // At this point, pBits contains a pointer to the image starting at address zero, with a stride of 100 pixels,
   // and a pixel depth of 32 bits.
 
+  DestroyIcon(hLarge);
   DeleteDC(hCompatDC);
 	return 0;
 }
