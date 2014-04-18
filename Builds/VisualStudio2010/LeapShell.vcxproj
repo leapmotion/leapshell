@@ -147,10 +147,12 @@
     <ClCompile Include="..\..\src\DummyNode.cpp" />
     <ClCompile Include="..\..\src\GLBuffer.cpp" />
     <ClCompile Include="..\..\src\Globals.cpp" />
+    <ClCompile Include="..\..\src\HierarchyNode.cpp" />
     <ClCompile Include="..\..\src\Interaction.cpp" />
     <ClCompile Include="..\..\src\Layout.cpp" />
     <ClCompile Include="..\..\src\LeapListener.cpp" />
     <ClCompile Include="..\..\src\MeshHand.cpp" />
+    <ClCompile Include="..\..\src\NavigationState.cpp" />
     <ClCompile Include="..\..\src\Render.cpp" />
     <ClCompile Include="..\..\src\Shell.cpp" />
     <ClCompile Include="..\..\src\StdAfx.cpp">

@@ -11,7 +11,7 @@
 
 class Layout {
 public:
-  virtual void UpdateTiles(const std::vector<std::shared_ptr<HierarchyNode>> nodes, TileVector& tiles) = 0;
+  virtual void UpdateTiles(const std::vector<std::shared_ptr<HierarchyNode>>& nodes, TileVector& tiles) = 0;
   virtual Vector2 GetCameraMinBounds() const = 0;
   virtual Vector2 GetCameraMaxBounds() const = 0;
 };
@@ -19,7 +19,7 @@ public:
 class GridLayout : public Layout {
 public:
   GridLayout();
-  virtual void UpdateTiles(const std::vector<std::shared_ptr<HierarchyNode>> nodes, TileVector& tiles) override;
+  virtual void UpdateTiles(const std::vector<std::shared_ptr<HierarchyNode>>& nodes, TileVector& tiles) override;
   virtual Vector2 GetCameraMinBounds() const override;
   virtual Vector2 GetCameraMaxBounds() const override;
   void SetWidth(double width) { m_width = width; }

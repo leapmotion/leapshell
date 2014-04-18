@@ -48,8 +48,8 @@ void NavigationState::update () {
   } 
 
   // inform all views that there has been an update
-  for (auto view : m_views) {
-    auto v = view.lock();
+  for (auto it = m_views.begin(); it != m_views.end(); ++it) {
+    auto v = it->lock();
     v->Update();
   }
 }
