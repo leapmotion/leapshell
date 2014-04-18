@@ -77,6 +77,9 @@
     <ClInclude Include="..\..\include\Value.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\include\FileSystemNode.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\src\CinderFbxStream.cpp">
@@ -128,6 +131,9 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="..\..\src\HierarchyNode.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\FileSystemNode.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
