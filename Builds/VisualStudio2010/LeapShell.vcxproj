@@ -139,6 +139,7 @@
     <ClInclude Include="..\..\include\StdAfx.h" />
     <ClInclude Include="..\..\include\Tile.h" />
     <ClInclude Include="..\..\include\Utilities.h" />
+    <ClInclude Include="..\..\include\Value.h" />
     <ClInclude Include="..\..\include\View.h" />
   </ItemGroup>
   <ItemGroup>
@@ -158,6 +159,7 @@
     </ClCompile>
     <ClCompile Include="..\..\src\Tile.cpp" />
     <ClCompile Include="..\..\src\Utilities.cpp" />
+    <ClCompile Include="..\..\src\Value.cpp" />
     <ClCompile Include="..\..\src\View.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

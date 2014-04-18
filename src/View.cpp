@@ -11,7 +11,6 @@ View::View(NavigationState &ownerNavigationState) {
   m_far = 10000.0f;
   m_layout = std::shared_ptr<Layout>(new GridLayout());
   m_tiles.resize(100);
-  m_rubberBandForce.Update(Vector3::Zero(), 0.0, 0.5f);
 }
 
 void View::Update() {

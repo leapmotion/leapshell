@@ -87,7 +87,11 @@ bool Value::toStream(std::ostream& stream, bool asJSON, bool escapeSlashes, int 
     stream << Cast<long long>();
   } else if (Is<double>()) {
     const double value = Cast<double>();
+#if _WIN32
+    if (!isnan(value)) {
+#else
     if (!std::isnan(value)) {
+#endif
       stream << value;
     } else {
       stream << "null"; // NaN is not valid JSON, use null instead
