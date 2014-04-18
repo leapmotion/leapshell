@@ -3,6 +3,9 @@
 #include "Shell.h"
 #include "Globals.h"
 #include "Value.h"
+#if defined(CINDER_COCOA)
+#include "NSImageExt.h"
+#endif
 
 // this doesn't test all possible types, but tests that different types are
 // distinguishable via Value::compare, and that values of the same type are
@@ -24,22 +27,22 @@ void unit_test_Value () {
   assert(v_int_6.compare(v_int_7) < 0);
   assert(v_int_7.compare(v_int_6) > 0);
   assert(v_int_7.compare(v_int_7) == 0);
-  
+
   assert(v_uint32_t_6.compare(v_uint32_t_6) == 0);
   assert(v_uint32_t_6.compare(v_uint32_t_7) < 0);
   assert(v_uint32_t_7.compare(v_uint32_t_6) > 0);
   assert(v_uint32_t_7.compare(v_uint32_t_7) == 0);
-  
+
   assert(v_double_6.compare(v_double_6) == 0);
   assert(v_double_6.compare(v_double_7) < 0);
   assert(v_double_7.compare(v_double_6) > 0);
   assert(v_double_7.compare(v_double_7) == 0);
-  
+
   assert(v_string_6.compare(v_string_6) == 0);
   assert(v_string_6.compare(v_string_7) < 0);
   assert(v_string_7.compare(v_string_6) > 0);
   assert(v_string_7.compare(v_string_7) == 0);
-  
+
   assert(v_bool_false.compare(v_bool_false) == 0);
   assert(v_bool_false.compare(v_bool_true) < 0);
   assert(v_bool_true.compare(v_bool_false) > 0);
@@ -262,7 +265,34 @@ void LeapShell::resize()
 
   glViewport(0, 0, width, height);
   updateGlobals();
-  m_render->update_background(width, height);
+#if defined(CINDER_COCOA)
+  @autoreleasepool {
+    NSScreen* screen = getDisplay()->getNsScreen();
+    NSSize size = NSMakeSize(width, height);
+    NSImage* nsImage = [[[NSImage alloc] initWithContentsOfURL:[[NSWorkspace sharedWorkspace] desktopImageURLForScreen:screen]] imageByScalingProportionallyToSize:size];
+    NSBitmapImageRep* nsBitmapImageRep = [NSBitmapImageRep imageRepWithData:[nsImage TIFFRepresentation]];
+    NSBitmapFormat nsBitmapFormat = [nsBitmapImageRep bitmapFormat];
+    unsigned char *srcBytes = [nsBitmapImageRep bitmapData];
+
+    size = [nsImage size];
+    const int32_t width = static_cast<int32_t>(size.width);
+    const int32_t height = static_cast<int32_t>(size.height);
+    const int32_t srcRowBytes = [nsBitmapImageRep bytesPerRow];
+
+    ci::Surface8u surface = ci::Surface8u(width, height, true,
+        (nsBitmapFormat & NSAlphaFirstBitmapFormat) ? ci::SurfaceChannelOrder::ARGB :ci::SurfaceChannelOrder::RGBA);
+    surface.setPremultiplied((nsBitmapFormat & NSAlphaNonpremultipliedBitmapFormat) == 0);
+    unsigned char* dstBytes = surface.getData();
+    int32_t dstRowBytes = width*4;
+
+    for (int32_t i = 0; i < height; i++) {
+      ::memcpy(dstBytes, srcBytes, dstRowBytes);
+      dstBytes += dstRowBytes;
+      srcBytes += srcRowBytes;
+    }
+    m_render->update_background(surface);
+  }
+#endif
 }
 
 void LeapShell::updateGlobals() {

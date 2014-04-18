@@ -10,7 +10,7 @@ public:
   Render();
   void draw(const View& view) const;
 
-  void update_background(int width, int height);
+  void update_background(const ci::Surface8u& surface);
 
 private:
 

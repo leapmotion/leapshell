@@ -62,7 +62,7 @@
 		214BE7F2E04F41DFBFCE9DE4 /* CinderApp.icns */ = {isa = PBXFileReference; lastKnownFileType = image.icns; name = CinderApp.icns; path = ../../resources/CinderApp.icns; sourceTree = "<group>"; };
 		29B97324FDCFA39411CA2CEA /* AppKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AppKit.framework; path = /System/Library/Frameworks/AppKit.framework; sourceTree = "<absolute>"; };
 		29B97325FDCFA39411CA2CEA /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = /System/Library/Frameworks/Foundation.framework; sourceTree = "<absolute>"; };
-		4422BBF42B584FBA8C8ECD34 /* Shell.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.cpp; name = Shell.cpp; path = ../../src/Shell.cpp; sourceTree = "<group>"; };
+		4422BBF42B584FBA8C8ECD34 /* Shell.cpp */ = {isa = PBXFileReference; explicitFileType = sourcecode.cpp.objcpp; name = Shell.cpp; path = ../../src/Shell.cpp; sourceTree = "<group>"; };
 		4E8D8B3719008B1000A2003E /* CinderFbxStream.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = CinderFbxStream.h; path = ../../include/CinderFbxStream.h; sourceTree = "<group>"; };
 		4E8D8B3819008B1000A2003E /* DataTypes.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = DataTypes.h; path = ../../include/DataTypes.h; sourceTree = "<group>"; };
 		4E8D8B3919008B1000A2003E /* GLBuffer.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = GLBuffer.h; path = ../../include/GLBuffer.h; sourceTree = "<group>"; };
@@ -86,7 +86,7 @@
 		4EB1875119009F2F00803428 /* View.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = View.h; path = ../../include/View.h; sourceTree = "<group>"; };
 		4EB1875219009F4400803428 /* Globals.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Globals.cpp; path = ../../src/Globals.cpp; sourceTree = "<group>"; };
 		4EB1875319009F4400803428 /* Layout.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Layout.cpp; path = ../../src/Layout.cpp; sourceTree = "<group>"; };
-		4EB1875419009F4400803428 /* Render.cpp */ = {isa = PBXFileReference; explicitFileType = sourcecode.cpp.objcpp; fileEncoding = 4; name = Render.cpp; path = ../../src/Render.cpp; sourceTree = "<group>"; };
+		4EB1875419009F4400803428 /* Render.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Render.cpp; path = ../../src/Render.cpp; sourceTree = "<group>"; };
 		4EB187581900A60F00803428 /* Value.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = Value.h; path = ../../include/Value.h; sourceTree = "<group>"; };
 		4EB187591900A63600803428 /* Value.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Value.cpp; path = ../../src/Value.cpp; sourceTree = "<group>"; };
 		4EB1875B1900A92500803428 /* Tile.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = Tile.h; path = ../../include/Tile.h; sourceTree = "<group>"; };

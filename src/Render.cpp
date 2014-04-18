@@ -2,45 +2,12 @@
 #include "Render.h"
 #include "Utilities.h"
 #include "Globals.h"
-#if defined(CINDER_COCOA)
-#include "NSImageExt.h"
-#endif
 
 Render::Render() {
-  
 }
 
-void Render::update_background(int width, int height)
-{
-#if defined(CINDER_COCOA)
-  @autoreleasepool {
-    NSScreen* screen = [NSScreen mainScreen];
-
-    NSSize size = NSMakeSize(width, height);
-    NSImage* nsImage = [[[NSImage alloc] initWithContentsOfURL:[[NSWorkspace sharedWorkspace] desktopImageURLForScreen:screen]] imageByScalingProportionallyToSize:size];
-    NSBitmapImageRep* nsBitmapImageRep = [NSBitmapImageRep imageRepWithData:[nsImage TIFFRepresentation]];
-    NSBitmapFormat nsBitmapFormat = [nsBitmapImageRep bitmapFormat];
-    unsigned char *srcBytes = [nsBitmapImageRep bitmapData];
-
-    size = [nsImage size];
-    const int32_t width = static_cast<int32_t>(size.width);
-    const int32_t height = static_cast<int32_t>(size.height);
-    const int32_t srcRowBytes = [nsBitmapImageRep bytesPerRow];
-
-    ci::Surface8u surface = ci::Surface8u(width, height, true,
-        (nsBitmapFormat & NSAlphaFirstBitmapFormat) ? ci::SurfaceChannelOrder::ARGB :ci::SurfaceChannelOrder::RGBA);
-    surface.setPremultiplied((nsBitmapFormat & NSAlphaNonpremultipliedBitmapFormat) == 0);
-    unsigned char* dstBytes = surface.getData();
-    int32_t dstRowBytes = width*4;
-
-    for (int32_t i = 0; i < height; i++) {
-      ::memcpy(dstBytes, srcBytes, dstRowBytes);
-      dstBytes += dstRowBytes;
-      srcBytes += srcRowBytes;
-    }
-    m_background = ci::gl::Texture::create(surface);
-  }
-#endif
+void Render::update_background(const ci::Surface8u& surface) {
+  m_background = ci::gl::Texture::create(surface);
 }
 
 void Render::draw(const View& view) const {
