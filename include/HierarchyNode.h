@@ -12,15 +12,21 @@ public:
   FilterCriteria () { }
 };
 
+class HierarchyNode;
+
+typedef std::vector<std::shared_ptr<HierarchyNode>> HierarchyNodeVector;
+
+
 class HierarchyNode
 {
 public:
+
   HierarchyNode () : m_metadata(Value::Hash()) {}
 
   // Returns the parent node if it exists, otherwise nullptr.
   virtual std::shared_ptr<HierarchyNode> parent () = 0;
   // Returns a list of the child nodes of this item.
-  virtual std::vector<std::shared_ptr<HierarchyNode>> child_nodes (FilterCriteria const &filter_criteria = FilterCriteria::NONE) = 0;
+  virtual HierarchyNodeVector child_nodes (FilterCriteria const &filter_criteria = FilterCriteria::NONE) = 0;
 
   // Uniquely identifies this item in the hierearchy.  This item's ancestry should be derivable from the path.
   virtual std::string path () const = 0;
@@ -50,7 +56,7 @@ public:
   virtual bool remove () = 0;
 
   // Provides a way to search the hierarchy given some particular search criteria.
-  virtual std::vector<std::shared_ptr<HierarchyNode>> recursive_search (FilterCriteria const &filter_criteria) = 0;
+  virtual HierarchyNodeVector recursive_search (FilterCriteria const &filter_criteria) = 0;
 
   // Provides a way for updates to a hierarchy node to update the state of something else.
   typedef void (*UpdateCallback)(std::shared_ptr<HierarchyNode> updated_node);

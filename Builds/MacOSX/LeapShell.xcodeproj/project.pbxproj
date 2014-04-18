@@ -32,6 +32,7 @@
 		8D11072F0486CEB800E47090 /* Cocoa.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1058C7A1FEA54F0111CA2CBB /* Cocoa.framework */; };
 		8D4C54A21640457789644020 /* Shell.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4422BBF42B584FBA8C8ECD34 /* Shell.cpp */; };
 		EDF4DB281900AAF7006678DF /* DummyNode.cpp in Sources */ = {isa = PBXBuildFile; fileRef = EDF4DB271900AAF7006678DF /* DummyNode.cpp */; };
+		EDF4DB2A1900C430006678DF /* NavigationState.cpp in Sources */ = {isa = PBXBuildFile; fileRef = EDF4DB291900C430006678DF /* NavigationState.cpp */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXCopyFilesBuildPhase section */
@@ -98,6 +99,7 @@
 		C6642498CA2E495DB0EB623E /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		EDF4DB261900AAE5006678DF /* DummyNode.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = DummyNode.h; path = ../../include/DummyNode.h; sourceTree = "<group>"; };
 		EDF4DB271900AAF7006678DF /* DummyNode.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = DummyNode.cpp; path = ../../src/DummyNode.cpp; sourceTree = "<group>"; };
+		EDF4DB291900C430006678DF /* NavigationState.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = NavigationState.cpp; path = ../../src/NavigationState.cpp; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -129,6 +131,7 @@
 		080E96DDFE201D6D7F000001 /* Source */ = {
 			isa = PBXGroup;
 			children = (
+				EDF4DB291900C430006678DF /* NavigationState.cpp */,
 				4EB187611900B87700803428 /* Interaction.cpp */,
 				4EB1875C1900A93500803428 /* Tile.cpp */,
 				4EB1875D1900A93500803428 /* View.cpp */,
@@ -319,6 +322,7 @@
 				4EB1875A1900A63600803428 /* Value.cpp in Sources */,
 				4E8D8B4A19008B3D00A2003E /* Utilities.cpp in Sources */,
 				EDF4DB281900AAF7006678DF /* DummyNode.cpp in Sources */,
+				EDF4DB2A1900C430006678DF /* NavigationState.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

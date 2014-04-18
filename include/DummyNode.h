@@ -16,7 +16,7 @@ public:
   // Returns the parent node if it exists, otherwise nullptr.
   virtual std::shared_ptr<HierarchyNode> parent () override { return m_parent; }
   // Returns a list of the child nodes of this item.
-  virtual std::vector<std::shared_ptr<HierarchyNode>> child_nodes (FilterCriteria const &filter_criteria = FilterCriteria::NONE) override {
+  virtual HierarchyNodeVector child_nodes (FilterCriteria const &filter_criteria = FilterCriteria::NONE) override {
     return m_childNodes; // ignore filter criteria for now
   }
 
@@ -31,8 +31,8 @@ public:
   virtual bool remove () override { return false; }
 
   // Provides a way to search the hierarchy given some particular search criteria.
-  virtual std::vector<std::shared_ptr<HierarchyNode>> recursive_search (FilterCriteria const &filter_criteria)override {
-    return std::vector<std::shared_ptr<HierarchyNode>>(); // nothing for now
+  virtual HierarchyNodeVector recursive_search (FilterCriteria const &filter_criteria)override {
+    return HierarchyNodeVector(); // nothing for now
   }
 
   // Provides a way for updates to a hierarchy node to update the state of something else.
@@ -46,7 +46,7 @@ public:
 private:
 
   std::shared_ptr<DummyNode> m_parent;
-  std::vector<std::shared_ptr<HierarchyNode>> m_childNodes;
+  HierarchyNodeVector m_childNodes;
 };
 
 std::shared_ptr<DummyNode> create_dummy_hierarchy (std::string const &root_name, unsigned int depth);
