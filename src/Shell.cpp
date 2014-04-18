@@ -10,6 +10,7 @@ LeapShell::LeapShell() :
   m_state = new NavigationState();
   m_view = new View(*m_state);
   m_render = new Render();
+  m_interaction = new Interaction();
 }
 
 LeapShell::~LeapShell()
@@ -86,6 +87,7 @@ void LeapShell::update()
   if (!frames.empty()) {
     for (auto iter = frames.cbegin(); iter != frames.cend(); ++iter) {
       const Leap::Frame& frame = *iter;
+      m_interaction->Update(frame, m_view);
     }
   }
 

@@ -127,6 +127,7 @@
     <ClInclude Include="..\..\include\GLBuffer.h" />
     <ClInclude Include="..\..\include\Globals.h" />
     <ClInclude Include="..\..\include\HierarchyNode.h" />
+    <ClInclude Include="..\..\include\Interaction.h" />
     <ClInclude Include="..\..\include\Layout.h" />
     <ClInclude Include="..\..\include\LeapListener.h" />
     <ClInclude Include="..\..\include\MeshHand.h" />
@@ -143,6 +144,7 @@
     <ClCompile Include="..\..\src\CinderFbxStream.cpp" />
     <ClCompile Include="..\..\src\GLBuffer.cpp" />
     <ClCompile Include="..\..\src\Globals.cpp" />
+    <ClCompile Include="..\..\src\Interaction.cpp" />
     <ClCompile Include="..\..\src\Layout.cpp" />
     <ClCompile Include="..\..\src\LeapListener.cpp" />
     <ClCompile Include="..\..\src\MeshHand.cpp" />

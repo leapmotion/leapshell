@@ -8,6 +8,7 @@
 #include "View.h"
 #include "Render.h"
 #include "NavigationState.h"
+#include "Interaction.h"
 #if defined(CINDER_COCOA)
 #include <boost/uuid/sha1.hpp>
 #include <mach-o/getsect.h>
@@ -77,6 +78,7 @@ private:
   NavigationState* m_state;
   View* m_view;
   Render* m_render;
+  Interaction* m_interaction;
 };
 
 #endif

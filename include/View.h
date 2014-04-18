@@ -19,6 +19,7 @@ public:
   void Update();
 	~View ();
 
+  // getters
   const TileVector& Tiles() const { return m_tiles; }
   const Vector3& Position() const { return m_position; }
   const Vector3& LookAt() const { return m_lookat; }
@@ -27,7 +28,13 @@ public:
   float Near() const { return m_near; }
   float Far() const { return m_far; }
 
+  // setters
+  void SetPosition(const Vector3& position);
+  void SetLookAt(const Vector3& lookat);
+
 private:
+
+  void clampCameraPosition(Vector3& position) const;
 
   // TODO: sorting criteria
   std::vector<std::shared_ptr<HierarchyNode>> m_sortedChildren;
