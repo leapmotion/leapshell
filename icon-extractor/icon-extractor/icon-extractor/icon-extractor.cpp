@@ -54,6 +54,7 @@ int main(int argc, _TCHAR* argv[])
   bmi.bmiHeader.biBitCount = 32;
   bmi.bmiHeader.biCompression = BI_RGB;
   HBITMAP hBmp = CreateDIBSection(nullptr, &bmi, 0, &pBits, hSection, 0);
+  CloseHandle(hSection);
 
   // Create a DC that we will use to render the HICON.  We select the backing surface into the DC so that draw
   // operations on the DC have a place to go.
@@ -69,6 +70,7 @@ int main(int argc, _TCHAR* argv[])
 
   DestroyIcon(hLarge);
   DeleteDC(hCompatDC);
+  DeleteObject(hBmp);
 	return 0;
 }
 
