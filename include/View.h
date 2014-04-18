@@ -23,14 +23,14 @@ public:
   // getters
   const TileVector& Tiles() const { return m_tiles; }
   const Vector3& Position() const { return m_position; }
-  const Vector3& LookAt() const { return m_lookat; }
+  const Vector3& LookAt() const { return m_lookatSmoother.value; }
   const Vector3& Up() const { return m_up; }
   float FOV() const { return m_fov; }
   float Near() const { return m_near; }
   float Far() const { return m_far; }
 
   // setters
-  void ApplyVelocity(const Vector3& velocity, double deltaTime);
+  void ApplyVelocity(const Vector3& velocity, double timeSeconds, double deltaTime);
   void SetPosition(const Vector3& position);
   void SetLookAt(const Vector3& lookat);
 
@@ -47,6 +47,7 @@ private:
   TileVector m_tiles;
 
   // render parameters
+  ExponentialFilter<Vector3> m_lookatSmoother;
   Vector3 m_position;
   Vector3 m_lookat;
   Vector3 m_up;

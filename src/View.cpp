@@ -15,6 +15,7 @@ View::View(std::shared_ptr<NavigationState> const &ownerNavigationState)
   m_far = 10000.0f;
   m_layout = std::shared_ptr<Layout>(new GridLayout());
   //m_layout = std::shared_ptr<Layout>(new RingLayout());
+  m_lookatSmoother.Update(m_lookat, 0.0, 0.5f);
 }
 
 View::~View () {
@@ -25,7 +26,7 @@ void View::Update() {
   m_layout->UpdateTiles(curNodes, m_tiles);
 }
 
-void View::ApplyVelocity(const Vector3& velocity, double deltaTime) {
+void View::ApplyVelocity(const Vector3& velocity, double timeSeconds, double deltaTime) {
   const Vector3 deltaPosition = velocity * deltaTime;
 
   m_position += deltaPosition;
@@ -33,10 +34,14 @@ void View::ApplyVelocity(const Vector3& velocity, double deltaTime) {
 
   static const double RUBBER_BAND_SPEED = 0.3333;
   const Vector3 clampedPosition = clampCameraPosition(m_position);
-  const Vector3 rubberBandForce = RUBBER_BAND_SPEED * (clampedPosition - m_position);
+  const Vector3 positionRubberBandForce = RUBBER_BAND_SPEED * (clampedPosition - m_position);
+  const Vector3 clampedLookat = clampCameraPosition(m_lookat);
+  const Vector3 lookatRubberBandForce = RUBBER_BAND_SPEED * (clampedLookat - m_lookat);
  
-  m_position += rubberBandForce;
-  m_lookat += rubberBandForce;
+  m_position += positionRubberBandForce;
+  m_lookat += lookatRubberBandForce;
+
+  m_lookatSmoother.Update(m_lookat, timeSeconds, 0.5f);
 }
 
 void View::SetPosition(const Vector3& position) {
