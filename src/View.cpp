@@ -26,6 +26,10 @@ void View::Update() {
   m_layout->UpdateTiles(curNodes, m_tiles);
 }
 
+void View::SetLayout(const std::shared_ptr<Layout>& layout) {
+  m_layout = layout;
+}
+
 void View::ApplyVelocity(const Vector3& velocity, double timeSeconds, double deltaTime) {
   const Vector3 deltaPosition = velocity * deltaTime;
 

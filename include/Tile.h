@@ -4,11 +4,14 @@
 #include "DataTypes.h"
 #include <memory>
 #include "HierarchyNode.h"
+#include "Utilities.h"
 
 class Tile {
 public:
+  static const float POSITION_SMOOTH;
   Tile();
   mutable ci::gl::TextureRef m_icon;
+  ExponentialFilter<Vector3> m_positionSmoother;
   Vector3 m_position;
   Vector3 m_size;
   std::shared_ptr<HierarchyNode> m_node;

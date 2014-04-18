@@ -1,5 +1,22 @@
 #include "StdAfx.h"
 #include "Layout.h"
+#include "Utilities.h"
+#include "Globals.h"
+
+// Layout
+
+Layout::Layout() : m_creationTime(Globals::curTimeSeconds) {
+
+}
+
+void Layout::animateTilePosition(Tile& tile, int idx, const Vector3& newPosition) const {
+  static const float SMOOTH_VARIATION_RADIUS = (1.0f - Tile::POSITION_SMOOTH)/2.0f;
+  const float mult = SmootherStep(std::min(1.0, 2 * (Globals::curTimeSeconds - m_creationTime)));
+  const float smoothVariation = SMOOTH_VARIATION_RADIUS * std::cos(3*Globals::curTimeSeconds + idx);
+  const float smooth = mult*(Tile::POSITION_SMOOTH + smoothVariation) + (1.0f - mult);
+  tile.m_positionSmoother.Update(newPosition, Globals::curTimeSeconds, smooth);
+  tile.m_position = tile.m_positionSmoother.value;
+}
 
 // GridLayout
 
@@ -23,7 +40,7 @@ void GridLayout::UpdateTiles(const HierarchyNodeVector &nodes, TileVector& tiles
   double curHeight = halfHeight;
   for (size_t i=0; i<tiles.size(); i++) {
     tiles[i].m_node = nodes[i];
-    tiles[i].m_position << curWidth, curHeight, 0.0;
+    animateTilePosition(tiles[i], i, Vector3(curWidth, curHeight, 0.0));
 
     curWidth += inc;
     if (curWidth > halfWidth) {
@@ -58,7 +75,7 @@ void RingLayout::UpdateTiles(const HierarchyNodeVector &nodes, TileVector& tiles
     const double x = m_radius * std::cos(theta);
     const double y = m_radius * std::sin(theta);
     tiles[i].m_node = nodes[i];
-    tiles[i].m_position << x, y, 0.0;
+    animateTilePosition(tiles[i], i, Vector3(x, y, 0.0));
     theta += thetaInc;
   }
 }

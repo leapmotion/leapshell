@@ -30,6 +30,7 @@ public:
   float Far() const { return m_far; }
 
   // setters
+  void SetLayout(const std::shared_ptr<Layout>& layout);
   void ApplyVelocity(const Vector3& velocity, double timeSeconds, double deltaTime);
   void SetPosition(const Vector3& position);
   void SetLookAt(const Vector3& lookat);

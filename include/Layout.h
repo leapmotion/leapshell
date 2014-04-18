@@ -11,9 +11,13 @@
 
 class Layout {
 public:
+  Layout();
   virtual void UpdateTiles(const HierarchyNodeVector& nodes, TileVector& tiles) = 0;
   virtual Vector2 GetCameraMinBounds() const = 0;
   virtual Vector2 GetCameraMaxBounds() const = 0;
+protected:
+  void animateTilePosition(Tile& tile, int idx, const Vector3& newPosition) const;
+  double m_creationTime;
 };
 
 class GridLayout : public Layout {

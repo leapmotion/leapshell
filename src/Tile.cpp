@@ -1,6 +1,8 @@
 #include "StdAfx.h"
 #include "Tile.h"
 
+const float Tile::POSITION_SMOOTH = 0.85f;
+
 Tile::Tile() {
   m_position = 100 * Vector3::Random();
   m_position.z() = 0.0;
