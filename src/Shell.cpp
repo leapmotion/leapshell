@@ -16,6 +16,7 @@ LeapShell::LeapShell()
   m_state->registerView(m_view);
 
   m_root = create_dummy_hierarchy("root", 3);
+  m_state->setCurrentLocation(m_root);
 }
 
 LeapShell::~LeapShell()
@@ -29,7 +30,7 @@ void LeapShell::prepareSettings(Settings* settings)
   settings->setWindowPos(100, 100);
   settings->setWindowSize(1024, 768);
   //settings->setBorderless(true);
-  settings->setAlwaysOnTop(true);
+  //settings->setAlwaysOnTop(true);
   settings->setFullScreen(false);
   settings->setFrameRate(60.0f);
   settings->disableFrameRate();

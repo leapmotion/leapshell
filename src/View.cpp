@@ -14,14 +14,15 @@ View::View(std::shared_ptr<NavigationState> const &ownerNavigationState)
   m_near = 1.0f;
   m_far = 10000.0f;
   m_layout = std::shared_ptr<Layout>(new GridLayout());
-  m_tiles.resize(100);
+  //m_layout = std::shared_ptr<Layout>(new RingLayout());
 }
 
 View::~View () {
 }
 
 void View::Update() {
-  m_layout->UpdateTiles(m_sortedChildren, m_tiles);
+  const HierarchyNodeVector& curNodes = m_ownerNavigationState->currentChildNodes();
+  m_layout->UpdateTiles(curNodes, m_tiles);
 }
 
 void View::ApplyVelocity(const Vector3& velocity, double deltaTime) {
@@ -32,7 +33,7 @@ void View::ApplyVelocity(const Vector3& velocity, double deltaTime) {
 
   static const double RUBBER_BAND_SPEED = 0.3333;
   const Vector3 clampedPosition = clampCameraPosition(m_position);
-  const Vector3 rubberBandForce = 0.3333 * (clampedPosition - m_position);
+  const Vector3 rubberBandForce = RUBBER_BAND_SPEED * (clampedPosition - m_position);
  
   m_position += rubberBandForce;
   m_lookat += rubberBandForce;

@@ -25,6 +25,7 @@ public:
   void SetWidth(double width) { m_width = width; }
 private:
   double m_width;
+  double m_height;
 };
 
 class RingLayout : public Layout {

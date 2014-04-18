@@ -3,30 +3,44 @@
 
 // GridLayout
 
-GridLayout::GridLayout() : m_width(100) {
+GridLayout::GridLayout() : m_width(100), m_height(m_width) {
 
 }
 
 void GridLayout::UpdateTiles(const HierarchyNodeVector &nodes, TileVector& tiles) {
-  static const int NUM_GRID = 10;
-  int tile = 0;
-  for (int i=0; i<NUM_GRID; i++) {
-    const double ratioX = static_cast<double>(i) / static_cast<double>(NUM_GRID-1);
-    const double x = -(m_width/2.0) + ratioX*m_width;
-    for (int j=0; j<NUM_GRID; j++) {
-      const double ratioY = static_cast<double>(j) / static_cast<double>(NUM_GRID-1);
-      const double y = -(m_width/2.0) + ratioY*m_width;
-      tiles[tile++].m_position << x, y, 0.0;
+  tiles.resize(nodes.size());
+
+  // compute number of rows and height of the layout
+  static const int TILES_PER_ROW = 6;
+  const double inc = m_width / (TILES_PER_ROW-1);
+  const int NUM_ROWS = static_cast<int>(std::ceil(static_cast<double>(tiles.size()) / TILES_PER_ROW));
+  m_height = inc * NUM_ROWS;
+
+  // start placing tiles
+  const double halfWidth = m_width/2.0;
+  const double halfHeight = m_height/2.0;
+  double curWidth = -halfWidth;
+  double curHeight = halfHeight;
+  for (size_t i=0; i<tiles.size(); i++) {
+    tiles[i].m_node = nodes[i];
+    tiles[i].m_position << curWidth, curHeight, 0.0;
+
+    curWidth += inc;
+    if (curWidth > halfWidth) {
+      curWidth = -halfWidth;
+      curHeight -= inc;
     }
   }
+
+  m_height = (halfWidth - curHeight);
 }
 
 Vector2 GridLayout::GetCameraMinBounds() const {
-  return Vector2(0, -m_width/4.0);
+  return Vector2(0, -m_height/4.0);
 }
 
 Vector2 GridLayout::GetCameraMaxBounds() const {
-  return Vector2(0, m_width/4.0);
+  return Vector2(0, m_height/4.0);
 }
 
 // RingLayout
@@ -36,11 +50,14 @@ RingLayout::RingLayout() : m_radius(50) {
 }
 
 void RingLayout::UpdateTiles(const HierarchyNodeVector &nodes, TileVector& tiles) {
+  tiles.resize(nodes.size());
+
   double theta = 0;
   const double thetaInc = 2*M_PI / static_cast<double>(tiles.size());
   for (size_t i=0; i<tiles.size(); i++) {
     const double x = m_radius * std::cos(theta);
     const double y = m_radius * std::sin(theta);
+    tiles[i].m_node = nodes[i];
     tiles[i].m_position << x, y, 0.0;
     theta += thetaInc;
   }

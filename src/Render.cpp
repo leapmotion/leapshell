@@ -19,6 +19,9 @@ void Render::draw(const View& view) const {
 }
 
 void Render::drawTile(const Tile& tile) const {
+  if (!tile.m_node) {
+    return;
+  }
   ci::gl::disableDepthRead();
   ci::gl::disableDepthWrite();
   glPushMatrix();
@@ -31,12 +34,12 @@ void Render::drawTile(const Tile& tile) const {
   // draw text
   static const double TEXT_SCALE = 0.1;
   glPushMatrix();
-  const std::string test("Node");
-  const ci::Vec2f nameSize = Globals::fontRegular->measureString(test);
+  const std::string name = tile.m_node->get_metadata_as<std::string>("name");
+  const ci::Vec2f nameSize = Globals::fontRegular->measureString(name);
   const ci::Rectf nameRect(-nameSize.x/2.0f, 0.0f, nameSize.x/2.0f, 100.0f);
   ci::gl::color(ci::ColorA::white());
   glScaled(TEXT_SCALE, -TEXT_SCALE, TEXT_SCALE);
-  Globals::fontRegular->drawString(test, nameRect);
+  Globals::fontRegular->drawString(name, nameRect);
   glPopMatrix();
 
   glPopMatrix();

@@ -14,6 +14,6 @@ public:
   std::shared_ptr<HierarchyNode> m_node;
 };
 
-typedef std::vector<Tile, Eigen::aligned_allocator<Tile> > TileVector;
+typedef std::vector<Tile, Eigen::aligned_allocator<Tile>> TileVector;
 
 #endif
