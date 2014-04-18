@@ -31,11 +31,12 @@ void Render::drawTile(const Tile& tile) const {
   // draw text
   static const double TEXT_SCALE = 0.1;
   glPushMatrix();
-  const ci::Vec2f nameSize = Globals::fontRegular->measureString(tile.m_name);
+  const std::string test("Node");
+  const ci::Vec2f nameSize = Globals::fontRegular->measureString(test);
   const ci::Rectf nameRect(-nameSize.x/2.0f, 0.0f, nameSize.x/2.0f, 100.0f);
   ci::gl::color(ci::ColorA::white());
   glScaled(TEXT_SCALE, -TEXT_SCALE, TEXT_SCALE);
-  Globals::fontRegular->drawString(tile.m_name, nameRect);
+  Globals::fontRegular->drawString(test, nameRect);
   glPopMatrix();
 
   glPopMatrix();

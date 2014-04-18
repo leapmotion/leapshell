@@ -19,10 +19,10 @@ void GridLayout::UpdateTiles(const std::vector<std::shared_ptr<HierarchyNode>> n
   }
 }
 
-Vector2 GridLayout::GetCameraBoundsX() const {
-  return Vector2(0, 0); // restrict movement only to vertical for this layout
+Vector2 GridLayout::GetCameraMinBounds() const {
+  return Vector2(0, -m_width/4.0);
 }
 
-Vector2 GridLayout::GetCameraBoundsY() const {
-  return Vector2(-m_width, m_width);
+Vector2 GridLayout::GetCameraMaxBounds() const {
+  return Vector2(0, m_width/4.0);
 }

@@ -7,6 +7,7 @@
 #include "DataTypes.h"
 #include "Layout.h"
 #include "Tile.h"
+#include "Utilities.h"
 
 class HierarchyNode;
 class Layout;
@@ -29,12 +30,13 @@ public:
   float Far() const { return m_far; }
 
   // setters
+  void ApplyVelocity(const Vector3& velocity, double deltaTime);
   void SetPosition(const Vector3& position);
   void SetLookAt(const Vector3& lookat);
 
 private:
 
-  void clampCameraPosition(Vector3& position) const;
+  Vector3 clampCameraPosition(const Vector3& position) const;
 
   // TODO: sorting criteria
   std::vector<std::shared_ptr<HierarchyNode>> m_sortedChildren;

@@ -1,11 +1,13 @@
 #include "StdAfx.h"
 #include "Interaction.h"
+#include "Globals.h"
 
 Interaction::Interaction() {
   m_panForce.Update(Vector3::Zero(), 0.0, 0.5f);
+  m_lastViewUpdateTime = 0.0;
 }
 
-void Interaction::Update(const Leap::Frame& frame, View* view) {
+void Interaction::Update(const Leap::Frame& frame) {
   const Leap::HandList hands = frame.hands();
   const double deltaTime = m_prevFrame.isValid() ? TIME_STAMP_TICKS_TO_SECS * (frame.timestamp() - m_prevFrame.timestamp()) : 0.0f;
   const double timeSeconds = TIME_STAMP_TICKS_TO_SECS * frame.timestamp();
@@ -28,12 +30,16 @@ void Interaction::Update(const Leap::Frame& frame, View* view) {
   const float curSmooth = force.squaredNorm() > prevForce.squaredNorm() ? SPEED_UP_SMOOTH : SLOW_DOWN_SMOOTH;
   m_panForce.Update(force, timeSeconds, curSmooth);
 
-  // apply the force to the view camera
-  const Vector3 deltaPosition = deltaTime * m_panForce.value;
-  view->SetPosition(view->Position() + deltaPosition);
-  view->SetLookAt(view->LookAt() + deltaPosition);
-
   m_prevFrame = frame;
+}
+
+void Interaction::UpdateView(View* view) {
+  const double deltaTime = Globals::curTimeSeconds - m_lastViewUpdateTime;
+
+  // apply the force to the view camera
+  view->ApplyVelocity(m_panForce.value, deltaTime);
+
+  m_lastViewUpdateTime = Globals::curTimeSeconds;
 }
 
 Vector3 Interaction::forceFromHand(const Leap::Hand& hand) {

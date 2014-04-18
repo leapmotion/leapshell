@@ -11,6 +11,8 @@ LeapShell::LeapShell() :
   m_view = new View(*m_state);
   m_render = new Render();
   m_interaction = new Interaction();
+
+  m_root = create_dummy_hierarchy("root", 3);
 }
 
 LeapShell::~LeapShell()
@@ -87,7 +89,7 @@ void LeapShell::update()
   if (!frames.empty()) {
     for (auto iter = frames.cbegin(); iter != frames.cend(); ++iter) {
       const Leap::Frame& frame = *iter;
-      m_interaction->Update(frame, m_view);
+      m_interaction->Update(frame);
     }
   }
 
@@ -98,6 +100,7 @@ void LeapShell::draw()
 {
   ci::gl::clear();
 
+  m_interaction->UpdateView(m_view);
   m_params->draw();
   m_render->draw(*m_view);
 

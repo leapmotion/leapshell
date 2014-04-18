@@ -10,7 +10,8 @@ class Interaction {
 public:
 
   Interaction();
-  void Update(const Leap::Frame& frame, View* view);
+  void Update(const Leap::Frame& frame);
+  void UpdateView(View* view);
 
 private:
 
@@ -19,6 +20,7 @@ private:
   Leap::Frame m_prevFrame;
   Leap::Frame m_curFrame;
   ExponentialFilter<Vector3> m_panForce;
+  double m_lastViewUpdateTime;
 
 };
 

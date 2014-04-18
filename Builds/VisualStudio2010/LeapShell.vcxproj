@@ -124,6 +124,7 @@
   <ItemGroup>
     <ClInclude Include="..\..\include\CinderFbxStream.h" />
     <ClInclude Include="..\..\include\DataTypes.h" />
+    <ClInclude Include="..\..\include\DummyNode.h" />
     <ClInclude Include="..\..\include\GLBuffer.h" />
     <ClInclude Include="..\..\include\Globals.h" />
     <ClInclude Include="..\..\include\HierarchyNode.h" />
@@ -142,6 +143,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\src\CinderFbxStream.cpp" />
+    <ClCompile Include="..\..\src\DummyNode.cpp" />
     <ClCompile Include="..\..\src\GLBuffer.cpp" />
     <ClCompile Include="..\..\src\Globals.cpp" />
     <ClCompile Include="..\..\src\Interaction.cpp" />

@@ -2,6 +2,8 @@
 #define __Tile_h__
 
 #include "DataTypes.h"
+#include <memory>
+#include "HierarchyNode.h"
 
 class Tile {
 public:
@@ -9,8 +11,7 @@ public:
   ci::gl::TextureRef m_icon;
   Vector3 m_position;
   Vector3 m_size;
-  std::string m_name;
-  std::string m_type;
+  std::shared_ptr<HierarchyNode> m_node;
 };
 
 typedef std::vector<Tile, Eigen::aligned_allocator<Tile> > TileVector;

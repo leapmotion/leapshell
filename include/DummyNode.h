@@ -49,6 +49,6 @@ private:
   std::vector<std::shared_ptr<HierarchyNode>> m_childNodes;
 };
 
-std::shared_ptr<DummyNode> create_dummy_hierarchy (std::string const &root_name, uint depth);
+std::shared_ptr<DummyNode> create_dummy_hierarchy (std::string const &root_name, unsigned int depth);
 
 #endif

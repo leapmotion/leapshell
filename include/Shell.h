@@ -9,6 +9,7 @@
 #include "Render.h"
 #include "NavigationState.h"
 #include "Interaction.h"
+#include "DummyNode.h"
 #if defined(CINDER_COCOA)
 #include <boost/uuid/sha1.hpp>
 #include <mach-o/getsect.h>
@@ -79,6 +80,8 @@ private:
   View* m_view;
   Render* m_render;
   Interaction* m_interaction;
+
+  std::shared_ptr<DummyNode> m_root;
 };
 
 #endif
