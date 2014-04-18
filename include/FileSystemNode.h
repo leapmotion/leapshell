@@ -48,8 +48,6 @@ private:
 
   boost::filesystem::path m_path;
   std::shared_ptr<FileSystemNode> m_parent;
-  HierarchyNodeVector m_childNodes;
-  bool m_dirtyChildren;
 };
 
 #endif
