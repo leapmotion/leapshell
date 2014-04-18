@@ -149,7 +149,7 @@ LeapShell::LeapShell()
 
   m_state->registerView(m_view);
 
-  m_root = create_dummy_hierarchy("root", 3);
+  m_root = std::shared_ptr<FileSystemNode>(new FileSystemNode("/"));
   m_state->setCurrentLocation(m_root);
 
   unit_test_Value(); // TEMP until this is verified to work on all platforms

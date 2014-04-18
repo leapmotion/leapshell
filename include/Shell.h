@@ -10,6 +10,7 @@
 #include "NavigationState.h"
 #include "Interaction.h"
 #include "DummyNode.h"
+#include "FileSystemNode.h"
 #if defined(CINDER_COCOA)
 #include <boost/uuid/sha1.hpp>
 #include <mach-o/getsect.h>
