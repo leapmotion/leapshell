@@ -37,7 +37,7 @@ void GridLayout::UpdateTiles(const HierarchyNodeVector &nodes, TileVector& tiles
   const double halfWidth = m_width/2.0;
   const double halfHeight = m_height/2.0;
   double curWidth = -halfWidth;
-  double curHeight = halfHeight;
+  double curHeight = halfHeight - inc/2.0;
   for (size_t i=0; i<tiles.size(); i++) {
     tiles[i].m_node = nodes[i];
     animateTilePosition(tiles[i], i, Vector3(curWidth, curHeight, 0.0));
@@ -49,15 +49,15 @@ void GridLayout::UpdateTiles(const HierarchyNodeVector &nodes, TileVector& tiles
     }
   }
 
-  m_height = (halfWidth - curHeight);
+  m_height = (halfHeight - curHeight);
 }
 
 Vector2 GridLayout::GetCameraMinBounds() const {
-  return Vector2(0, -m_height/4.0);
+  return Vector2(0, -m_height/2.0);
 }
 
 Vector2 GridLayout::GetCameraMaxBounds() const {
-  return Vector2(0, m_height/4.0);
+  return Vector2(0, m_height/2.0);
 }
 
 // RingLayout
