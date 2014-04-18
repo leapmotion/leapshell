@@ -13,9 +13,6 @@ public:
   // the name for the root node is not used in the path
   DummyNode (std::string const &name, std::shared_ptr<DummyNode> const &parent = std::shared_ptr<DummyNode>());
 
-  std::string name () const { return m_name; }
-  void set_name (std::string const &name);
-
   // Returns the parent node if it exists, otherwise nullptr.
   virtual std::shared_ptr<HierarchyNode> parent () override { return m_parent; }
   // Returns a list of the child nodes of this item.
@@ -25,8 +22,6 @@ public:
 
   // Uniquely identifies this item in the hierearchy.  This item's ancestry should be derivable from the path.
   virtual std::string path () const override;
-  // Returns the hierarchy-specific meta
-  virtual void metadata () const { }
 
   // Provides a way to open/activate/execute a node (e.g. run an executable or open a C++ class source file).
   virtual bool open (std::vector<std::string> const &parameters) const override { return false; }
@@ -50,7 +45,6 @@ public:
 
 private:
 
-  std::string m_name;
   std::shared_ptr<DummyNode> m_parent;
   std::vector<std::shared_ptr<HierarchyNode>> m_childNodes;
 };

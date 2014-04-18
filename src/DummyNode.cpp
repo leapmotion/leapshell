@@ -9,22 +9,15 @@ DummyNode::DummyNode (std::string const &name, std::shared_ptr<DummyNode> const 
   :
   m_parent(parent)
 {
-  set_name(name);
-}
-
-void DummyNode::set_name (std::string const &name) {
-  if (name.empty())
-    throw std::invalid_argument("DummyNode name must not be empty");
-  if (name.find('/') != std::string::npos)
-    throw std::invalid_argument("DummyNode name can not contain '/' character");
-  m_name = name;
+  // Name cannot contain slash -- FIXME
+  set_metadata_as("name", name);
 }
 
 std::string DummyNode::path () const {
   if (!m_parent) 
     return "/"; // root path
   else
-    return m_parent->path() + '/' + m_name;
+    return m_parent->path() + '/' + get_metadata_as<std::string>("name");
 }
 
 std::shared_ptr<DummyNode> create_dummy_hierarchy (std::string const &root_name, uint depth) {
