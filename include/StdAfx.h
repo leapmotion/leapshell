@@ -31,6 +31,7 @@
 #include <deque>
 #include <map>
 #include <sstream>
+#include <cmath>
 
 // fbx
 #include "fbxsdk.h"

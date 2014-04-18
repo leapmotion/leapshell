@@ -22,6 +22,9 @@
 		4EB1875519009F4400803428 /* Globals.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4EB1875219009F4400803428 /* Globals.cpp */; };
 		4EB1875619009F4400803428 /* Layout.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4EB1875319009F4400803428 /* Layout.cpp */; };
 		4EB1875719009F4400803428 /* Render.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4EB1875419009F4400803428 /* Render.cpp */; };
+		4EB1875A1900A63600803428 /* Value.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4EB187591900A63600803428 /* Value.cpp */; };
+		4EB1875E1900A93500803428 /* Tile.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4EB1875C1900A93500803428 /* Tile.cpp */; };
+		4EB1875F1900A93500803428 /* View.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4EB1875D1900A93500803428 /* View.cpp */; };
 		5323E6B20EAFCA74003A9687 /* CoreVideo.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 5323E6B10EAFCA74003A9687 /* CoreVideo.framework */; };
 		5323E6B60EAFCA7E003A9687 /* QTKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 5323E6B50EAFCA7E003A9687 /* QTKit.framework */; };
 		5AC204B9EB0D4837966924B4 /* CinderApp.icns in Resources */ = {isa = PBXBuildFile; fileRef = 214BE7F2E04F41DFBFCE9DE4 /* CinderApp.icns */; };
@@ -79,6 +82,11 @@
 		4EB1875219009F4400803428 /* Globals.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Globals.cpp; path = ../../src/Globals.cpp; sourceTree = "<group>"; };
 		4EB1875319009F4400803428 /* Layout.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Layout.cpp; path = ../../src/Layout.cpp; sourceTree = "<group>"; };
 		4EB1875419009F4400803428 /* Render.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Render.cpp; path = ../../src/Render.cpp; sourceTree = "<group>"; };
+		4EB187581900A60F00803428 /* Value.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = Value.h; path = ../../include/Value.h; sourceTree = "<group>"; };
+		4EB187591900A63600803428 /* Value.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Value.cpp; path = ../../src/Value.cpp; sourceTree = "<group>"; };
+		4EB1875B1900A92500803428 /* Tile.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = Tile.h; path = ../../include/Tile.h; sourceTree = "<group>"; };
+		4EB1875C1900A93500803428 /* Tile.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Tile.cpp; path = ../../src/Tile.cpp; sourceTree = "<group>"; };
+		4EB1875D1900A93500803428 /* View.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = View.cpp; path = ../../src/View.cpp; sourceTree = "<group>"; };
 		5323E6B10EAFCA74003A9687 /* CoreVideo.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreVideo.framework; path = /System/Library/Frameworks/CoreVideo.framework; sourceTree = "<absolute>"; };
 		5323E6B50EAFCA7E003A9687 /* QTKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = QTKit.framework; path = /System/Library/Frameworks/QTKit.framework; sourceTree = "<absolute>"; };
 		6D885E5CC2C64D9895194BC6 /* Resources.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = Resources.h; path = ../../include/Resources.h; sourceTree = "<group>"; };
@@ -115,6 +123,9 @@
 		080E96DDFE201D6D7F000001 /* Source */ = {
 			isa = PBXGroup;
 			children = (
+				4EB1875C1900A93500803428 /* Tile.cpp */,
+				4EB1875D1900A93500803428 /* View.cpp */,
+				4EB187591900A63600803428 /* Value.cpp */,
 				4EB1875219009F4400803428 /* Globals.cpp */,
 				4EB1875319009F4400803428 /* Layout.cpp */,
 				4EB1875419009F4400803428 /* Render.cpp */,
@@ -177,6 +188,8 @@
 		29B97315FDCFA39411CA2CEA /* Headers */ = {
 			isa = PBXGroup;
 			children = (
+				4EB1875B1900A92500803428 /* Tile.h */,
+				4EB187581900A60F00803428 /* Value.h */,
 				4EB1875119009F2F00803428 /* View.h */,
 				4EB1874C19009F1D00803428 /* Globals.h */,
 				4EB1874D19009F1D00803428 /* HierarchyNode.h */,
@@ -284,12 +297,15 @@
 				4EB1875619009F4400803428 /* Layout.cpp in Sources */,
 				4EB1875519009F4400803428 /* Globals.cpp in Sources */,
 				8D4C54A21640457789644020 /* Shell.cpp in Sources */,
+				4EB1875E1900A93500803428 /* Tile.cpp in Sources */,
 				4EB1875719009F4400803428 /* Render.cpp in Sources */,
 				4E8D8B4819008B3D00A2003E /* MeshHand.cpp in Sources */,
 				4E8D8B4719008B3D00A2003E /* LeapListener.cpp in Sources */,
 				4E8D8B4919008B3D00A2003E /* StdAfx.cpp in Sources */,
+				4EB1875F1900A93500803428 /* View.cpp in Sources */,
 				4E8D8B4619008B3D00A2003E /* GLBuffer.cpp in Sources */,
 				4E8D8B4519008B3D00A2003E /* CinderFbxStream.cpp in Sources */,
+				4EB1875A1900A63600803428 /* Value.cpp in Sources */,
 				4E8D8B4A19008B3D00A2003E /* Utilities.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
