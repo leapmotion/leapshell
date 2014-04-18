@@ -17,7 +17,7 @@ bool NavigationState::navigateUp () {
     m_currentLocation = parent;
     update();
   }
-  return bool(parent); // navigation succeeded if there was a parent
+  return !!parent; // navigation succeeded if there was a parent
 }
 
 bool NavigationState::navigateDown (std::shared_ptr<HierarchyNode> const &targetNode) {
@@ -36,8 +36,9 @@ void NavigationState::registerView (std::weak_ptr<View> const &view) {
 
 void NavigationState::unregisterView (std::weak_ptr<View> const &view) {
   auto it = m_views.find(view);
-  assert(it != m_views.end() && "this View is not registered");
-  m_views.erase(it);
+  if (it != m_views.end()) {
+    m_views.erase(it);
+  }
 }
 
 void NavigationState::update () {
@@ -48,8 +49,14 @@ void NavigationState::update () {
   } 
 
   // inform all views that there has been an update
-  for (auto it = m_views.begin(); it != m_views.end(); ++it) {
+  auto it = m_views.begin();
+  while (it != m_views.end()) {
     auto v = it->lock();
-    v->Update();
+    if (v) {
+      v->Update();
+      ++it;
+    } else {
+      m_views.erase(it++);
+    }
   }
 }
