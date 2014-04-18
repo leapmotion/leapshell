@@ -45,7 +45,7 @@ public:
 
   template<typename T>
   void set_metadata_as(std::string const& key, T const& value) {
-    m_metadata[key] = value;
+    m_metadata.HashSet(key, Value(value));
   }
 
   // Provides a way to open/activate/execute a node (e.g. run an executable or open a C++ class source file).
