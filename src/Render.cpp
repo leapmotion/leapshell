@@ -36,13 +36,17 @@ void Render::drawTile(const Tile& tile) const {
   ci::gl::drawStrokedRoundedRect(rect, 2.0, 10);
 
   // draw text
-  static const double TEXT_SCALE = 0.05;
   glPushMatrix();
   const std::string name = tile.m_node->get_metadata_as<std::string>("name");
   const ci::Vec2f nameSize = Globals::fontRegular->measureString(name);
   const ci::Rectf nameRect(-nameSize.x/2.0f, 0.0f, nameSize.x/2.0f, 100.0f);
+
+  const double TEXT_SCALE = std::min(0.03, tile.m_size.x() / nameSize.x);
+  static const double NAME_OFFSET = 1.0;
   ci::gl::color(ci::ColorA::white());
+  glTranslated(0.0, -tile.m_size.y()/2.0 - NAME_OFFSET, 0.0);
   glScaled(TEXT_SCALE, -TEXT_SCALE, TEXT_SCALE);
+  glTranslated(0, -Globals::FONT_SIZE/2.0, 0);
   Globals::fontRegular->drawString(name, nameRect);
   glPopMatrix();
 

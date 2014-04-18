@@ -12,6 +12,7 @@ public:
   static double curTimeSeconds;
 
   // fonts
+  static const float FONT_SIZE;
   static ci::gl::TextureFontRef fontRegular;
   static ci::gl::TextureFontRef fontBold;
 
