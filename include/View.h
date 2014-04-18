@@ -16,7 +16,7 @@ class NavigationState;
 class View {
 public:
 
-	View (NavigationState &ownerNavigationState);
+	View (std::shared_ptr<NavigationState> const &ownerNavigationState);
   void Update();
 	~View ();
 
@@ -37,6 +37,8 @@ public:
 private:
 
   Vector3 clampCameraPosition(const Vector3& position) const;
+
+  std::shared_ptr<NavigationState> m_ownerNavigationState;
 
   // TODO: sorting criteria
   std::vector<std::shared_ptr<HierarchyNode>> m_sortedChildren;

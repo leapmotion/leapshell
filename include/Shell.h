@@ -76,8 +76,8 @@ private:
 
   ci::params::InterfaceGlRef m_params;
 
-  NavigationState* m_state;
-  View* m_view;
+  std::shared_ptr<NavigationState> m_state;
+  std::shared_ptr<View> m_view;
   Render* m_render;
   Interaction* m_interaction;
 

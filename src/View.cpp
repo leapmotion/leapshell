@@ -1,8 +1,12 @@
 #include "StdAfx.h"
+#include "NavigationState.h"
 #include "View.h"
 #include <algorithm>
 
-View::View(NavigationState &ownerNavigationState) {
+View::View(std::shared_ptr<NavigationState> const &ownerNavigationState)
+  :
+  m_ownerNavigationState(ownerNavigationState)
+{
   m_position = 50 * Vector3::UnitZ();
   m_lookat = Vector3::Zero();
   m_up = Vector3::UnitY();
@@ -10,6 +14,10 @@ View::View(NavigationState &ownerNavigationState) {
   m_near = 1.0f;
   m_far = 10000.0f;
   m_layout = std::shared_ptr<Layout>(new GridLayout());
+  m_tiles.resize(100);
+}
+
+View::~View () {
 }
 
 void View::Update() {
@@ -24,7 +32,7 @@ void View::ApplyVelocity(const Vector3& velocity, double deltaTime) {
 
   static const double RUBBER_BAND_SPEED = 0.3333;
   const Vector3 clampedPosition = clampCameraPosition(m_position);
-  const Vector3 rubberBandForce = RUBBER_BAND_SPEED * (clampedPosition - m_position);
+  const Vector3 rubberBandForce = 0.3333 * (clampedPosition - m_position);
  
   m_position += rubberBandForce;
   m_lookat += rubberBandForce;

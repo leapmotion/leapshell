@@ -17,7 +17,7 @@ class HierarchyNode;
 typedef std::vector<std::shared_ptr<HierarchyNode>> HierarchyNodeVector;
 
 
-class HierarchyNode
+class HierarchyNode : public std::enable_shared_from_this<HierarchyNode>
 {
 public:
 

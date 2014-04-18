@@ -5,7 +5,7 @@ GridLayout::GridLayout() : m_width(100) {
 
 }
 
-void GridLayout::UpdateTiles(const std::vector<std::shared_ptr<HierarchyNode>> nodes, TileVector& tiles) {
+void GridLayout::UpdateTiles(const HierarchyNodeVector &nodes, TileVector& tiles) {
   static const int NUM_GRID = 10;
   int tile = 0;
   for (int i=0; i<NUM_GRID; i++) {

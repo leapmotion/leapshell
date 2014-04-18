@@ -3,14 +3,17 @@
 #include "Shell.h"
 #include "Globals.h"
 
-LeapShell::LeapShell() :
+LeapShell::LeapShell()
+  :
+  m_state(new NavigationState()),
+  m_view(new View(m_state)),
   m_render(nullptr)
 {
   m_leapController.addListener(m_leapListener);
-  m_state = new NavigationState();
-  m_view = new View(*m_state);
   m_render = new Render();
   m_interaction = new Interaction();
+
+  m_state->registerView(m_view);
 
   m_root = create_dummy_hierarchy("root", 3);
 }
@@ -100,7 +103,7 @@ void LeapShell::draw()
 {
   ci::gl::clear();
 
-  m_interaction->UpdateView(m_view);
+  m_interaction->UpdateView(*m_view);
   m_params->draw();
   m_render->draw(*m_view);
 

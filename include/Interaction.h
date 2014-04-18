@@ -11,7 +11,7 @@ public:
 
   Interaction();
   void Update(const Leap::Frame& frame);
-  void UpdateView(View* view);
+  void UpdateView(View &view);
 
 private:
 

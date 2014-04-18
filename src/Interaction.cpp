@@ -33,11 +33,11 @@ void Interaction::Update(const Leap::Frame& frame) {
   m_prevFrame = frame;
 }
 
-void Interaction::UpdateView(View* view) {
+void Interaction::UpdateView(View &view) {
   const double deltaTime = Globals::curTimeSeconds - m_lastViewUpdateTime;
 
   // apply the force to the view camera
-  view->ApplyVelocity(m_panForce.value, deltaTime);
+  view.ApplyVelocity(m_panForce.value, deltaTime);
 
   m_lastViewUpdateTime = Globals::curTimeSeconds;
 }
