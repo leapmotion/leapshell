@@ -8,7 +8,7 @@
 class Tile {
 public:
   Tile();
-  ci::gl::TextureRef m_icon;
+  mutable ci::gl::TextureRef m_icon;
   Vector3 m_position;
   Vector3 m_size;
   std::shared_ptr<HierarchyNode> m_node;

@@ -25,15 +25,26 @@ void Render::drawTile(const Tile& tile) const {
   glPushMatrix();
   glTranslated(tile.m_position.x(), tile.m_position.y(), tile.m_position.z());
 
-  // draw border
   const float halfWidth = static_cast<float>(tile.m_size.x()/2.0f);
   const float halfHeight = static_cast<float>(tile.m_size.y()/2.0f);
   const ci::Rectf rect(-halfWidth, -halfHeight, halfWidth, halfHeight);
 
-  ci::gl::color(ci::ColorA(0.5f, 0.5f, 0.5f));
-  ci::gl::drawSolidRoundedRect(rect, 2.0, 10);
-  ci::gl::color(ci::ColorA::white());
-  ci::gl::drawStrokedRoundedRect(rect, 2.0, 10);
+  if (!tile.m_icon) {
+    ci::Surface8u thumbnail = tile.m_node->thumbnail();
+    if (thumbnail) {
+      tile.m_icon = ci::gl::Texture::create(thumbnail);
+    }
+  }
+  if (tile.m_icon) {
+    // draw the thumbnail
+    ci::gl::draw(tile.m_icon, rect);
+  } else {
+    // draw border
+    ci::gl::color(ci::ColorA(0.5f, 0.5f, 0.5f));
+    ci::gl::drawSolidRoundedRect(rect, 2.0, 10);
+    ci::gl::color(ci::ColorA::white());
+    ci::gl::drawStrokedRoundedRect(rect, 2.0, 10);
+  }
 
   // draw text
   glPushMatrix();

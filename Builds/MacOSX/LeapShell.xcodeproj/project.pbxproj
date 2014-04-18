@@ -95,7 +95,7 @@
 		4EB187601900B86D00803428 /* Interaction.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = Interaction.h; path = ../../include/Interaction.h; sourceTree = "<group>"; };
 		4EB187611900B87700803428 /* Interaction.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Interaction.cpp; path = ../../src/Interaction.cpp; sourceTree = "<group>"; };
 		4EB187651900FD4500803428 /* FileSystemNode.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = FileSystemNode.h; path = ../../include/FileSystemNode.h; sourceTree = "<group>"; };
-		4EB187661900FD5200803428 /* FileSystemNode.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = FileSystemNode.cpp; path = ../../src/FileSystemNode.cpp; sourceTree = "<group>"; };
+		4EB187661900FD5200803428 /* FileSystemNode.cpp */ = {isa = PBXFileReference; explicitFileType = sourcecode.cpp.objcpp; fileEncoding = 4; name = FileSystemNode.cpp; path = ../../src/FileSystemNode.cpp; sourceTree = "<group>"; };
 		5323E6B10EAFCA74003A9687 /* CoreVideo.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreVideo.framework; path = /System/Library/Frameworks/CoreVideo.framework; sourceTree = "<absolute>"; };
 		5323E6B50EAFCA7E003A9687 /* QTKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = QTKit.framework; path = /System/Library/Frameworks/QTKit.framework; sourceTree = "<absolute>"; };
 		6D885E5CC2C64D9895194BC6 /* Resources.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = Resources.h; path = ../../include/Resources.h; sourceTree = "<group>"; };

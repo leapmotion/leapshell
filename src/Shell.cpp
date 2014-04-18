@@ -167,7 +167,7 @@ void LeapShell::prepareSettings(Settings* settings)
   settings->setWindowSize(1024, 768);
   //settings->setBorderless(true);
   //settings->setAlwaysOnTop(true);
-  settings->setFullScreen(false);
+  settings->setFullScreen(true);
   settings->setFrameRate(60.0f);
   settings->disableFrameRate();
 #if defined(CINDER_MSW)
