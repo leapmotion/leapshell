@@ -181,6 +181,11 @@ void LeapShell::setup()
   Globals::fontRegular = ci::gl::TextureFont::create(ci::Font(loadResource(RES_FONT_FREIGHTSANS_TTF), 72.0f));
   Globals::fontBold = ci::gl::TextureFont::create(ci::Font(loadResource(RES_FONT_FREIGHTSANSBOLD_TTF), 72.0f));
 
+  // disable depth test and enable alpha
+  ci::gl::disableDepthRead();
+  ci::gl::disableDepthWrite();
+  ci::gl::enableAlphaBlending();
+
   m_params = ci::params::InterfaceGl::create(getWindow(), "App parameters", ci::app::toPixels(ci::Vec2i(200, 400)));
   m_params->minimize();
 }

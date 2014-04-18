@@ -22,8 +22,6 @@ void Render::drawTile(const Tile& tile) const {
   if (!tile.m_node) {
     return;
   }
-  ci::gl::disableDepthRead();
-  ci::gl::disableDepthWrite();
   glPushMatrix();
   glTranslated(tile.m_position.x(), tile.m_position.y(), tile.m_position.z());
 
@@ -31,6 +29,10 @@ void Render::drawTile(const Tile& tile) const {
   const float halfWidth = static_cast<float>(tile.m_size.x()/2.0f);
   const float halfHeight = static_cast<float>(tile.m_size.y()/2.0f);
   const ci::Rectf rect(-halfWidth, -halfHeight, halfWidth, halfHeight);
+
+  ci::gl::color(ci::ColorA(0.5f, 0.5f, 0.5f));
+  ci::gl::drawSolidRoundedRect(rect, 2.0, 10);
+  ci::gl::color(ci::ColorA::white());
   ci::gl::drawStrokedRoundedRect(rect, 2.0, 10);
 
   // draw text
