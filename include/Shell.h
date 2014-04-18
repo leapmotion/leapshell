@@ -5,7 +5,9 @@
 #include "Resources.h"
 #include "LeapListener.h"
 #include "MeshHand.h"
+#include "View.h"
 #include "Render.h"
+#include "NavigationState.h"
 #if defined(CINDER_COCOA)
 #include <boost/uuid/sha1.hpp>
 #include <mach-o/getsect.h>
@@ -71,6 +73,9 @@ private:
   std::deque<Leap::Frame> m_frames;
 
   ci::params::InterfaceGlRef m_params;
+
+  NavigationState* m_state;
+  View* m_view;
   Render* m_render;
 };
 

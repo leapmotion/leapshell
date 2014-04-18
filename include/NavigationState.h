@@ -9,18 +9,17 @@ class Hierarchy;
 class HierarchyNode;
 class View;
 
-enum class NavigateResult { SUCCESS, FAILURE };
-
 class NavigationState {
 public:
 
 	typedef std::vector<std::shared_ptr<HierarchyNode>> NodeVector;
 
+  NavigationState() { }
 	std::shared_ptr<HierarchyNode> currentLocation () { return m_currentLocation; }
-	NodeVector const &currentChildNodes () { return m_currentLocation; }
+  NodeVector const &currentChildNodes() { return m_currentChildNodes; }
 
-	NavigateResult navigateUp ();
-	NavigateResult navigateDown (std::shared_ptr<HierarchyNode> const &targetNode);
+	bool navigateUp ();
+	bool navigateDown (std::shared_ptr<HierarchyNode> const &targetNode);
 
 	void registerView (View &view);
 	void unregisterView (View &view);

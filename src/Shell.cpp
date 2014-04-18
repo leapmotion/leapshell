@@ -7,6 +7,8 @@ LeapShell::LeapShell() :
   m_render(nullptr)
 {
   m_leapController.addListener(m_leapListener);
+  m_state = new NavigationState();
+  m_view = new View(*m_state);
   m_render = new Render();
 }
 
@@ -93,7 +95,7 @@ void LeapShell::draw()
   ci::gl::clear();
 
   m_params->draw();
-  m_render->draw();
+  m_render->draw(*m_view);
 
   ci::gl::setMatricesWindow(getWindowSize());
   ci::gl::drawString("FPS: " + ci::toString(getAverageFps()), ci::Vec2f(10.0f, 10.0f), ci::ColorA::white(), ci::Font("Arial", 18));

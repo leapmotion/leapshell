@@ -142,6 +142,7 @@
     <ClCompile Include="..\..\src\CinderFbxStream.cpp" />
     <ClCompile Include="..\..\src\GLBuffer.cpp" />
     <ClCompile Include="..\..\src\Globals.cpp" />
+    <ClCompile Include="..\..\src\Layout.cpp" />
     <ClCompile Include="..\..\src\LeapListener.cpp" />
     <ClCompile Include="..\..\src\MeshHand.cpp" />
     <ClCompile Include="..\..\src\Render.cpp" />
@@ -151,6 +152,7 @@
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>
     </ClCompile>
     <ClCompile Include="..\..\src\Utilities.cpp" />
+    <ClCompile Include="..\..\src\View.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets" />
