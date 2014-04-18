@@ -69,7 +69,7 @@
 		4E8D8B4219008B3D00A2003E /* MeshHand.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = MeshHand.cpp; path = ../../src/MeshHand.cpp; sourceTree = "<group>"; };
 		4E8D8B4319008B3D00A2003E /* StdAfx.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = StdAfx.cpp; path = ../../src/StdAfx.cpp; sourceTree = "<group>"; };
 		4E8D8B4419008B3D00A2003E /* Utilities.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Utilities.cpp; path = ../../src/Utilities.cpp; sourceTree = "<group>"; };
-		4E8D8B4C1900911000A2003E /* libLeap.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libLeap.dylib; path = "../../../../opt/local/Libraries/LeapSDK/lib/libc++/libLeap.dylib"; sourceTree = "<group>"; };
+		4E8D8B4C1900911000A2003E /* libLeap.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libLeap.dylib; path = "/opt/local/Libraries/LeapSDK/lib/libc++/libLeap.dylib"; sourceTree = "<absolute>"; };
 		4EB1874C19009F1D00803428 /* Globals.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = Globals.h; path = ../../include/Globals.h; sourceTree = "<group>"; };
 		4EB1874D19009F1D00803428 /* HierarchyNode.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = HierarchyNode.h; path = ../../include/HierarchyNode.h; sourceTree = "<group>"; };
 		4EB1874E19009F1D00803428 /* Layout.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = Layout.h; path = ../../include/Layout.h; sourceTree = "<group>"; };
@@ -164,7 +164,6 @@
 		29B97314FDCFA39411CA2CEA /* LeapShell */ = {
 			isa = PBXGroup;
 			children = (
-				4E8D8B4C1900911000A2003E /* libLeap.dylib */,
 				01B97315FEAEA392516A2CEA /* Blocks */,
 				29B97315FDCFA39411CA2CEA /* Headers */,
 				080E96DDFE201D6D7F000001 /* Source */,
@@ -210,6 +209,7 @@
 		29B97323FDCFA39411CA2CEA /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
+				4E8D8B4C1900911000A2003E /* libLeap.dylib */,
 				1058C7A0FEA54F0111CA2CBB /* Linked Frameworks */,
 				1058C7A2FEA54F0111CA2CBB /* Other Frameworks */,
 			);
