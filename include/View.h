@@ -16,6 +16,7 @@ class View {
 public:
 
 	View (NavigationState &ownerNavigationState);
+  void Update();
 	~View ();
 
   const TileVector& Tiles() const { return m_tiles; }

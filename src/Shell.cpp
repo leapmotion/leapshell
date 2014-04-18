@@ -88,6 +88,8 @@ void LeapShell::update()
       const Leap::Frame& frame = *iter;
     }
   }
+
+  m_view->Update();
 }
 
 void LeapShell::draw()

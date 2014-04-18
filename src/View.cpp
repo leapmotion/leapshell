@@ -8,17 +8,10 @@ View::View(NavigationState &ownerNavigationState) {
   m_fov = 80.0f;
   m_near = 1.0f;
   m_far = 10000.0f;
+  m_layout = std::shared_ptr<Layout>(new GridLayout());
+  m_tiles.resize(100);
+}
 
-  static const int NUM_GRID = 10;
-  const double size = 100;
-  for (int i=0; i<NUM_GRID; i++) {
-    const double ratioX = static_cast<double>(i) / static_cast<double>(NUM_GRID-1);
-    const double x = -(size/2.0) + ratioX*size;
-    for (int j=0; j<NUM_GRID; j++) {
-      const double ratioY = static_cast<double>(j) / static_cast<double>(NUM_GRID-1);
-      const double y = -(size/2.0) + ratioY*size;
-      m_tiles.push_back(Tile());
-      m_tiles.back().m_position << x, y, 0.0;
-    }
-  }
+void View::Update() {
+  m_layout->UpdateTiles(m_sortedChildren, m_tiles);
 }
