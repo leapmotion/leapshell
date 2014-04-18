@@ -33,6 +33,7 @@
 		8D4C54A21640457789644020 /* Shell.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4422BBF42B584FBA8C8ECD34 /* Shell.cpp */; };
 		EDF4DB281900AAF7006678DF /* DummyNode.cpp in Sources */ = {isa = PBXBuildFile; fileRef = EDF4DB271900AAF7006678DF /* DummyNode.cpp */; };
 		EDF4DB2A1900C430006678DF /* NavigationState.cpp in Sources */ = {isa = PBXBuildFile; fileRef = EDF4DB291900C430006678DF /* NavigationState.cpp */; };
+		EDF4DB2C1900E041006678DF /* HierarchyNode.cpp in Sources */ = {isa = PBXBuildFile; fileRef = EDF4DB2B1900E041006678DF /* HierarchyNode.cpp */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXCopyFilesBuildPhase section */
@@ -100,6 +101,7 @@
 		EDF4DB261900AAE5006678DF /* DummyNode.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = DummyNode.h; path = ../../include/DummyNode.h; sourceTree = "<group>"; };
 		EDF4DB271900AAF7006678DF /* DummyNode.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = DummyNode.cpp; path = ../../src/DummyNode.cpp; sourceTree = "<group>"; };
 		EDF4DB291900C430006678DF /* NavigationState.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = NavigationState.cpp; path = ../../src/NavigationState.cpp; sourceTree = "<group>"; };
+		EDF4DB2B1900E041006678DF /* HierarchyNode.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = HierarchyNode.cpp; path = ../../src/HierarchyNode.cpp; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -131,6 +133,7 @@
 		080E96DDFE201D6D7F000001 /* Source */ = {
 			isa = PBXGroup;
 			children = (
+				EDF4DB2B1900E041006678DF /* HierarchyNode.cpp */,
 				EDF4DB291900C430006678DF /* NavigationState.cpp */,
 				4EB187611900B87700803428 /* Interaction.cpp */,
 				4EB1875C1900A93500803428 /* Tile.cpp */,
@@ -323,6 +326,7 @@
 				4E8D8B4A19008B3D00A2003E /* Utilities.cpp in Sources */,
 				EDF4DB281900AAF7006678DF /* DummyNode.cpp in Sources */,
 				EDF4DB2A1900C430006678DF /* NavigationState.cpp in Sources */,
+				EDF4DB2C1900E041006678DF /* HierarchyNode.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
