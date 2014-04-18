@@ -86,7 +86,7 @@
 		4EB1875119009F2F00803428 /* View.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = View.h; path = ../../include/View.h; sourceTree = "<group>"; };
 		4EB1875219009F4400803428 /* Globals.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Globals.cpp; path = ../../src/Globals.cpp; sourceTree = "<group>"; };
 		4EB1875319009F4400803428 /* Layout.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Layout.cpp; path = ../../src/Layout.cpp; sourceTree = "<group>"; };
-		4EB1875419009F4400803428 /* Render.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Render.cpp; path = ../../src/Render.cpp; sourceTree = "<group>"; };
+		4EB1875419009F4400803428 /* Render.cpp */ = {isa = PBXFileReference; explicitFileType = sourcecode.cpp.objcpp; fileEncoding = 4; name = Render.cpp; path = ../../src/Render.cpp; sourceTree = "<group>"; };
 		4EB187581900A60F00803428 /* Value.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = Value.h; path = ../../include/Value.h; sourceTree = "<group>"; };
 		4EB187591900A63600803428 /* Value.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Value.cpp; path = ../../src/Value.cpp; sourceTree = "<group>"; };
 		4EB1875B1900A92500803428 /* Tile.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = Tile.h; path = ../../include/Tile.h; sourceTree = "<group>"; };
@@ -96,6 +96,7 @@
 		4EB187611900B87700803428 /* Interaction.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Interaction.cpp; path = ../../src/Interaction.cpp; sourceTree = "<group>"; };
 		4EB187651900FD4500803428 /* FileSystemNode.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = FileSystemNode.h; path = ../../include/FileSystemNode.h; sourceTree = "<group>"; };
 		4EB187661900FD5200803428 /* FileSystemNode.cpp */ = {isa = PBXFileReference; explicitFileType = sourcecode.cpp.objcpp; fileEncoding = 4; name = FileSystemNode.cpp; path = ../../src/FileSystemNode.cpp; sourceTree = "<group>"; };
+		4EEBAB251901D40600A7ED74 /* NSImageExt.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = NSImageExt.h; path = ../../include/NSImageExt.h; sourceTree = "<group>"; };
 		5323E6B10EAFCA74003A9687 /* CoreVideo.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreVideo.framework; path = /System/Library/Frameworks/CoreVideo.framework; sourceTree = "<absolute>"; };
 		5323E6B50EAFCA7E003A9687 /* QTKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = QTKit.framework; path = /System/Library/Frameworks/QTKit.framework; sourceTree = "<absolute>"; };
 		6D885E5CC2C64D9895194BC6 /* Resources.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = Resources.h; path = ../../include/Resources.h; sourceTree = "<group>"; };
@@ -206,6 +207,7 @@
 		29B97315FDCFA39411CA2CEA /* Headers */ = {
 			isa = PBXGroup;
 			children = (
+				4EEBAB251901D40600A7ED74 /* NSImageExt.h */,
 				4EB187651900FD4500803428 /* FileSystemNode.h */,
 				4EB187601900B86D00803428 /* Interaction.h */,
 				4EB1875B1900A92500803428 /* Tile.h */,

@@ -262,6 +262,7 @@ void LeapShell::resize()
 
   glViewport(0, 0, width, height);
   updateGlobals();
+  m_render->update_background(width, height);
 }
 
 void LeapShell::updateGlobals() {
