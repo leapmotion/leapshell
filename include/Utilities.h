@@ -3,6 +3,8 @@
 
 #include "DataTypes.h"
 
+#define FORMAT(expr) static_cast<std::ostringstream &>(std::ostringstream().flush() << expr).str()
+
 template <class T>
 static inline T SmootherStep(const T& x) {
   // x is blending parameter between 0 and 1

@@ -29,9 +29,10 @@ public:
 
 private:
 
-	// TODO: sorting criteria
-	std::vector<std::shared_ptr<HierarchyNode>> m_sortedChildren;
-	std::shared_ptr<Layout> m_layout;
+  // TODO: sorting criteria
+  std::vector<std::shared_ptr<HierarchyNode>> m_sortedChildren;
+  TileVector m_sortedChildPositions;
+  std::shared_ptr<Layout> m_layout;
   TileVector m_tiles;
 
   // render parameters
@@ -41,7 +42,6 @@ private:
   float m_fov;
   float m_near;
   float m_far;
-
 };
 
 #endif

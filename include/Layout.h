@@ -1,6 +1,7 @@
 #ifndef __LAYOUT_H__
 #define __LAYOUT_H__
 
+#include "DataTypes.h"
 #include "HierarchyNode.h"
 #include "Tile.h"
 

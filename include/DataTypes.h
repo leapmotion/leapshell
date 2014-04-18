@@ -1,6 +1,8 @@
 #ifndef __DataTypes_h__
 #define __DataTypes_h__
 
+#include "Eigen/Core"
+
 // matrices
 typedef Eigen::Matrix<double, 2, 2> Matrix2x2;
 typedef Eigen::Matrix<double, 3, 3> Matrix3x3;

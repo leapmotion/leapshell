@@ -30,6 +30,7 @@
 		5AC204B9EB0D4837966924B4 /* CinderApp.icns in Resources */ = {isa = PBXBuildFile; fileRef = 214BE7F2E04F41DFBFCE9DE4 /* CinderApp.icns */; };
 		8D11072F0486CEB800E47090 /* Cocoa.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1058C7A1FEA54F0111CA2CBB /* Cocoa.framework */; };
 		8D4C54A21640457789644020 /* Shell.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4422BBF42B584FBA8C8ECD34 /* Shell.cpp */; };
+		EDF4DB281900AAF7006678DF /* DummyNode.cpp in Sources */ = {isa = PBXBuildFile; fileRef = EDF4DB271900AAF7006678DF /* DummyNode.cpp */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXCopyFilesBuildPhase section */
@@ -92,6 +93,8 @@
 		6D885E5CC2C64D9895194BC6 /* Resources.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = Resources.h; path = ../../include/Resources.h; sourceTree = "<group>"; };
 		8D1107320486CEB800E47090 /* LeapShell.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = LeapShell.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		C6642498CA2E495DB0EB623E /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		EDF4DB261900AAE5006678DF /* DummyNode.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = DummyNode.h; path = ../../include/DummyNode.h; sourceTree = "<group>"; };
+		EDF4DB271900AAF7006678DF /* DummyNode.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = DummyNode.cpp; path = ../../src/DummyNode.cpp; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -126,6 +129,7 @@
 				4EB1875C1900A93500803428 /* Tile.cpp */,
 				4EB1875D1900A93500803428 /* View.cpp */,
 				4EB187591900A63600803428 /* Value.cpp */,
+				EDF4DB271900AAF7006678DF /* DummyNode.cpp */,
 				4EB1875219009F4400803428 /* Globals.cpp */,
 				4EB1875319009F4400803428 /* Layout.cpp */,
 				4EB1875419009F4400803428 /* Render.cpp */,
@@ -190,6 +194,7 @@
 			children = (
 				4EB1875B1900A92500803428 /* Tile.h */,
 				4EB187581900A60F00803428 /* Value.h */,
+				EDF4DB261900AAE5006678DF /* DummyNode.h */,
 				4EB1875119009F2F00803428 /* View.h */,
 				4EB1874C19009F1D00803428 /* Globals.h */,
 				4EB1874D19009F1D00803428 /* HierarchyNode.h */,
@@ -307,6 +312,7 @@
 				4E8D8B4519008B3D00A2003E /* CinderFbxStream.cpp in Sources */,
 				4EB1875A1900A63600803428 /* Value.cpp in Sources */,
 				4E8D8B4A19008B3D00A2003E /* Utilities.cpp in Sources */,
+				EDF4DB281900AAF7006678DF /* DummyNode.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

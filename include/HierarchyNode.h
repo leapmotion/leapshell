@@ -17,7 +17,7 @@ public:
   // Returns the parent node if it exists, otherwise nullptr.
   virtual std::shared_ptr<HierarchyNode> parent () = 0;
   // Returns a list of the child nodes of this item.
-  virtual std::vector<HierarchyNode *> child_nodes (FilterCriteria const &filter_criteria = FilterCriteria::NONE) = 0;
+  virtual std::vector<std::shared_ptr<HierarchyNode>> child_nodes (FilterCriteria const &filter_criteria = FilterCriteria::NONE) = 0;
 
   // Uniquely identifies this item in the hierearchy.  This item's ancestry should be derivable from the path.
   virtual std::string path () const = 0;
