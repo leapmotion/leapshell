@@ -23,7 +23,7 @@ int main(int argc, _TCHAR* argv[])
 
   // Need to construct a descriptor list which describes the path to the file we are trying to find:
   PIDLIST_RELATIVE pidl;
-  hr = pshf->ParseDisplayName(nullptr, nullptr, L"C:\\Windows\\install.exe", nullptr, &pidl, nullptr);
+  hr = pshf->ParseDisplayName(nullptr, nullptr, L"C:\\Windows\\", nullptr, &pidl, nullptr);
 
   // Now we need to make an extractor for the file we're interested in.  The extractor allows us to generate
   // an HICON from a given file, and does most of the work of format parsing for us.
@@ -38,8 +38,7 @@ int main(int argc, _TCHAR* argv[])
 
   // Pull the icon out of storage by its file name and index.
   HICON hLarge;
-  HICON hSmall;
-  hr = iconExtract->Extract(iconFile, index, &hLarge, &hSmall, 0);
+  hr = iconExtract->Extract(iconFile, index, &hLarge, nullptr, 0);
 
   // Create an HBITMAP which we can query from a backing DIB:
   HANDLE hSection = CreateFileMapping(INVALID_HANDLE_VALUE, nullptr, PAGE_READWRITE, 0, 0x1000 * 0x1000, nullptr);
