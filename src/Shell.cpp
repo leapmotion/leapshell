@@ -239,11 +239,22 @@ void LeapShell::mouseDrag(ci::app::MouseEvent event)
 void LeapShell::keyDown(ci::app::KeyEvent event)
 {
   switch (event.getChar()) {
-  case '1': m_view->SetPositionLayout(std::shared_ptr<PositionLayout>(new GridLayout())); break;
-  case '2': m_view->SetPositionLayout(std::shared_ptr<PositionLayout>(new RingLayout())); break;
-  case '3': m_view->SetPositionLayout(std::shared_ptr<PositionLayout>(new LinearSpiralLayout())); break;
-
-  case '7': m_view->SetSizeLayout(std::shared_ptr<SizeLayout>(new UniformSizeLayout())); break;
+  case '1':
+    m_view->SetSizeLayout(std::shared_ptr<SizeLayout>(new UniformSizeLayout()));
+    m_view->SetPositionLayout(std::shared_ptr<PositionLayout>(new GridLayout()));
+    break;
+  case '2':
+    m_view->SetSizeLayout(std::shared_ptr<SizeLayout>(new UniformSizeLayout()));
+    m_view->SetPositionLayout(std::shared_ptr<PositionLayout>(new RingLayout()));
+    break;
+  case '3':
+    m_view->SetSizeLayout(std::shared_ptr<SizeLayout>(new UniformSizeLayout()));
+    m_view->SetPositionLayout(std::shared_ptr<PositionLayout>(new LinearSpiralLayout()));
+    break;
+  case '4':
+    m_view->SetSizeLayout(std::shared_ptr<SizeLayout>(new ExponentialSpiralLayout()));
+    m_view->SetPositionLayout(std::shared_ptr<PositionLayout>(new ExponentialSpiralLayout())); 
+    break;
 
   case ci::app::KeyEvent::KEY_ESCAPE:
     quit();

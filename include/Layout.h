@@ -72,7 +72,26 @@ public:
 private:
   double m_startingAngle;
   double m_slope;
-  double m_radius;
+  double m_boundingRadius;
 };
 
+class ExponentialSpiralLayout : public SizeLayout, public PositionLayout {
+public:
+  ExponentialSpiralLayout();
+  virtual void UpdateTileSizes(TilePointerVector::iterator tile_start, TilePointerVector::iterator tile_end) override;
+  virtual void UpdateTilePositions(TilePointerVector::iterator tile_start, TilePointerVector::iterator tile_end) override;
+  virtual Vector2 GetCameraMinBounds() const override;
+  virtual Vector2 GetCameraMaxBounds() const override;
+  void SetBaseTileSize(const Vector3 &baseTileSize) { m_baseTileSize = baseTileSize; }
+  void SetSpacing(double spacing);
+private:
+  void SetBaseRadius(double baseRadius);
+
+  Vector3 m_baseTileSize;
+  double m_spacing;
+  double m_baseRadius;
+  double m_boundingRadius;
+  double m_exponentialRate;
+  double m_thetaIncrement;
+};
 #endif

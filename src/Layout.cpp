@@ -112,7 +112,7 @@ Vector2 RingLayout::GetCameraMaxBounds() const {
 
 // LinearSpiralLayout
 
-LinearSpiralLayout::LinearSpiralLayout() : m_startingAngle(2.0*M_PI), m_slope(3.0), m_radius(0.0) {
+LinearSpiralLayout::LinearSpiralLayout() : m_startingAngle(2.0*M_PI), m_slope(3.0), m_boundingRadius(0.0) {
 
 }
 
@@ -126,7 +126,6 @@ void LinearSpiralLayout::UpdateTilePositions(TilePointerVector::iterator tile_st
     const double x = radius * std::cos(theta);
     const double y = radius * std::sin(theta);
     animateTilePosition(tile, idx, Vector3(x, y, 0.0));
-    // theta += m_spacing;
     // Calculate the next angle based on the speed at which the spiral is being swept out.
     // we want to go along the arc a length of about the tile diameter.  This should make
     // it so that the tiles don't overlap. 
@@ -136,13 +135,75 @@ void LinearSpiralLayout::UpdateTilePositions(TilePointerVector::iterator tile_st
     double tile_diameter = tile_size_in_2d.norm() * 0.707;
     theta += tile_diameter / radius;
   }
-  m_radius = radius;
+  m_boundingRadius = radius;
 }
 
 Vector2 LinearSpiralLayout::GetCameraMinBounds() const {
-  return Vector2(-m_radius/2.0, -m_radius/2.0);
+  return Vector2(-m_boundingRadius/2.0, -m_boundingRadius/2.0);
 }
 
 Vector2 LinearSpiralLayout::GetCameraMaxBounds() const {
-  return Vector2(m_radius/2.0, m_radius/2.0);
+  return Vector2(m_boundingRadius/2.0, m_boundingRadius/2.0);
+}
+
+// ExponentialSpiralLayout
+
+ExponentialSpiralLayout::ExponentialSpiralLayout()
+  :
+  m_baseTileSize(Vector3::Constant(8.0)),
+  m_spacing(1.0)
+{
+  SetBaseRadius(5.0);
+}
+
+void ExponentialSpiralLayout::UpdateTileSizes(TilePointerVector::iterator tile_start, TilePointerVector::iterator tile_end) {
+  int tile_count = tile_end - tile_start;
+  int idx = 0;
+  for (auto it = tile_start; it != tile_end; ++it, ++idx) {
+    double centeredIndex = (idx - tile_count/2.0);
+    double theta = m_thetaIncrement*centeredIndex;
+    double ratio = std::exp(m_exponentialRate*theta);
+    animateTileSize(**it, idx, ratio*m_baseTileSize);
+  }
+}
+
+void ExponentialSpiralLayout::UpdateTilePositions(TilePointerVector::iterator tile_start, TilePointerVector::iterator tile_end) {
+  Vector2 baseTileSizeIn2d(m_baseTileSize(0), m_baseTileSize(1));
+  // divide by sqrt(2) to get a better approx of the shape of the icons we use
+  double baseTileDiameter = baseTileSizeIn2d.norm() * 0.707;
+  double baseTileRadius = baseTileDiameter / 2.0;
+  int tile_count = tile_end - tile_start;
+  int idx = 0;
+  double radius = 0.0;
+  for (auto it = tile_start; it != tile_end; ++it, ++idx) {
+    double centeredIndex = (idx - tile_count/2.0);
+    double theta = m_thetaIncrement*centeredIndex;
+    double ratio = m_spacing * std::exp(m_exponentialRate*theta);
+    radius = m_baseRadius * baseTileRadius * ratio;
+    const double x = radius * std::cos(theta);
+    const double y = radius * std::sin(theta);
+    animateTilePosition(**it, idx, Vector3(x, y, 0.0));
+  }
+  m_boundingRadius = radius;
+}
+
+Vector2 ExponentialSpiralLayout::GetCameraMinBounds() const {
+  return Vector2(-m_boundingRadius/2.0, -m_boundingRadius/2.0);
+}
+
+Vector2 ExponentialSpiralLayout::GetCameraMaxBounds() const {
+  return Vector2(m_boundingRadius/2.0, m_boundingRadius/2.0);
+}
+
+void ExponentialSpiralLayout::SetSpacing(double spacing) {
+  m_spacing = std::max(1.0, spacing);
+  SetBaseRadius(m_baseRadius);
+}
+
+void ExponentialSpiralLayout::SetBaseRadius(double baseRadius) {
+  assert(baseRadius > 1.0);
+  m_baseRadius = baseRadius;
+  m_thetaIncrement = 2.0 / (m_baseRadius * m_spacing);
+  double c = (m_baseRadius + 1.0) / (m_baseRadius - 1.0);
+  m_exponentialRate = std::log(c) / (2.0*M_PI);
 }

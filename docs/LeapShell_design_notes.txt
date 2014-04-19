@@ -13,6 +13,8 @@ Random ideas/TODOs
 - Blob-clustering layout -- cluster by some metadata key (e.g. file type) and then within
   each cluster, use some other layout (e.g. RingLayout, LinearSpiralLayout, or even
   cluster layout).  Zooming would probably be necessary if nested clustering was to be used.
+  The blobs' positions should be defined by a PositionLayout, e.g. LinearSpiralLayout,
+  which would put the blob clusters in a spiral.
 - Sector-clustering layout -- cluster by some metadata key as in blob-clustering, but
   lay the clusters out as the sectors of a disk.  The nodes would be packed tightly into
   each sector.  The sector angles should depend on how many nodes are in the cluster, so
@@ -26,9 +28,20 @@ Random ideas/TODOs
   when each node has a unique key (e.g. filename).
 - Exponential spiral layout -- place the nodes in an exponential spiral, and vary the
   nodes' sizes exponentially as well.  Zooming toward/away from the center of the spiral
-  would effectively "scroll along the sorting axis".  In order to not bog down the rendering
-  and not present too many tiny nodes to interact with, the nodes should fade out to
-  transparent below some size threshold and also be non-interactable below that threshold.
+  would effectively "scroll along the sorting axis" (it should spin the spiral also, so
+  that the eye can stay looking at the same spot on the screen, and the icons go by).  In
+  order to not bog down the rendering and not present too many tiny nodes to interact
+  with, the nodes should fade out to transparent below some size threshold and also be
+  non-interactable below that threshold.
+- Random-ish packing layout - Probably just for laying out clusters in a packed way.
+  It would take into account their sizes and pack them relatively efficiently.
+  Maybe some sort of force directed network could be used to compute this efficiently.
+- When sorting based on a prioritized list of keys, also specify the PositionLayout
+  to use for each one.  The goal is to make the layouts fractal-like, so that there are
+  subclusters, or making the clusters layed out in spirals, etc.
+- For clustering based on metadata types that span a large range of values (e.g. filenames)
+  instead of a small range of values (e.g. file types), break the range up into percentile
+  chunks, like say 20% chunks.
 
 Modular design
 - filesystem module -- querying the filesystem, opening/moving/copying/deleting files, etc
