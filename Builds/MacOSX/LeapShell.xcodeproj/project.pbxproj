@@ -359,9 +359,13 @@
 				GCC_SYMBOLS_PRIVATE_EXTERN = NO;
 				INFOPLIST_FILE = Info.plist;
 				INSTALL_PATH = "$(HOME)/Applications";
-				LIBRARY_SEARCH_PATHS = "\"$(LEAPSDK_PATH)/lib/libc++\"";
+				LIBRARY_SEARCH_PATHS = (
+					"\"$(LEAPSDK_PATH)/lib/libc++\"",
+					"\"$(FBXSDK_PATH)/lib/clang/ub/release\"",
+				);
 				OTHER_LDFLAGS = (
 					"\"$(CINDER_PATH)/lib/libcinder_d.a\"",
+					"\"$(FBXSDK_PATH)/lib/clang/ub/release/libfbxsdk.a\"",
 					"-lLeap",
 					"-sectcreate",
 					__DATA,
@@ -393,9 +397,13 @@
 				GCC_SYMBOLS_PRIVATE_EXTERN = NO;
 				INFOPLIST_FILE = Info.plist;
 				INSTALL_PATH = "$(HOME)/Applications";
-				LIBRARY_SEARCH_PATHS = "\"$(LEAPSDK_PATH)/lib/libc++\"";
+				LIBRARY_SEARCH_PATHS = (
+					"\"$(LEAPSDK_PATH)/lib/libc++\"",
+					"\"$(FBXSDK_PATH)/lib/clang/ub/release\"",
+				);
 				OTHER_LDFLAGS = (
 					"\"$(CINDER_PATH)/lib/libcinder.a\"",
+					"\"$(FBXSDK_PATH)/lib/clang/ub/release/libfbxsdk.a\"",
 					"-lLeap",
 					"-sectcreate",
 					__DATA,

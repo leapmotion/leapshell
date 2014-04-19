@@ -17,16 +17,20 @@ View::View(std::shared_ptr<NavigationState> const &ownerNavigationState)
   m_layout = std::shared_ptr<Layout>(new GridLayout());
   m_lookatSmoother.Update(m_lookat, 0.0, 0.5f);
 
+#if !__APPLE__ // TEMP because hand mesh resources are not loading properly on mac
   m_handL = new MeshHand("Left Hand", MeshHand::LEFT);
   m_handR = new MeshHand("Right Hand", MeshHand::RIGHT);
 
   m_handL->SetScale(0.75f);
   m_handR->SetScale(0.75f);
+#endif
 }
 
 View::~View () {
+#if !__APPLE__ // TEMP because hand mesh resources are not loading properly on mac
   delete m_handL;
   delete m_handR;
+#endif
 }
 
 void View::Update() {

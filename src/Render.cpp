@@ -26,7 +26,9 @@ void Render::draw(const View& view) const {
     drawTile(*it);
   }
 
+#if !__APPLE__ // TEMP because hand mesh resources are not loading properly on mac
   drawHands(view);
+#endif
 }
 
 void Render::drawTile(const Tile& tile) const {

@@ -157,10 +157,12 @@ LeapShell::LeapShell()
   m_root = std::shared_ptr<FileSystemNode>(new FileSystemNode("/"));
   m_state->setCurrentLocation(m_root);
 
+#if !__APPLE__ // TEMP because hand mesh resources are not loading properly on mac
   // setup hand meshes
   ci::DataSourceRef leftHand = loadResource(RES_LEFT_HAND_FBX);
   ci::DataSourceRef rightHand = loadResource(RES_RIGHT_HAND_FBX);
   MeshHand::SetMeshSources(leftHand, rightHand);
+#endif
   // this is done after m_state->setCurrentLocation so the metadata keys are accessible to View.
   // also, view must be created after meshes.
   m_view = std::shared_ptr<View>(new View(m_state));
