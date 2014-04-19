@@ -47,9 +47,9 @@ void View::Update() {
   SortTiles(m_sortedTiles, m_sortingCriteria.PrioritizedKeys());
 
   // update the sizes first (a PositionLayout implementation often depends on the sizes)
-  m_sizeLayout->UpdateTileSizes(m_sortedTiles);
+  m_sizeLayout->UpdateTileSizes(m_sortedTiles.begin(), m_sortedTiles.end());
   // then update the positions
-  m_positionLayout->UpdateTilePositions(m_sortedTiles);
+  m_positionLayout->UpdateTilePositions(m_sortedTiles.begin(), m_sortedTiles.end());
 
   std::shared_ptr<HierarchyNode> selectedNode(nullptr);
   for (TileVector::iterator it = m_tiles.begin(); it != m_tiles.end(); ++it) {

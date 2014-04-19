@@ -22,9 +22,10 @@ void SizeLayout::animateTileSize(Tile& tile, int idx, const Vector3& newSize) co
 
 UniformSizeLayout::UniformSizeLayout() : m_size(Vector3::Constant(15.0)) { }
 
-void UniformSizeLayout::UpdateTileSizes(TilePointerVector &tiles) {
-  for (size_t i=0; i<tiles.size(); i++) {
-    animateTileSize(*tiles[i], i, m_size);
+void UniformSizeLayout::UpdateTileSizes(TilePointerVector::iterator tile_start, TilePointerVector::iterator tile_end) {
+  int idx = 0;
+  for (auto it = tile_start; it != tile_end; ++it, ++idx) {
+    animateTileSize(**it, idx, m_size);
   }
 }
 
@@ -49,11 +50,11 @@ GridLayout::GridLayout() : m_width(100), m_height(m_width) {
 
 }
 
-void GridLayout::UpdateTilePositions(TilePointerVector &tiles) {
+void GridLayout::UpdateTilePositions(TilePointerVector::iterator tile_start, TilePointerVector::iterator tile_end) {
   // compute number of rows and height of the layout
   static const int TILES_PER_ROW = 6;
   const double inc = m_width / (TILES_PER_ROW-1);
-  const int NUM_ROWS = static_cast<int>(std::ceil(static_cast<double>(tiles.size()) / TILES_PER_ROW));
+  const int NUM_ROWS = static_cast<int>(std::ceil(static_cast<double>(tile_end - tile_start) / TILES_PER_ROW));
   m_height = inc * NUM_ROWS;
 
   // start placing tiles
@@ -61,8 +62,9 @@ void GridLayout::UpdateTilePositions(TilePointerVector &tiles) {
   const double halfHeight = m_height/2.0;
   double curWidth = -halfWidth;
   double curHeight = halfHeight - inc/2.0;
-  for (size_t i=0; i<tiles.size(); i++) {
-    animateTilePosition(*tiles[i], i, Vector3(curWidth, curHeight, 0.0));
+  int idx = 0;
+  for (auto it = tile_start; it != tile_end; ++it, ++idx) {
+    animateTilePosition(**it, idx, Vector3(curWidth, curHeight, 0.0));
 
     curWidth += inc;
     if (curWidth > halfWidth) {
@@ -88,13 +90,14 @@ RingLayout::RingLayout() : m_radius(50) {
 
 }
 
-void RingLayout::UpdateTilePositions(TilePointerVector &tiles) {
+void RingLayout::UpdateTilePositions(TilePointerVector::iterator tile_start, TilePointerVector::iterator tile_end) {
   double theta = 0;
-  const double thetaInc = 2*M_PI / static_cast<double>(tiles.size());
-  for (size_t i=0; i<tiles.size(); i++) {
+  const double thetaInc = 2*M_PI / static_cast<double>(tile_end - tile_start);
+  int idx = 0;
+  for (auto it = tile_start; it != tile_end; ++it, ++idx) {
     const double x = m_radius * std::cos(theta);
     const double y = m_radius * std::sin(theta);
-    animateTilePosition(*tiles[i], i, Vector3(x, y, 0.0));
+    animateTilePosition(**it, idx, Vector3(x, y, 0.0));
     theta += thetaInc;
   }
 }
@@ -113,15 +116,16 @@ LinearSpiralLayout::LinearSpiralLayout() : m_startingAngle(2.0*M_PI), m_slope(3.
 
 }
 
-void LinearSpiralLayout::UpdateTilePositions(TilePointerVector &tiles) {
+void LinearSpiralLayout::UpdateTilePositions(TilePointerVector::iterator tile_start, TilePointerVector::iterator tile_end) {
   double theta = m_startingAngle;
   double radius;
-  for (size_t i=0; i<tiles.size(); i++) {
-    Tile &tile = *tiles[i];
+  int idx = 0;
+  for (auto it = tile_start; it != tile_end; ++it, ++idx) {
+    Tile &tile = **it;
     radius = m_slope * theta;
     const double x = radius * std::cos(theta);
     const double y = radius * std::sin(theta);
-    animateTilePosition(tile, i, Vector3(x, y, 0.0));
+    animateTilePosition(tile, idx, Vector3(x, y, 0.0));
     // theta += m_spacing;
     // Calculate the next angle based on the speed at which the spiral is being swept out.
     // we want to go along the arc a length of about the tile diameter.  This should make

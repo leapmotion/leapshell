@@ -8,11 +8,10 @@
 #include <memory>
 #include <vector>
 
-
 class SizeLayout {
 public:
   SizeLayout();
-  virtual void UpdateTileSizes(TilePointerVector &tiles) = 0;
+  virtual void UpdateTileSizes(TilePointerVector::iterator tile_start, TilePointerVector::iterator tile_end) = 0;
 protected:
   void animateTileSize(Tile& tile, int idx, const Vector3& newSize) const;
   double m_creationTime;
@@ -21,7 +20,7 @@ protected:
 class UniformSizeLayout : public SizeLayout {
 public:
   UniformSizeLayout();
-  virtual void UpdateTileSizes(TilePointerVector &tiles) override;
+  virtual void UpdateTileSizes(TilePointerVector::iterator tile_start, TilePointerVector::iterator tile_end) override;
   void SetSize(const Vector3 &size) { m_size = size; }
 protected:
   Vector3 m_size;
@@ -31,7 +30,7 @@ protected:
 class PositionLayout {
 public:
   PositionLayout();
-  virtual void UpdateTilePositions(TilePointerVector &tiles) = 0;
+  virtual void UpdateTilePositions(TilePointerVector::iterator tile_start, TilePointerVector::iterator tile_end) = 0;
   virtual Vector2 GetCameraMinBounds() const = 0;
   virtual Vector2 GetCameraMaxBounds() const = 0;
 protected:
@@ -42,7 +41,7 @@ protected:
 class GridLayout : public PositionLayout {
 public:
   GridLayout();
-  virtual void UpdateTilePositions(TilePointerVector &tiles) override;
+  virtual void UpdateTilePositions(TilePointerVector::iterator tile_start, TilePointerVector::iterator tile_end) override;
   virtual Vector2 GetCameraMinBounds() const override;
   virtual Vector2 GetCameraMaxBounds() const override;
   void SetWidth(double width) { m_width = width; }
@@ -54,7 +53,7 @@ private:
 class RingLayout : public PositionLayout {
 public:
   RingLayout();
-  virtual void UpdateTilePositions(TilePointerVector &tiles) override;
+  virtual void UpdateTilePositions(TilePointerVector::iterator tile_start, TilePointerVector::iterator tile_end) override;
   virtual Vector2 GetCameraMinBounds() const override;
   virtual Vector2 GetCameraMaxBounds() const override;
   void SetRadius(double radius) { m_radius = radius; }
@@ -65,7 +64,7 @@ private:
 class LinearSpiralLayout : public PositionLayout {
 public:
   LinearSpiralLayout();
-  virtual void UpdateTilePositions(TilePointerVector &tiles) override;
+  virtual void UpdateTilePositions(TilePointerVector::iterator tile_start, TilePointerVector::iterator tile_end) override;
   virtual Vector2 GetCameraMinBounds() const override;
   virtual Vector2 GetCameraMaxBounds() const override;
   void SetStartingAngle(double startingAngle) { m_startingAngle = startingAngle; }
