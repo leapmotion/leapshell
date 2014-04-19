@@ -2,6 +2,8 @@
 #include "Render.h"
 #include "Utilities.h"
 #include "Globals.h"
+#include "MeshHand.h"
+#include "GLBuffer.h"
 
 Render::Render() {
 }
@@ -18,10 +20,13 @@ void Render::draw(const View& view) const {
   m_camera.setPerspective(view.FOV(), static_cast<float>(Globals::aspectRatio), view.Near(), view.Far());
   ci::gl::setMatrices(m_camera);
 
+  // draw tiles
   const TileVector& tiles = view.Tiles();
   for (TileVector::const_iterator it = tiles.begin(); it != tiles.end(); ++it) {
     drawTile(*it);
   }
+
+  drawHands(view);
 }
 
 void Render::drawTile(const Tile& tile) const {
@@ -77,3 +82,82 @@ void Render::drawTile(const Tile& tile) const {
 
   glPopMatrix();
 }
+
+void Render::drawHands(const View& view) const {
+  ci::gl::enableDepthWrite();
+  ci::gl::enableDepthRead();
+
+  const ci::Area origViewport = ci::gl::getViewport();
+  ci::gl::setViewport(Globals::handsFbo.getBounds());
+  Globals::handsFbo.bindFramebuffer();
+  ci::gl::clear(ci::ColorA(0.0f, 0.0f, 0.0f, 0.0f));
+
+  MeshHand& handL = view.LeftHand();
+  MeshHand& handR = view.RightHand();
+
+  ci::gl::GlslProg& shader = Globals::handsShader;
+  shader.bind();
+  GLint vertex = shader.getAttribLocation("vertex");
+  GLint normal = shader.getAttribLocation("normal");
+  GLint color = shader.getAttribLocation("color");
+  MeshHand::SetAttributeIndices(vertex, normal, color);
+  ci::Matrix44f transformMatrix = ci::Matrix44f::identity();
+  ci::Matrix44f normalMatrix = transformMatrix.inverted().transposed();
+  ci::Matrix44f projectionMatrix = ci::gl::getProjection();
+
+  // set uniforms
+  shader.uniform("transformMatrix", transformMatrix);
+  shader.uniform("normalMatrix", normalMatrix);
+  shader.uniform("projectionMatrix", projectionMatrix);
+  shader.uniform("lightPosition1", ci::Vec3f(1000, 500, 0));
+  shader.uniform("lightPosition2", ci::Vec3f(-1000, 500, 0));
+  shader.uniform("cameraPosition", ToVec3f(view.Position()));
+  shader.uniform("ambientFactor", 0.0f);
+  shader.uniform("specularPower", 1.0f);
+  shader.uniform("specularFactor", 0.0f);
+  shader.uniform("diffuseFactor", 0.0f);
+  shader.uniform("rimColor", ci::Color::white());
+  shader.uniform("rimStart", 0.5f);
+  shader.uniform("innerTransparency", 1.0f);
+
+  handL.SetScale(0.75f);
+  handR.SetScale(0.75f);
+
+  static const float FADE_TIME = 1.0f;
+
+  ci::gl::enableDepthRead();
+  ci::gl::enableDepthWrite();
+  ci::gl::disableAlphaBlending();
+
+  const float activeRatioL = 1.0f - SmootherStep(std::min(1.0, (Globals::curTimeSeconds - handL.LastUpdateTime())/FADE_TIME));
+  if (activeRatioL > 0.001f) {
+    shader.uniform("opacity", activeRatioL);
+    handL.Draw();
+  }
+
+  const float activeRatioR = 1.0f - SmootherStep(std::min(1.0, (Globals::curTimeSeconds - handR.LastUpdateTime())/FADE_TIME));
+  if (activeRatioR > 0.001f) {
+    shader.uniform("opacity", activeRatioR);
+    handR.Draw();
+  }
+
+  ci::gl::disableDepthRead();
+  ci::gl::disableDepthWrite();
+  ci::gl::enableAlphaBlending();
+
+  ci::gl::color(ci::ColorA::white());
+  Globals::handsFbo.unbindFramebuffer();
+
+  shader.unbind();
+
+  // draw hands FBO to screen
+  ci::gl::setMatricesWindow(static_cast<int>(Globals::windowWidth), static_cast<int>(Globals::windowHeight));
+  ci::gl::enableAdditiveBlending();
+  ci::gl::setViewport(origViewport);
+  Globals::handsFbo.bindTexture();
+  const ci::Rectf rect(0.0f, static_cast<float>(Globals::windowHeight), static_cast<float>(Globals::windowWidth), 0.0f);
+  ci::gl::drawSolidRect(rect);
+  Globals::handsFbo.unbindTexture();
+  ci::gl::enableAlphaBlending();
+}
+

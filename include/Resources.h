@@ -11,5 +11,7 @@
 #define RES_RIGHT_HAND_FBX                    CINDER_RESOURCE( ../resources/, models/right_hand.fbx, 121, FBX )
 
 // shaders
+#define RES_HANDS_FRAG_GLSL                   CINDER_RESOURCE( ../resources/, shaders/hands-frag.glsl, 130, GLSL )
+#define RES_HANDS_VERT_GLSL                   CINDER_RESOURCE( ../resources/, shaders/hands-vert.glsl, 131, GLSL )
 
 // images

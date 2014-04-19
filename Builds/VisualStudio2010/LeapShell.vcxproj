@@ -166,6 +166,10 @@
     <ClCompile Include="..\..\src\Value.cpp" />
     <ClCompile Include="..\..\src\View.cpp" />
   </ItemGroup>
+  <ItemGroup>
+    <None Include="..\..\resources\shaders\hands-frag.glsl" />
+    <None Include="..\..\resources\shaders\hands-vert.glsl" />
+  </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets" />
 </Project>

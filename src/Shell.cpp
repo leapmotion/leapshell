@@ -142,8 +142,8 @@ void unit_test_Value () {
 
 LeapShell::LeapShell()
   :
+  m_view(nullptr),
   m_state(new NavigationState()),
-  m_view(new View(m_state)),
   m_render(nullptr)
 {
 #if defined(CINDER_MSW)
@@ -153,10 +153,16 @@ LeapShell::LeapShell()
   m_render = new Render();
   m_interaction = new Interaction();
 
-  m_state->registerView(m_view);
-
   m_root = std::shared_ptr<FileSystemNode>(new FileSystemNode("/"));
   m_state->setCurrentLocation(m_root);
+
+  // setup hand meshes
+  ci::DataSourceRef leftHand = loadResource(RES_LEFT_HAND_FBX);
+  ci::DataSourceRef rightHand = loadResource(RES_RIGHT_HAND_FBX);
+  MeshHand::SetMeshSources(leftHand, rightHand);
+  m_view = std::shared_ptr<View>(new View(m_state)); // view must be created after meshes
+
+  m_state->registerView(m_view);
 
   unit_test_Value(); // TEMP until this is verified to work on all platforms
 }
@@ -190,10 +196,17 @@ void LeapShell::setup()
   Globals::fontRegular = ci::gl::TextureFont::create(ci::Font(loadResource(RES_FONT_FREIGHTSANS_TTF), Globals::FONT_SIZE));
   Globals::fontBold = ci::gl::TextureFont::create(ci::Font(loadResource(RES_FONT_FREIGHTSANSBOLD_TTF), Globals::FONT_SIZE));
 
-  // disable depth test and enable alpha
-  ci::gl::disableDepthRead();
-  ci::gl::disableDepthWrite();
+  // enable alpha
   ci::gl::enableAlphaBlending();
+
+  // load shaders
+  try {
+    Globals::handsShader = ci::gl::GlslProg(loadResource(RES_HANDS_VERT_GLSL), loadResource(RES_HANDS_FRAG_GLSL));
+  } catch (ci::gl::GlslProgCompileExc e) {
+    std::cerr << e.what() << std::endl;
+  }
+
+  glEnable(GL_TEXTURE_2D);
 
   m_params = ci::params::InterfaceGl::create(getWindow(), "App parameters", ci::app::toPixels(ci::Vec2i(200, 400)));
   m_params->minimize();
@@ -254,10 +267,11 @@ void LeapShell::update()
 
 void LeapShell::draw()
 {
-  ci::gl::clear();
+  ci::gl::clear(ci::ColorA::gray(0.4f, 1.0f));
+
+  m_params->draw();
 
   m_interaction->UpdateView(*m_view);
-  m_params->draw();
   m_render->draw(*m_view);
 
   ci::gl::setMatricesWindow(getWindowSize());
@@ -268,6 +282,8 @@ void LeapShell::resize()
 {
   const GLsizei width = static_cast<GLsizei>(getWindowWidth());
   const GLsizei height = static_cast<GLsizei>(getWindowHeight());
+
+  Globals::handsFbo = ci::gl::Fbo(width, height);
 
   glViewport(0, 0, width, height);
   updateGlobals();

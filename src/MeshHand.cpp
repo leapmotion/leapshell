@@ -1,6 +1,7 @@
 // Copyright (c) 2010 - 2014 Leap Motion. All rights reserved. Proprietary and confidential.
 #include "StdAfx.h"
 #include "MeshHand.h"
+#include "Globals.h"
 
 static const double RADIANS_TO_DEGREES =  180.0 / M_PI;
 static const double DEGREES_TO_RADIANS = M_PI / 180.0;
@@ -95,7 +96,7 @@ void MeshHand::Draw() {
   Vector3 side = normal.cross(direction).normalized();
   basis << side, -normal, -direction;
 
-  const Vector3 handPosition = position - distancePalmToWrist*direction;
+  const Vector3 handPosition = position - distancePalmToWrist*direction + Globals::LEAP_OFFSET;
 
   double pitch = m_Hand.direction().pitch();
   double yaw = -m_Hand.direction().yaw();

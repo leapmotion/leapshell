@@ -16,6 +16,15 @@ public:
   static ci::gl::TextureFontRef fontRegular;
   static ci::gl::TextureFontRef fontBold;
 
+  // shaders
+  static ci::gl::GlslProg handsShader;
+
+  // FBOs
+  static ci::gl::Fbo handsFbo;
+
+  // leap
+  static const Vector3 LEAP_OFFSET;
+
 };
 
 #endif

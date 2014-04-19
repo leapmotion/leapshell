@@ -14,11 +14,18 @@ View::View(std::shared_ptr<NavigationState> const &ownerNavigationState)
   m_near = 1.0f;
   m_far = 10000.0f;
   m_layout = std::shared_ptr<Layout>(new GridLayout());
-  //m_layout = std::shared_ptr<Layout>(new RingLayout());
   m_lookatSmoother.Update(m_lookat, 0.0, 0.5f);
+
+  m_handL = new MeshHand("Left Hand", MeshHand::LEFT);
+  m_handR = new MeshHand("Right Hand", MeshHand::RIGHT);
+
+  m_handL->SetScale(0.75f);
+  m_handR->SetScale(0.75f);
 }
 
 View::~View () {
+  delete m_handL;
+  delete m_handR;
 }
 
 void View::Update() {

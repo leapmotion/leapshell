@@ -7,6 +7,7 @@
 #include "Layout.h"
 #include "Tile.h"
 #include "Utilities.h"
+#include "MeshHand.h"
 
 class HierarchyNode;
 class Layout;
@@ -27,6 +28,8 @@ public:
   float FOV() const { return m_fov; }
   float Near() const { return m_near; }
   float Far() const { return m_far; }
+  MeshHand& LeftHand() const { return *m_handL; }
+  MeshHand& RightHand() const { return *m_handR; }
 
   // setters
   void SetLayout(const std::shared_ptr<Layout>& layout);
@@ -54,6 +57,11 @@ private:
   float m_fov;
   float m_near;
   float m_far;
+
+  // hands
+  mutable MeshHand* m_handL;
+  mutable MeshHand* m_handR;
+
 };
 
 #endif

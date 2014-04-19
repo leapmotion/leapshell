@@ -35,9 +35,19 @@ void Interaction::Update(const Leap::Frame& frame) {
 
 void Interaction::UpdateView(View &view) {
   const double deltaTime = Globals::curTimeSeconds - m_lastViewUpdateTime;
+  assert(deltaTime > 0);
 
   // apply the force to the view camera
   view.ApplyVelocity(m_panForce.value, Globals::curTimeSeconds, deltaTime);
+
+  const Leap::HandList hands = m_prevFrame.hands();
+  for (int i=0; i<hands.count(); i++) {
+    if (hands[i].isLeft()) {
+      view.LeftHand().Update(hands[i], Globals::curTimeSeconds);
+    } else if (hands[i].isRight()) {
+      view.RightHand().Update(hands[i], Globals::curTimeSeconds);
+    }
+  }
 
   m_lastViewUpdateTime = Globals::curTimeSeconds;
 }

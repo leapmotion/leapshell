@@ -14,6 +14,7 @@ public:
 private:
 
   void drawTile(const Tile& tile) const;
+  void drawHands(const View& view) const;
 
   mutable ci::CameraPersp m_camera;
   mutable ci::gl::TextureRef m_background;
