@@ -81,3 +81,39 @@ Vector2 RingLayout::GetCameraMinBounds() const {
 Vector2 RingLayout::GetCameraMaxBounds() const {
   return Vector2(m_radius/2.0, m_radius/2.0);
 }
+
+// LinearSpiralLayout
+
+LinearSpiralLayout::LinearSpiralLayout() : m_startingAngle(2.0*M_PI), m_slope(3.0), m_radius(0.0) {
+
+}
+
+void LinearSpiralLayout::UpdateTiles(TilePointerVector &tiles) {
+  double theta = m_startingAngle;
+  double radius;
+  for (size_t i=0; i<tiles.size(); i++) {
+    Tile &tile = *tiles[i];
+    radius = m_slope * theta;
+    const double x = radius * std::cos(theta);
+    const double y = radius * std::sin(theta);
+    animateTilePosition(tile, i, Vector3(x, y, 0.0));
+    // theta += m_spacing;
+    // Calculate the next angle based on the speed at which the spiral is being swept out.
+    // we want to go along the arc a length of about the tile diameter.  This should make
+    // it so that the tiles don't overlap. 
+    // length = radius * change_in_theta, so change_in_theta = length / radius.
+    Vector2 tile_size_in_2d(tile.m_size(0), tile.m_size(1));
+    // divide by sqrt(2) to get a better approx of the shape of the icons we use
+    double tile_diameter = tile_size_in_2d.norm() * 0.707;
+    theta += tile_diameter / radius;
+  }
+  m_radius = radius;
+}
+
+Vector2 LinearSpiralLayout::GetCameraMinBounds() const {
+  return Vector2(-m_radius/2.0, -m_radius/2.0);
+}
+
+Vector2 LinearSpiralLayout::GetCameraMaxBounds() const {
+  return Vector2(m_radius/2.0, m_radius/2.0);
+}

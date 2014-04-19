@@ -6,6 +6,27 @@ Minimal feature set
 - maybe moving/copying/deleting/renaming files
 - Filesystem search function
 
+Random ideas/TODOs
+- Blob-clustering layout -- cluster by some metadata key (e.g. file type) and then within
+  each cluster, use some other layout (e.g. RingLayout, LinearSpiralLayout, or even
+  cluster layout).  Zooming would probably be necessary if nested clustering was to be used.
+- Sector-clustering layout -- cluster by some metadata key as in blob-clustering, but
+  lay the clusters out as the sectors of a disk.  The nodes would be packed tightly into
+  each sector.  The sector angles should depend on how many nodes are in the cluster, so
+  that the bounding radius of each cluster is roughly uniform.  The radial direction
+  would be the secondary sorting coordinate, so that the first elements in each cluster
+  would be closest to the center.  Probably the tight packing could be achieved by using
+  segments of a linear spiral within each cluster.
+- Line-clustering layout -- same as Sector clustering layout, except each cluster is a
+  single radial line, instead of the nodes being packed tightly.  Then the sorting of
+  each cluster would be completely clear.  This would coincide exactly with RingLayout
+  when each node has a unique key (e.g. filename).
+- Exponential spiral layout -- place the nodes in an exponential spiral, and vary the
+  nodes' sizes exponentially as well.  Zooming toward/away from the center of the spiral
+  would effectively "scroll along the sorting axis".  In order to not bog down the rendering
+  and not present too many tiny nodes to interact with, the nodes should fade out to
+  transparent below some size threshold and also be non-interactable below that threshold.
+
 Modular design
 - filesystem module -- querying the filesystem, opening/moving/copying/deleting files, etc
 - OS integration module -- bringing this app to foreground/background, dealing with focus/activation
@@ -104,7 +125,11 @@ Visualization module (Victor, Raffi, Adrian)
       between their old and new locations).  This means that the "frame time" needs to be available
       to the layout method to do the interpolation.
 
-// Abstract Hierarchy
+
+
+
+
+
 
 enum class MetaDataType { STRING, INTEGER, DATE, ICON };
 
@@ -165,64 +190,6 @@ class Dictionary
 public:
     virtual Value const &operator [] (Key const &key) const = 0;
     virtual std::vector<Key> const &keys () const = 0; // should this use std::set<Key> instead?
-};
-
-
-// use smart_ptr<> instead of ordinary pointers?
-class HierarchyNode
-{
-public:
-    // Returns the parent node if it exists, otherwise nullptr.
-    virtual std::shared_ptr<HierarchyNode> parent () = 0;
-    // Returns a list of the child nodes of this item.
-    virtual std::vector<HierarchyNode *> child_nodes (FilterCriteria const &filter_criteria = FilterCriteria::NONE) = 0;
-
-    // Uniquely identifies this item in the hierearchy.  This item's ancestry should be derivable from the path.
-    virtual std::string path () const = 0;
-    // Returns the hierarchy-specific meta
-    virtual Dictionary<MetaDataType,MetaData> const &metadata () const = 0;
-};
-
-enum class OpenResult { SUCCESS, FAILURE };
-enum class MoveResult { SUCCESS, FAILURE };
-enum class RemoveResult { SUCCESS, FAILURE };
-
-class Hierarchy
-{
-public:
-    // Returns the root node of the hierarchy.
-    virtual std::shared_ptr<HierarchyNode> root_node () = 0;
-    // Returns a specification of the metadata that nodes should be expected to have; key -> type
-    virtual std::map<std::string,MetaDataType> const &metadata () const = 0;
-    // Provides a way to search the hierarchy given some particular search criteria.
-    virtual std::vector<std::shared_ptr<HierarchyNode>> search (SearchCriteria const &search_criteria) = 0;
-    // This is how updates to the hierarchy are indicated.  The provided callback function
-    // should be called when any part of the hierarchy is changed, and the affected nodes
-    // should be passed in.  NOTE: this particular interface method is probably outside of the
-    // scope of the hackathon, so should probably not actually be used.
-    typedef void (*UpdateCallback)(std::shared_ptr<Hierarchy> hierarchy, std::vector<std::shared_ptr<HierarchyNode>> const &updated_nodes);
-    virtual void set_update_callback (UpdateCallback update_callback) = 0;
-
-    // Provides a way to open/activate/execute a node (e.g. run an executable or open a C++
-    // class source file).
-    virtual OpenResult open (HierarchyNode &node, std::vector<std::string> const &parameters) const = 0;
-    // Move a node to a particular parent node.
-    virtual MoveResult move (HierarchyNode &node, HierarchyNode &to_parent) = 0;
-    // Remove a node from its parent.  Should not remove the root node.
-    virtual RemoveResult remove (HierarchyNode &node) = 0;
-};
-
-// Layout submodule is part of the Visualization module
-
-// PositionalData is some to-be-defined class that defines a physical location/size/shape
-// and will be what the interaction model uses in its logic/physics.
-
-class Layout
-{
-    // Given a particular LayoutRegion (which could specify 2d or 3d region), gets the
-    // positional properties of the requested child node.  The current time is passed in
-    // so that interpolation of positions can be done (e.g. when switching sorting modes).
-    virtual PositionalData get_position_of (std::shared_ptr<HierarchyNode const> child, LayoutRegion const &layout_region, Time const &t) const = 0;
 };
 
 

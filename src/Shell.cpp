@@ -241,6 +241,7 @@ void LeapShell::keyDown(ci::app::KeyEvent event)
   switch (event.getChar()) {
   case '1': m_view->SetLayout(std::shared_ptr<Layout>(new GridLayout())); break;
   case '2': m_view->SetLayout(std::shared_ptr<Layout>(new RingLayout())); break;
+  case '3': m_view->SetLayout(std::shared_ptr<Layout>(new LinearSpiralLayout())); break;
   case ci::app::KeyEvent::KEY_ESCAPE:
     quit();
     break;

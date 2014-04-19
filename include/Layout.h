@@ -3,6 +3,7 @@
 
 #include "HierarchyNode.h"
 #include "Tile.h"
+#include "Utilities.h"
 
 #include <memory>
 #include <vector>
@@ -38,6 +39,20 @@ public:
   virtual Vector2 GetCameraMaxBounds() const override;
   void SetRadius(double radius) { m_radius = radius; }
 private:
+  double m_radius;
+};
+
+class LinearSpiralLayout : public Layout {
+public:
+  LinearSpiralLayout();
+  virtual void UpdateTiles(TilePointerVector &tiles) override;
+  virtual Vector2 GetCameraMinBounds() const override;
+  virtual Vector2 GetCameraMaxBounds() const override;
+  void SetStartingAngle(double startingAngle) { m_startingAngle = startingAngle; }
+  void SetSlope(double slope) { m_slope = slope; }
+private:
+  double m_startingAngle;
+  double m_slope;
   double m_radius;
 };
 
