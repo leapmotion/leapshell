@@ -43,7 +43,10 @@ void Render::drawTile(const Tile& tile) const {
   }
   if (tile.m_icon) {
     // draw the icon
+    glPushMatrix();
+    glScaled(1, -1, 1);
     ci::gl::draw(tile.m_icon, rect);
+    glPopMatrix();
   } else {
     // draw border
     ci::gl::color(ci::ColorA(0.5f, 0.5f, 0.5f));

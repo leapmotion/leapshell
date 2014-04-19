@@ -6,6 +6,18 @@
 
 @implementation NSImage (ProportionalScaling)
 
+- (NSSize)pixelSize
+{
+  NSInteger actualWidth = 0;
+  NSInteger actualHeight = 0;
+  NSArray* representations = [self representations];
+  for (NSImageRep* nsImageRep in representations) {
+    if ([nsImageRep pixelsWide] > actualWidth)  { actualWidth =  [nsImageRep pixelsWide]; }
+    if ([nsImageRep pixelsHigh] > actualHeight) { actualHeight = [nsImageRep pixelsHigh]; }
+  }
+  return NSMakeSize(actualWidth, actualHeight);
+}
+
 - (NSImage*)imageByScalingProportionallyToSize:(NSSize)targetSize
 {
   NSImage* sourceImage = self;
@@ -13,13 +25,14 @@
 
   if ([sourceImage isValid]) {
     NSSize imageSize = [sourceImage size];
+
     float width  = imageSize.width;
     float height = imageSize.height;
 
     float targetWidth  = targetSize.width;
     float targetHeight = targetSize.height;
 
-    float scaleFactor  = 0.0;
+    float scaleFactor  = 0.0f;
     float scaledWidth  = targetWidth;
     float scaledHeight = targetHeight;
 
@@ -34,8 +47,8 @@
       } else {
         scaleFactor = heightFactor;
       }
-      scaledWidth  = width  * scaleFactor;
-      scaledHeight = height * scaleFactor;
+      scaledWidth  = width*scaleFactor;
+      scaledHeight = height*scaleFactor;
 
       if (widthFactor < heightFactor) {
         thumbnailPoint.y = (targetHeight - scaledHeight)*0.5;
@@ -44,7 +57,7 @@
       }
     }
     newImage = [[NSImage alloc] initWithSize:targetSize];
-    [newImage lockFocusFlipped:YES];
+    [newImage lockFocus];
       NSRect thumbnailRect;
       thumbnailRect.origin = thumbnailPoint;
       thumbnailRect.size.width = scaledWidth;
@@ -57,6 +70,7 @@
   }
   return [newImage autorelease];
 }
+
 @end
 
 #endif

@@ -65,9 +65,9 @@ ci::Surface8u FileSystemNode::icon()
       NSBitmapFormat nsBitmapFormat = [nsBitmapImageRep bitmapFormat];
       unsigned char *srcBytes = [nsBitmapImageRep bitmapData];
 
-      size = [nsImage size];
-      const int32_t width = static_cast<int32_t>(size.width)*2;
-      const int32_t height = static_cast<int32_t>(size.height)*2;
+      size = [nsImage pixelSize];
+      const int32_t width = static_cast<int32_t>(size.width);
+      const int32_t height = static_cast<int32_t>(size.height);
       const int32_t srcRowBytes = [nsBitmapImageRep bytesPerRow];
 
       m_surface = ci::Surface8u(width, height, true,
