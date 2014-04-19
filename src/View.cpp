@@ -56,7 +56,9 @@ void View::Update() {
     }
   }
 
-  if (selectedNode) {
+  if (selectedNode &&
+     !selectedNode->open() &&
+     !selectedNode->is_leaf()) {
     m_tiles.clear();
     m_ownerNavigationState->setCurrentLocation(selectedNode);
   }
