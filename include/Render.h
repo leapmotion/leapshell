@@ -1,7 +1,6 @@
 #ifndef __Render_h__
 #define __Render_h__
 
-#include "DataTypes.h"
 #include "View.h"
 #include "Tile.h"
 

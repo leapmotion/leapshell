@@ -23,6 +23,7 @@
 
 // eigen
 #include <Eigen/Dense>
+#include "DataTypes.h"
 
 // stl
 #include <vector>

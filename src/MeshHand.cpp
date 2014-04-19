@@ -1,8 +1,6 @@
 // Copyright (c) 2010 - 2014 Leap Motion. All rights reserved. Proprietary and confidential.
 #include "StdAfx.h"
 #include "MeshHand.h"
-#include <cinder/gl/gl.h>
-#include "DataTypes.h"
 
 static const double RADIANS_TO_DEGREES =  180.0 / M_PI;
 static const double DEGREES_TO_RADIANS = M_PI / 180.0;

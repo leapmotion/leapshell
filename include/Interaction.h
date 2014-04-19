@@ -1,7 +1,6 @@
 #ifndef __Interaction_h__
 #define __Interaction_h__
 
-#include "DataTypes.h"
 #include "View.h"
 #include "Utilities.h"
 
@@ -18,7 +17,6 @@ private:
   static Vector3 forceFromHand(const Leap::Hand& hand);
 
   Leap::Frame m_prevFrame;
-  Leap::Frame m_curFrame;
   ExponentialFilter<Vector3> m_panForce;
   double m_lastViewUpdateTime;
 

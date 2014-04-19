@@ -4,7 +4,6 @@
 
 #include "CinderFbxStream.h"
 #include "GLBuffer.h"
-#include "DataTypes.h"
 
 class MeshHand {
 public:

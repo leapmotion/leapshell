@@ -4,7 +4,6 @@
 #include <memory>
 #include <vector>
 
-#include "DataTypes.h"
 #include "Layout.h"
 #include "Tile.h"
 #include "Utilities.h"
