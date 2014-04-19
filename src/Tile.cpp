@@ -3,6 +3,7 @@
 #include "Globals.h"
 
 const float Tile::POSITION_SMOOTH = 0.85f;
+const float Tile::SIZE_SMOOTH = 0.85f;
 const float Tile::ACTIVATION_SMOOTH = 0.95f;
 
 Tile::Tile() {

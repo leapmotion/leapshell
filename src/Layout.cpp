@@ -3,13 +3,38 @@
 #include "Utilities.h"
 #include "Globals.h"
 
-// Layout
+// SizeLayout
 
-Layout::Layout() : m_creationTime(Globals::curTimeSeconds) {
+SizeLayout::SizeLayout() : m_creationTime(Globals::curTimeSeconds) {
 
 }
 
-void Layout::animateTilePosition(Tile& tile, int idx, const Vector3& newPosition) const {
+void SizeLayout::animateTileSize(Tile& tile, int idx, const Vector3& newSize) const {
+  static const float SMOOTH_VARIATION_RADIUS = (1.0f - Tile::SIZE_SMOOTH)/2.0f;
+  const float mult = SmootherStep(static_cast<float>(std::min(1.0, 2 * (Globals::curTimeSeconds - m_creationTime))));
+  const float smoothVariation = SMOOTH_VARIATION_RADIUS * static_cast<float>(std::cos(3*Globals::curTimeSeconds + idx));
+  const float smooth = mult*(Tile::SIZE_SMOOTH + smoothVariation) + (1.0f - mult);
+  tile.m_sizeSmoother.Update(newSize, Globals::curTimeSeconds, smooth);
+  tile.m_size = tile.m_sizeSmoother.value;
+}
+
+// UniformSizeLayout
+
+UniformSizeLayout::UniformSizeLayout() : m_size(Vector3::Constant(15.0)) { }
+
+void UniformSizeLayout::UpdateTileSizes(TilePointerVector &tiles) {
+  for (size_t i=0; i<tiles.size(); i++) {
+    animateTileSize(*tiles[i], i, m_size);
+  }
+}
+
+// PositionLayout
+
+PositionLayout::PositionLayout() : m_creationTime(Globals::curTimeSeconds) {
+
+}
+
+void PositionLayout::animateTilePosition(Tile& tile, int idx, const Vector3& newPosition) const {
   static const float SMOOTH_VARIATION_RADIUS = (1.0f - Tile::POSITION_SMOOTH)/2.0f;
   const float mult = SmootherStep(static_cast<float>(std::min(1.0, 2 * (Globals::curTimeSeconds - m_creationTime))));
   const float smoothVariation = SMOOTH_VARIATION_RADIUS * static_cast<float>(std::cos(3*Globals::curTimeSeconds + idx));
@@ -24,7 +49,7 @@ GridLayout::GridLayout() : m_width(100), m_height(m_width) {
 
 }
 
-void GridLayout::UpdateTiles(TilePointerVector &tiles) {
+void GridLayout::UpdateTilePositions(TilePointerVector &tiles) {
   // compute number of rows and height of the layout
   static const int TILES_PER_ROW = 6;
   const double inc = m_width / (TILES_PER_ROW-1);
@@ -63,7 +88,7 @@ RingLayout::RingLayout() : m_radius(50) {
 
 }
 
-void RingLayout::UpdateTiles(TilePointerVector &tiles) {
+void RingLayout::UpdateTilePositions(TilePointerVector &tiles) {
   double theta = 0;
   const double thetaInc = 2*M_PI / static_cast<double>(tiles.size());
   for (size_t i=0; i<tiles.size(); i++) {
@@ -88,7 +113,7 @@ LinearSpiralLayout::LinearSpiralLayout() : m_startingAngle(2.0*M_PI), m_slope(3.
 
 }
 
-void LinearSpiralLayout::UpdateTiles(TilePointerVector &tiles) {
+void LinearSpiralLayout::UpdateTilePositions(TilePointerVector &tiles) {
   double theta = m_startingAngle;
   double radius;
   for (size_t i=0; i<tiles.size(); i++) {

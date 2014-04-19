@@ -8,10 +8,30 @@
 #include <memory>
 #include <vector>
 
-class Layout {
+
+class SizeLayout {
 public:
-  Layout();
-  virtual void UpdateTiles(TilePointerVector &tiles) = 0;
+  SizeLayout();
+  virtual void UpdateTileSizes(TilePointerVector &tiles) = 0;
+protected:
+  void animateTileSize(Tile& tile, int idx, const Vector3& newSize) const;
+  double m_creationTime;
+};
+
+class UniformSizeLayout : public SizeLayout {
+public:
+  UniformSizeLayout();
+  virtual void UpdateTileSizes(TilePointerVector &tiles) override;
+  void SetSize(const Vector3 &size) { m_size = size; }
+protected:
+  Vector3 m_size;
+};
+
+// the tiles' sizes will have been updated before their positions are updated.
+class PositionLayout {
+public:
+  PositionLayout();
+  virtual void UpdateTilePositions(TilePointerVector &tiles) = 0;
   virtual Vector2 GetCameraMinBounds() const = 0;
   virtual Vector2 GetCameraMaxBounds() const = 0;
 protected:
@@ -19,10 +39,10 @@ protected:
   double m_creationTime;
 };
 
-class GridLayout : public Layout {
+class GridLayout : public PositionLayout {
 public:
   GridLayout();
-  virtual void UpdateTiles(TilePointerVector &tiles) override;
+  virtual void UpdateTilePositions(TilePointerVector &tiles) override;
   virtual Vector2 GetCameraMinBounds() const override;
   virtual Vector2 GetCameraMaxBounds() const override;
   void SetWidth(double width) { m_width = width; }
@@ -31,10 +51,10 @@ private:
   double m_height;
 };
 
-class RingLayout : public Layout {
+class RingLayout : public PositionLayout {
 public:
   RingLayout();
-  virtual void UpdateTiles(TilePointerVector &tiles) override;
+  virtual void UpdateTilePositions(TilePointerVector &tiles) override;
   virtual Vector2 GetCameraMinBounds() const override;
   virtual Vector2 GetCameraMaxBounds() const override;
   void SetRadius(double radius) { m_radius = radius; }
@@ -42,10 +62,10 @@ private:
   double m_radius;
 };
 
-class LinearSpiralLayout : public Layout {
+class LinearSpiralLayout : public PositionLayout {
 public:
   LinearSpiralLayout();
-  virtual void UpdateTiles(TilePointerVector &tiles) override;
+  virtual void UpdateTilePositions(TilePointerVector &tiles) override;
   virtual Vector2 GetCameraMinBounds() const override;
   virtual Vector2 GetCameraMaxBounds() const override;
   void SetStartingAngle(double startingAngle) { m_startingAngle = startingAngle; }

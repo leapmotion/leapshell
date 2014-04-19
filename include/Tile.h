@@ -8,10 +8,12 @@
 class Tile {
 public:
   static const float POSITION_SMOOTH;
+  static const float SIZE_SMOOTH;
   static const float ACTIVATION_SMOOTH;
   Tile();
   mutable ci::gl::TextureRef m_icon;
   ExponentialFilter<Vector3> m_positionSmoother;
+  ExponentialFilter<Vector3> m_sizeSmoother;
   ExponentialFilter<float> m_highlightSmoother;
   ExponentialFilter<float> m_activationSmoother;
   Vector3 m_position;

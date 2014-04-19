@@ -10,7 +10,7 @@
 #include "MeshHand.h"
 
 class HierarchyNode;
-class Layout;
+class PositionLayout;
 class NavigationState;
 
 class SortingCriteria {
@@ -32,8 +32,8 @@ private:
 class View {
 public:
 
-	View (std::shared_ptr<NavigationState> const &ownerNavigationState);
-	~View ();
+  View (std::shared_ptr<NavigationState> const &ownerNavigationState);
+  ~View ();
 
   void Update();
 
@@ -50,7 +50,8 @@ public:
   MeshHand& RightHand() const { return *m_handR; }
 
   // setters
-  void SetLayout(const std::shared_ptr<Layout>& layout);
+  void SetSizeLayout(const std::shared_ptr<SizeLayout>& sizeLayout);
+  void SetPositionLayout(const std::shared_ptr<PositionLayout>& positionLayout);
   void ApplyVelocity(const Vector3& velocity, double timeSeconds, double deltaTime);
   void SetPosition(const Vector3& position);
   void SetLookAt(const Vector3& lookat);
@@ -64,7 +65,8 @@ private:
   std::shared_ptr<NavigationState> m_ownerNavigationState;
 
   SortingCriteria m_sortingCriteria;
-  std::shared_ptr<Layout> m_layout;
+  std::shared_ptr<SizeLayout> m_sizeLayout;
+  std::shared_ptr<PositionLayout> m_positionLayout;
   TileVector m_tiles;
   TilePointerVector m_sortedTiles;
 

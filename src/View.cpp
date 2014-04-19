@@ -14,7 +14,8 @@ View::View(std::shared_ptr<NavigationState> const &ownerNavigationState)
   m_fov = 80.0f;
   m_near = 1.0f;
   m_far = 10000.0f;
-  m_layout = std::shared_ptr<Layout>(new GridLayout());
+  m_sizeLayout = std::shared_ptr<SizeLayout>(new UniformSizeLayout());
+  m_positionLayout = std::shared_ptr<PositionLayout>(new GridLayout());
   m_lookatSmoother.Update(m_lookat, 0.0, 0.5f);
 
 #if !__APPLE__ // TEMP because hand mesh resources are not loading properly on mac
@@ -44,7 +45,11 @@ void View::Update() {
     // should be cleared and regenerated if m_tiles is changed.
   }
   SortTiles(m_sortedTiles, m_sortingCriteria.PrioritizedKeys());
-  m_layout->UpdateTiles(m_sortedTiles);
+
+  // update the sizes first (a PositionLayout implementation often depends on the sizes)
+  m_sizeLayout->UpdateTileSizes(m_sortedTiles);
+  // then update the positions
+  m_positionLayout->UpdateTilePositions(m_sortedTiles);
 
   std::shared_ptr<HierarchyNode> selectedNode(nullptr);
   for (TileVector::iterator it = m_tiles.begin(); it != m_tiles.end(); ++it) {
@@ -61,8 +66,12 @@ void View::Update() {
   }
 }
 
-void View::SetLayout(const std::shared_ptr<Layout>& layout) {
-  m_layout = layout;
+void View::SetSizeLayout(const std::shared_ptr<SizeLayout>& sizeLayout) {
+  m_sizeLayout = sizeLayout;
+}
+
+void View::SetPositionLayout(const std::shared_ptr<PositionLayout>& positionLayout) {
+  m_positionLayout = positionLayout;
 }
 
 void View::ApplyVelocity(const Vector3& velocity, double timeSeconds, double deltaTime) {
@@ -93,7 +102,7 @@ void View::SetLookAt(const Vector3& lookat) {
 
 Vector3 View::clampCameraPosition(const Vector3& position) const {
   Vector3 result(position);
-  result.head<2>() = result.head<2>().cwiseMax(m_layout->GetCameraMinBounds()).cwiseMin(m_layout->GetCameraMaxBounds());
+  result.head<2>() = result.head<2>().cwiseMax(m_positionLayout->GetCameraMinBounds()).cwiseMin(m_positionLayout->GetCameraMaxBounds());
   return result;
 }
 

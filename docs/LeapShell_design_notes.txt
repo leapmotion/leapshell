@@ -7,6 +7,9 @@ Minimal feature set
 - Filesystem search function
 
 Random ideas/TODOs
+- Regarding multiple sorting criteria and sub-layouts -- use iterator ranges into the
+  single m_sortedTiles vector in order to specify the tiles in each cluster, and then
+  sub-ranges within those ranges to specify the tiles in each subcluster, etc.
 - Blob-clustering layout -- cluster by some metadata key (e.g. file type) and then within
   each cluster, use some other layout (e.g. RingLayout, LinearSpiralLayout, or even
   cluster layout).  Zooming would probably be necessary if nested clustering was to be used.
