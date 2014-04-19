@@ -41,7 +41,6 @@ void Interaction::UpdateView(View &view) {
   // apply the force to the view camera
   view.ApplyVelocity(m_panForce.value, Globals::curTimeSeconds, deltaTime);
 
-#if !__APPLE__ // TEMP because hand mesh resources are not loading properly on mac
   const Leap::HandList hands = m_prevFrame.hands();
   for (int i=0; i<hands.count(); i++) {
     if (hands[i].isLeft()) {
@@ -51,7 +50,6 @@ void Interaction::UpdateView(View &view) {
     }
   }
   applyInfluenceToTiles(hands, view.Tiles());
-#endif
 
   m_lastViewUpdateTime = Globals::curTimeSeconds;
 }

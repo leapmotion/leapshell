@@ -151,24 +151,6 @@ LeapShell::LeapShell()
   CoInitializeEx(nullptr, COINIT_MULTITHREADED);
 #endif
   m_leapController.addListener(m_leapListener);
-  m_render = new Render();
-  m_interaction = new Interaction();
-
-  m_root = std::shared_ptr<FileSystemNode>(new FileSystemNode("/"));
-  m_state->setCurrentLocation(m_root);
-
-#if !__APPLE__ // TEMP because hand mesh resources are not loading properly on mac
-  // setup hand meshes
-  ci::DataSourceRef leftHand = loadResource(RES_LEFT_HAND_FBX);
-  ci::DataSourceRef rightHand = loadResource(RES_RIGHT_HAND_FBX);
-  MeshHand::SetMeshSources(leftHand, rightHand);
-#endif
-  // this is done after m_state->setCurrentLocation so the metadata keys are accessible to View.
-  // also, view must be created after meshes.
-  m_view = std::shared_ptr<View>(new View(m_state));
-  m_state->registerView(m_view);
-
-  unit_test_Value(); // TEMP until this is verified to work on all platforms
 }
 
 LeapShell::~LeapShell()
@@ -200,6 +182,11 @@ void LeapShell::setup()
   Globals::fontRegular = ci::gl::TextureFont::create(ci::Font(loadResource(RES_FONT_FREIGHTSANS_TTF), Globals::FONT_SIZE));
   Globals::fontBold = ci::gl::TextureFont::create(ci::Font(loadResource(RES_FONT_FREIGHTSANSBOLD_TTF), Globals::FONT_SIZE));
 
+  // setup hand meshes
+  ci::DataSourceRef leftHand = loadResource(RES_LEFT_HAND_FBX);
+  ci::DataSourceRef rightHand = loadResource(RES_RIGHT_HAND_FBX);
+  MeshHand::SetMeshSources(leftHand, rightHand);
+
   // enable alpha
   ci::gl::enableAlphaBlending();
 
@@ -214,6 +201,19 @@ void LeapShell::setup()
 
   m_params = ci::params::InterfaceGl::create(getWindow(), "App parameters", ci::app::toPixels(ci::Vec2i(200, 400)));
   m_params->minimize();
+
+  m_render = new Render();
+  m_interaction = new Interaction();
+
+  m_root = std::shared_ptr<FileSystemNode>(new FileSystemNode("/"));
+  m_state->setCurrentLocation(m_root);
+
+  // this is done after m_state->setCurrentLocation so the metadata keys are accessible to View.
+  // also, view must be created after meshes.
+  m_view = std::shared_ptr<View>(new View(m_state));
+  m_state->registerView(m_view);
+
+  unit_test_Value(); // TEMP until this is verified to work on all platforms
 }
 
 void LeapShell::shutdown()
