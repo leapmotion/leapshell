@@ -25,8 +25,6 @@ GridLayout::GridLayout() : m_width(100), m_height(m_width) {
 }
 
 void GridLayout::UpdateTiles(const HierarchyNodeVector &nodes, TileVector& tiles) {
-  tiles.resize(nodes.size());
-
   // compute number of rows and height of the layout
   static const int TILES_PER_ROW = 6;
   const double inc = m_width / (TILES_PER_ROW-1);
@@ -67,8 +65,6 @@ RingLayout::RingLayout() : m_radius(50) {
 }
 
 void RingLayout::UpdateTiles(const HierarchyNodeVector &nodes, TileVector& tiles) {
-  tiles.resize(nodes.size());
-
   double theta = 0;
   const double thetaInc = 2*M_PI / static_cast<double>(tiles.size());
   for (size_t i=0; i<tiles.size(); i++) {

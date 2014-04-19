@@ -14,6 +14,7 @@ public:
 
 private:
 
+  static void applyInfluenceToTiles(const Leap::HandList& hands, TileVector& tiles);
   static Vector3 forceFromHand(const Leap::Hand& hand);
 
   Leap::Frame m_prevFrame;

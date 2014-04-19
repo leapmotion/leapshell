@@ -22,6 +22,7 @@ public:
 
   // getters
   const TileVector& Tiles() const { return m_tiles; }
+  TileVector& Tiles() { return m_tiles; }
   const Vector3& Position() const { return m_position; }
   const Vector3& LookAt() const { return m_lookatSmoother.value; }
   const Vector3& Up() const { return m_up; }

@@ -1,5 +1,6 @@
 #include "StdAfx.h"
 #include "Interaction.h"
+#include "Tile.h"
 #include "Globals.h"
 
 Interaction::Interaction() {
@@ -48,8 +49,59 @@ void Interaction::UpdateView(View &view) {
       view.RightHand().Update(hands[i], Globals::curTimeSeconds);
     }
   }
+  applyInfluenceToTiles(hands, view.Tiles());
 
   m_lastViewUpdateTime = Globals::curTimeSeconds;
+}
+
+void Interaction::applyInfluenceToTiles(const Leap::HandList& hands, TileVector& tiles) {
+  // TODO: hacky and unoptimized... these three passes should be done in one pass
+
+  static const float MAX_INFLUENCE_DISTANCE_SQ = 30 * 30;
+
+  // add highlight
+  for (TileVector::iterator it = tiles.begin(); it != tiles.end(); ++it) {
+    Tile& tile = *it;
+    float influence = 0.0f;
+    for (int i=0; i<hands.count(); i++) {
+      Vector3 palmPos = hands[i].palmPosition().toVector3<Vector3>() + Globals::LEAP_OFFSET;
+      palmPos.z() = 0.0;
+      const float distSq = (palmPos - tile.m_position).squaredNorm();
+      if (distSq < MAX_INFLUENCE_DISTANCE_SQ) {
+        influence = SmootherStep(1.0f - (distSq / MAX_INFLUENCE_DISTANCE_SQ));
+      }
+    }
+    tile.m_highlightSmoother.Update(influence, Globals::curTimeSeconds, Tile::ACTIVATION_SMOOTH);
+  }
+
+  // add selection
+  for (int i=0; i<hands.count(); i++) {
+    Vector3 palmPos = hands[i].palmPosition().toVector3<Vector3>() + Globals::LEAP_OFFSET;
+    const float grabMultiplier = SmootherStep(std::max(hands[i].grabStrength(), hands[i].pinchStrength()));
+    palmPos.z() = 0.0;
+    float closestDistSq = MAX_INFLUENCE_DISTANCE_SQ;
+    Tile* closestTile = nullptr;
+    for (TileVector::iterator it = tiles.begin(); it != tiles.end(); ++it) {
+      Tile& tile = *it;
+      const float distSq = (palmPos - tile.m_position).squaredNorm();
+      if (distSq < closestDistSq) {
+        closestTile = &tile;
+        closestDistSq = distSq;
+      }
+    }
+
+    if (closestTile) {
+      closestTile->m_activationSmoother.Update(grabMultiplier, Globals::curTimeSeconds, Tile::ACTIVATION_SMOOTH);
+    }
+  }
+
+  // decrease activation for all other tiles
+  for (TileVector::iterator it = tiles.begin(); it != tiles.end(); ++it) {
+    Tile& tile = *it;
+    if (tile.m_activationSmoother.lastTimeSeconds != Globals::curTimeSeconds) {
+      tile.m_activationSmoother.Update(0.0f, Globals::curTimeSeconds, Tile::ACTIVATION_SMOOTH);
+    }
+  }
 }
 
 Vector3 Interaction::forceFromHand(const Leap::Hand& hand) {

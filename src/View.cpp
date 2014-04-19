@@ -30,7 +30,22 @@ View::~View () {
 
 void View::Update() {
   const HierarchyNodeVector& curNodes = m_ownerNavigationState->currentChildNodes();
+  m_tiles.resize(curNodes.size());
   m_layout->UpdateTiles(curNodes, m_tiles);
+
+  std::shared_ptr<HierarchyNode> selectedNode(nullptr);
+  for (TileVector::iterator it = m_tiles.begin(); it != m_tiles.end(); ++it) {
+    Tile& tile = *it;
+    if (tile.m_activationSmoother.value > 0.99f) {
+      selectedNode = tile.m_node;
+      break;
+    }
+  }
+
+  if (selectedNode) {
+    m_tiles.clear();
+    m_ownerNavigationState->setCurrentLocation(selectedNode);
+  }
 }
 
 void View::SetLayout(const std::shared_ptr<Layout>& layout) {

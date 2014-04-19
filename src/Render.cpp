@@ -54,9 +54,13 @@ void Render::drawTile(const Tile& tile) const {
     glPopMatrix();
   } else {
     // draw border
-    ci::gl::color(ci::ColorA(0.5f, 0.5f, 0.5f));
+    if (tile.m_activationSmoother.value > 0.01f) {
+      ci::gl::color(ci::ColorA(1.0f, 0.3f, 0.1f, 0.8f * tile.m_activationSmoother.value));
+    } else {
+      ci::gl::color(ci::ColorA(0.7f, 0.7f, 0.7f, 0.5f * tile.m_highlightSmoother.value));
+    }
     ci::gl::drawSolidRoundedRect(rect, 2.0, 10);
-    ci::gl::color(ci::ColorA::white());
+    ci::gl::color(ci::ColorA(1.0f, 1.0f, 1.0f, 0.6f));
     ci::gl::drawStrokedRoundedRect(rect, 2.0, 10);
   }
 

@@ -1,12 +1,16 @@
 #include "StdAfx.h"
 #include "Tile.h"
+#include "Globals.h"
 
 const float Tile::POSITION_SMOOTH = 0.85f;
+const float Tile::ACTIVATION_SMOOTH = 0.95f;
 
 Tile::Tile() {
   m_position = 100 * Vector3::Random();
   m_position.z() = 0.0;
   m_size = Vector3::Constant(15);
+  m_highlightSmoother.Update(0.0f, Globals::curTimeSeconds, 0.5f);
+  m_activationSmoother.Update(0.0f, Globals::curTimeSeconds, 0.5f);
 }
 
 struct TileOrder {
