@@ -146,6 +146,9 @@ LeapShell::LeapShell()
   m_view(new View(m_state)),
   m_render(nullptr)
 {
+#if defined(CINDER_MSW)
+  CoInitializeEx(nullptr, COINIT_MULTITHREADED);
+#endif
   m_leapController.addListener(m_leapListener);
   m_render = new Render();
   m_interaction = new Interaction();
@@ -162,6 +165,9 @@ LeapShell::~LeapShell()
 {
   delete m_render;
   m_leapController.removeListener(m_leapListener);
+#if defined(CINDER_MSW)
+  CoUninitialize();
+#endif
 }
 
 void LeapShell::prepareSettings(Settings* settings)

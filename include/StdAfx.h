@@ -39,6 +39,9 @@
 // OS-specific
 #if _WIN32
 #include <Windows.h>
+#include <atlbase.h>
+#include <ShlObj.h>
+#include <ShObjIdl.h>
 #include <Shellapi.h>
 #include <direct.h>
 #include <WinTrust.h>
