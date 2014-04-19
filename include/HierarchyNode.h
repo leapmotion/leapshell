@@ -27,6 +27,8 @@ public:
   virtual std::shared_ptr<HierarchyNode> parent () = 0;
   // Returns a list of the child nodes of this item.
   virtual HierarchyNodeVector child_nodes (FilterCriteria const &filter_criteria = FilterCriteria::NONE) = 0;
+  // Returns whether this is a leaf node
+  virtual bool is_leaf () const = 0;
 
   // Uniquely identifies this item in the hierearchy.  This item's ancestry should be derivable from the path.
   virtual std::string path () const = 0;
@@ -43,15 +45,17 @@ public:
     return value.To<T>();
   }
 
+  // Set metadata property
   template<typename T>
   void set_metadata_as(std::string const& key, T const& value) {
     m_metadata.HashSet(key, Value(value));
   }
 
+  // Returns the icon associated with this node
   virtual ci::Surface8u icon() { return ci::Surface8u(); }
 
   // Provides a way to open/activate/execute a node (e.g. run an executable or open a C++ class source file).
-  virtual bool open (std::vector<std::string> const &parameters) const = 0;
+  virtual bool open (std::vector<std::string> const &parameters = std::vector<std::string>()) const = 0;
   // Move a node to a particular parent node.
   virtual bool move (HierarchyNode &to_parent) = 0;
   // Remove a node from its parent.  Should not remove the root node.

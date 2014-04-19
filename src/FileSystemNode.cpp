@@ -34,11 +34,21 @@ void FileSystemNode::init(std::shared_ptr<FileSystemNode> const& parent)
              std::shared_ptr<FileSystemNode>(new FileSystemNode(m_path.parent_path())) : parent;
   set_metadata_as("name", m_path.filename().string());
   uint64_t size = 0;
-  if (boost::filesystem::is_regular_file(m_path)) {
-    size = static_cast<uint64_t>(boost::filesystem::file_size(m_path));
+  if (boost::filesystem::is_directory(m_path)) {
+    m_isLeaf = false;
+  } else {
+    m_isLeaf = true;
+    if (boost::filesystem::is_regular_file(m_path)) {
+      size = static_cast<uint64_t>(boost::filesystem::file_size(m_path));
+    }
   }
   set_metadata_as("size", size);
   set_metadata_as("time", static_cast<uint64_t>(boost::filesystem::last_write_time(m_path)));
+}
+
+bool FileSystemNode::is_leaf() const
+{
+  return m_isLeaf;
 }
 
 HierarchyNodeVector FileSystemNode::child_nodes(FilterCriteria const& filter_criteria)
@@ -152,4 +162,19 @@ ci::Surface8u FileSystemNode::icon()
 #endif
   }
   return m_surface;
+}
+
+bool FileSystemNode::open(std::vector<std::string> const& parameters) const
+{
+  return false;
+}
+
+bool FileSystemNode::move(HierarchyNode& to_parent)
+{
+  return false;
+}
+
+bool FileSystemNode::remove()
+{
+  return false;
 }
