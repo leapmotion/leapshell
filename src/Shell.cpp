@@ -298,7 +298,7 @@ void LeapShell::resize()
 #if defined(CINDER_COCOA)
   @autoreleasepool {
     NSScreen* screen = getDisplay()->getNsScreen();
-    NSSize size = NSMakeSize(width*0.5, height*0.5); // Lower resolution for now (the OS may be scale this back up)
+    NSSize size = NSMakeSize(width, height);
     NSImage* nsImage = [[[NSImage alloc] initWithContentsOfURL:[[NSWorkspace sharedWorkspace] desktopImageURLForScreen:screen]] imageByScalingProportionallyToSize:size];
     NSBitmapImageRep* nsBitmapImageRep = [NSBitmapImageRep imageRepWithData:[nsImage TIFFRepresentation]];
     NSBitmapFormat nsBitmapFormat = [nsBitmapImageRep bitmapFormat];
