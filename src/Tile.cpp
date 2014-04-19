@@ -15,7 +15,17 @@ Tile::Tile() {
 
 struct TileOrder {
   TileOrder (std::vector<std::string> const &prioritizedKeys) : m_prioritizedKeys(prioritizedKeys) { }
-  bool operator () (std::shared_ptr<Tile> const &lhs, std::shared_ptr<Tile> const &rhs) {
+  bool operator () (Tile *&lhs, Tile *&rhs) {
+    assert(lhs != nullptr);
+    assert(rhs != nullptr);
+    if (m_prioritizedKeys.empty()) {
+      // we have to set a fallback ordering which is used if there are no prioritized keys.
+      // use the paths of the hierarchy nodes for the tiles
+      assert(rhs->m_node && "rhs Tile has invalid HierarchyNode member m_node (this should never happen)");
+      assert(lhs->m_node && "lhs Tile has invalid HierarchyNode member m_node (this should never happen)");
+      return lhs->m_node->path() < rhs->m_node->path();
+    }
+    // otherwise go through the keys in priority order and check ordering on those values
     int compareResult = 0;
     for (auto it = m_prioritizedKeys.begin(), it_end = m_prioritizedKeys.end(); it != it_end; ++it) {
       std::string const &key = *it;

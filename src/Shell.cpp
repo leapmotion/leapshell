@@ -6,6 +6,7 @@
 #if defined(CINDER_COCOA)
 #include "NSImageExt.h"
 #endif
+#include <memory>
 
 // this doesn't test all possible types, but tests that different types are
 // distinguishable via Value::compare, and that values of the same type are
@@ -160,8 +161,9 @@ LeapShell::LeapShell()
   ci::DataSourceRef leftHand = loadResource(RES_LEFT_HAND_FBX);
   ci::DataSourceRef rightHand = loadResource(RES_RIGHT_HAND_FBX);
   MeshHand::SetMeshSources(leftHand, rightHand);
-  m_view = std::shared_ptr<View>(new View(m_state)); // view must be created after meshes
-
+  // this is done after m_state->setCurrentLocation so the metadata keys are accessible to View.
+  // also, view must be created after meshes.
+  m_view = std::shared_ptr<View>(new View(m_state));
   m_state->registerView(m_view);
 
   unit_test_Value(); // TEMP until this is verified to work on all platforms

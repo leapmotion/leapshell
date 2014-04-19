@@ -13,12 +13,29 @@ class HierarchyNode;
 class Layout;
 class NavigationState;
 
+class SortingCriteria {
+public:
+
+  SortingCriteria (std::vector<std::string> const &prioritizedKeys = std::vector<std::string>())
+    :
+    m_prioritizedKeys(prioritizedKeys)
+  { }
+
+  std::vector<std::string> const &PrioritizedKeys () const { return m_prioritizedKeys; }
+  void SetPrioritizedKeys (std::vector<std::string> const &prioritizedKeys) { m_prioritizedKeys = prioritizedKeys; }
+
+private:
+
+  std::vector<std::string> m_prioritizedKeys;
+};
+
 class View {
 public:
 
 	View (std::shared_ptr<NavigationState> const &ownerNavigationState);
-  void Update();
 	~View ();
+
+  void Update();
 
   // getters
   const TileVector& Tiles() const { return m_tiles; }
@@ -41,14 +58,15 @@ public:
 private:
 
   Vector3 clampCameraPosition(const Vector3& position) const;
+  static void ExtractPrioritizedKeysFrom(const HierarchyNode &node, SortingCriteria &sortingCriteria);
+  static void RegenerateTilesAndTilePointers(const HierarchyNodeVector &nodes, TileVector &tiles, TilePointerVector &tilePointers);
 
   std::shared_ptr<NavigationState> m_ownerNavigationState;
 
-  // TODO: sorting criteria
-  std::vector<std::shared_ptr<HierarchyNode>> m_sortedChildren;
-  TileVector m_sortedChildPositions;
+  SortingCriteria m_sortingCriteria;
   std::shared_ptr<Layout> m_layout;
   TileVector m_tiles;
+  TilePointerVector m_sortedTiles;
 
   // render parameters
   ExponentialFilter<Vector3> m_lookatSmoother;

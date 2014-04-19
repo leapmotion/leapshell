@@ -22,7 +22,7 @@ public:
 };
 
 typedef std::vector<Tile, Eigen::aligned_allocator<Tile>> TileVector;
-typedef std::vector<std::shared_ptr<Tile>> TilePointerVector;
+typedef std::vector<Tile *> TilePointerVector;
 
 void SortTiles (TilePointerVector &v, std::vector<std::string> const &prioritizedKeys);
 

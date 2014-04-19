@@ -10,7 +10,7 @@
 class Layout {
 public:
   Layout();
-  virtual void UpdateTiles(const HierarchyNodeVector& nodes, TileVector& tiles) = 0;
+  virtual void UpdateTiles(TilePointerVector &tiles) = 0;
   virtual Vector2 GetCameraMinBounds() const = 0;
   virtual Vector2 GetCameraMaxBounds() const = 0;
 protected:
@@ -21,7 +21,7 @@ protected:
 class GridLayout : public Layout {
 public:
   GridLayout();
-  virtual void UpdateTiles(const HierarchyNodeVector& nodes, TileVector& tiles) override;
+  virtual void UpdateTiles(TilePointerVector &tiles) override;
   virtual Vector2 GetCameraMinBounds() const override;
   virtual Vector2 GetCameraMaxBounds() const override;
   void SetWidth(double width) { m_width = width; }
@@ -33,7 +33,7 @@ private:
 class RingLayout : public Layout {
 public:
   RingLayout();
-  virtual void UpdateTiles(const HierarchyNodeVector& nodes, TileVector& tiles) override;
+  virtual void UpdateTiles(TilePointerVector &tiles) override;
   virtual Vector2 GetCameraMinBounds() const override;
   virtual Vector2 GetCameraMaxBounds() const override;
   void SetRadius(double radius) { m_radius = radius; }

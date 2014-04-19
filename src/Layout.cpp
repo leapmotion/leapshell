@@ -24,7 +24,7 @@ GridLayout::GridLayout() : m_width(100), m_height(m_width) {
 
 }
 
-void GridLayout::UpdateTiles(const HierarchyNodeVector &nodes, TileVector& tiles) {
+void GridLayout::UpdateTiles(TilePointerVector &tiles) {
   // compute number of rows and height of the layout
   static const int TILES_PER_ROW = 6;
   const double inc = m_width / (TILES_PER_ROW-1);
@@ -37,8 +37,7 @@ void GridLayout::UpdateTiles(const HierarchyNodeVector &nodes, TileVector& tiles
   double curWidth = -halfWidth;
   double curHeight = halfHeight - inc/2.0;
   for (size_t i=0; i<tiles.size(); i++) {
-    tiles[i].m_node = nodes[i];
-    animateTilePosition(tiles[i], i, Vector3(curWidth, curHeight, 0.0));
+    animateTilePosition(*tiles[i], i, Vector3(curWidth, curHeight, 0.0));
 
     curWidth += inc;
     if (curWidth > halfWidth) {
@@ -64,14 +63,13 @@ RingLayout::RingLayout() : m_radius(50) {
 
 }
 
-void RingLayout::UpdateTiles(const HierarchyNodeVector &nodes, TileVector& tiles) {
+void RingLayout::UpdateTiles(TilePointerVector &tiles) {
   double theta = 0;
   const double thetaInc = 2*M_PI / static_cast<double>(tiles.size());
   for (size_t i=0; i<tiles.size(); i++) {
     const double x = m_radius * std::cos(theta);
     const double y = m_radius * std::sin(theta);
-    tiles[i].m_node = nodes[i];
-    animateTilePosition(tiles[i], i, Vector3(x, y, 0.0));
+    animateTilePosition(*tiles[i], i, Vector3(x, y, 0.0));
     theta += thetaInc;
   }
 }
