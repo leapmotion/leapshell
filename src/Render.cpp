@@ -40,6 +40,16 @@ void Render::drawTile(const Tile& tile) const {
   const float halfHeight = static_cast<float>(tile.m_size.y()/2.0f);
   const ci::Rectf rect(-halfWidth, -halfHeight, halfWidth, halfHeight);
 
+  // draw border
+  if (tile.m_activationSmoother.value > 0.01f) {
+    ci::gl::color(ci::ColorA(1.0f, 0.3f, 0.1f, 0.8f * tile.m_activationSmoother.value));
+  } else {
+    ci::gl::color(ci::ColorA(0.7f, 0.7f, 0.7f, 0.5f * tile.m_highlightSmoother.value));
+  }
+  ci::gl::drawSolidRoundedRect(rect, 2.0, 10);
+  ci::gl::color(ci::ColorA(1.0f, 1.0f, 1.0f, 0.6f));
+  ci::gl::drawStrokedRoundedRect(rect, 2.0, 10);
+
   if (!tile.m_icon) {
     ci::Surface8u icon = tile.m_node->icon();
     if (icon) {
@@ -52,16 +62,6 @@ void Render::drawTile(const Tile& tile) const {
     glScaled(1, -1, 1);
     ci::gl::draw(tile.m_icon, rect);
     glPopMatrix();
-  } else {
-    // draw border
-    if (tile.m_activationSmoother.value > 0.01f) {
-      ci::gl::color(ci::ColorA(1.0f, 0.3f, 0.1f, 0.8f * tile.m_activationSmoother.value));
-    } else {
-      ci::gl::color(ci::ColorA(0.7f, 0.7f, 0.7f, 0.5f * tile.m_highlightSmoother.value));
-    }
-    ci::gl::drawSolidRoundedRect(rect, 2.0, 10);
-    ci::gl::color(ci::ColorA(1.0f, 1.0f, 1.0f, 0.6f));
-    ci::gl::drawStrokedRoundedRect(rect, 2.0, 10);
   }
 
   // draw text
