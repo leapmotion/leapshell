@@ -1,9 +1,6 @@
 #ifndef __VIEW_H__
 #define __VIEW_H__
 
-#include <memory>
-#include <vector>
-
 #include "Layout.h"
 #include "Tile.h"
 #include "Utilities.h"

@@ -1,10 +1,6 @@
 #ifndef __NAVIGATIONSTATE_H__
 #define __NAVIGATIONSTATE_H__
 
-#include <memory>
-#include <set>
-#include <vector>
-
 #include "HierarchyNode.h" // this is really just for the HierarchyNodeVector typedef, which could be moved to a smaller header file
 
 class View;

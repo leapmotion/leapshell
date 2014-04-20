@@ -1,7 +1,6 @@
 #ifndef __Tile_h__
 #define __Tile_h__
 
-#include <memory>
 #include "HierarchyNode.h"
 #include "Utilities.h"
 

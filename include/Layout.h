@@ -5,9 +5,6 @@
 #include "Tile.h"
 #include "Utilities.h"
 
-#include <memory>
-#include <vector>
-
 class SizeLayout {
 public:
   SizeLayout();

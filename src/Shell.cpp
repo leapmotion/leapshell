@@ -6,7 +6,6 @@
 #if defined(CINDER_COCOA)
 #include "NSImageExt.h"
 #endif
-#include <memory>
 
 // this doesn't test all possible types, but tests that different types are
 // distinguishable via Value::compare, and that values of the same type are

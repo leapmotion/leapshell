@@ -13,7 +13,6 @@
   #define __STDC_LIMIT_MACROS
 #endif
 #include "Value.h"
-#include <stdint.h>
 
 std::string Value::ToJSON(bool escapeSlashes, bool prettify) const
 {

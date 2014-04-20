@@ -2,7 +2,6 @@
 #include "NavigationState.h"
 #include "Value.h"
 #include "View.h"
-#include <algorithm>
 
 const double View::CAM_DISTANCE_FROM_PLANE = 50.0;
 

@@ -33,6 +33,14 @@
 #include <map>
 #include <sstream>
 #include <cmath>
+#include <algorithm>
+#include <memory>
+#include <set>
+#include <stdint.h>
+#include <istream>
+#include <ostream>
+#include <climits>
+#include <stdexcept>
 
 // fbx
 #include "fbxsdk.h"
@@ -55,3 +63,4 @@
 
 // boost
 #include <boost/filesystem.hpp>
+#include <boost/any.hpp>

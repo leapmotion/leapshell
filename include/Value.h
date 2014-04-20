@@ -22,17 +22,6 @@
 #if !defined(__Value_h__)
 #define __Value_h__
 
-#include <boost/any.hpp>
-
-#include <map>
-#include <string>
-#include <vector>
-#include <istream>
-#include <ostream>
-#include <sstream>
-#include <climits>
-#include <stdexcept>
-
 class Value {
   public:
     typedef std::vector<Value> Array;
