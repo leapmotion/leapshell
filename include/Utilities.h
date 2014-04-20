@@ -1,8 +1,6 @@
 #ifndef __UTILITIES_H__
 #define __UTILITIES_H__
 
-#include "DataTypes.h"
-
 template <class T>
 static inline T SmootherStep(const T& x) {
   // x is blending parameter between 0 and 1
@@ -32,6 +30,15 @@ struct ExponentialFilter {
 
 inline ci::Vec3f ToVec3f(const Vector3& vec) {
   return ci::Vec3f(static_cast<float>(vec.x()), static_cast<float>(vec.y()), static_cast<float>(vec.z()));
+}
+
+inline bool RayPlaneIntersection(const Vector3& origin, const Vector3& direction, const Vector3& center, const Vector3& normal, Vector3& hitPoint) {
+  double t = -(normal.dot(origin - center)) / normal.dot(direction);
+  if (t <= 0) {
+    return false;
+  }
+  hitPoint = origin + t*direction;
+  return true;
 }
 
 static const int TIME_STAMP_TICKS_PER_SEC = 1000000;

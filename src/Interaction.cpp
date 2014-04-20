@@ -18,7 +18,6 @@ void Interaction::Update(const Leap::Frame& frame) {
   for (int i=0; i<hands.count(); i++) {
     force += forceFromHand(hands[i]);
   }
-  force.z() = 0; // disable zoom movement for now
 
   // scale the force by a constant to make sure we're not flying around the screen
   static const double FORCE_POSITION_SCALE = -0.1;
@@ -49,49 +48,45 @@ void Interaction::UpdateView(View &view) {
       view.RightHand().Update(hands[i], Globals::curTimeSeconds);
     }
   }
-  applyInfluenceToTiles(hands, view.Tiles());
+  applyInfluenceToTiles(hands, view);
 
   m_lastViewUpdateTime = Globals::curTimeSeconds;
 }
 
-void Interaction::applyInfluenceToTiles(const Leap::HandList& hands, TileVector& tiles) {
-  // TODO: hacky and unoptimized... these three passes should be done in one pass
-
+void Interaction::applyInfluenceToTiles(const Leap::HandList& hands, View& view) {
   static const float MAX_INFLUENCE_DISTANCE_SQ = 30 * 30;
 
-  // add highlight
-  for (TileVector::iterator it = tiles.begin(); it != tiles.end(); ++it) {
-    Tile& tile = *it;
-    float influence = 0.0f;
-    for (int i=0; i<hands.count(); i++) {
-      Vector3 palmPos = hands[i].palmPosition().toVector3<Vector3>() + Globals::LEAP_OFFSET;
-      palmPos.z() = 0.0;
-      const float distSq = (palmPos - tile.m_position).squaredNorm();
-      if (distSq < MAX_INFLUENCE_DISTANCE_SQ) {
-        influence = SmootherStep(1.0f - (distSq / MAX_INFLUENCE_DISTANCE_SQ));
-      }
-    }
-    tile.m_highlightSmoother.Update(influence, Globals::curTimeSeconds, Tile::ACTIVATION_SMOOTH);
-  }
-
-  // add selection
+  TileVector& tiles = view.Tiles();
+  const Vector3& lookat = view.LookAt();
+  Vector3 hitPoint;
   for (int i=0; i<hands.count(); i++) {
-    Vector3 palmPos = hands[i].palmPosition().toVector3<Vector3>() + Globals::LEAP_OFFSET;
+    // calculate projection point from camera to tiles
+    if (!projectToPlane(hands[i], hitPoint)) {
+      continue;
+    }
+    hitPoint += lookat;
+
+    // calculate grab/pinch strength
     const float grabMultiplier = SmootherStep(std::max(hands[i].grabStrength(), hands[i].pinchStrength()));
-    palmPos.z() = 0.0;
+
+    // find the closest tile to the projection point
     float closestDistSq = MAX_INFLUENCE_DISTANCE_SQ;
     Tile* closestTile = nullptr;
     for (TileVector::iterator it = tiles.begin(); it != tiles.end(); ++it) {
       Tile& tile = *it;
-      const float distSq = (palmPos - tile.m_position).squaredNorm();
+      const float distSq = (hitPoint - tile.m_position).squaredNorm();
       if (distSq < closestDistSq) {
         closestTile = &tile;
         closestDistSq = distSq;
       }
     }
 
+    // increase activation for closest tile to hand
     if (closestTile) {
-      closestTile->m_activationSmoother.Update(grabMultiplier, Globals::curTimeSeconds, Tile::ACTIVATION_SMOOTH);
+      // only allow activating the tile if it's already highlighted
+      const float newActivation = closestTile->m_highlightSmoother.value > 0.95f ? grabMultiplier : 0.0f;
+      closestTile->m_activationSmoother.Update(newActivation, Globals::curTimeSeconds, Tile::ACTIVATION_SMOOTH);
+      closestTile->m_highlightSmoother.Update(1.0f, Globals::curTimeSeconds, Tile::ACTIVATION_SMOOTH);
     }
   }
 
@@ -100,8 +95,19 @@ void Interaction::applyInfluenceToTiles(const Leap::HandList& hands, TileVector&
     Tile& tile = *it;
     if (tile.m_activationSmoother.lastTimeSeconds != Globals::curTimeSeconds) {
       tile.m_activationSmoother.Update(0.0f, Globals::curTimeSeconds, Tile::ACTIVATION_SMOOTH);
+      tile.m_highlightSmoother.Update(0.0f, Globals::curTimeSeconds, Tile::ACTIVATION_SMOOTH);
     }
   }
+}
+
+bool Interaction::projectToPlane(const Leap::Hand& hand, Vector3& hit) {
+  static const Vector3 origin = View::CAM_DISTANCE_FROM_PLANE * Vector3::UnitZ();
+  static const Vector3 center = Vector3::Zero();
+  static const Vector3 normal = Vector3::UnitZ();
+
+  const Vector3 position = hand.palmPosition().toVector3<Vector3>() + Globals::LEAP_OFFSET;
+  const Vector3 direction = (position - origin).normalized();
+  return RayPlaneIntersection(origin, direction, center, normal, hit);
 }
 
 Vector3 Interaction::forceFromHand(const Leap::Hand& hand) {

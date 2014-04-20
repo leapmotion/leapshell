@@ -41,11 +41,10 @@ void Render::drawTile(const Tile& tile) const {
   const ci::Rectf rect(-halfWidth, -halfHeight, halfWidth, halfHeight);
 
   // draw border
-  if (tile.m_activationSmoother.value > 0.01f) {
-    ci::gl::color(ci::ColorA(1.0f, 0.3f, 0.1f, 0.8f * tile.m_activationSmoother.value));
-  } else {
-    ci::gl::color(ci::ColorA(0.7f, 0.7f, 0.7f, 0.5f * tile.m_highlightSmoother.value));
-  }
+  const ci::ColorA active = ci::ColorA(1.0f, 0.3f, 0.1f, 0.8f * tile.m_activationSmoother.value);
+  const ci::ColorA highlight = ci::ColorA(0.7f, 0.7f, 0.7f, 0.5f * tile.m_highlightSmoother.value);
+  const ci::ColorA blended = blendColors(active, highlight, tile.m_activationSmoother.value);
+  ci::gl::color(blended);
   ci::gl::drawSolidRoundedRect(rect, 2.0, 10);
   ci::gl::color(ci::ColorA(1.0f, 1.0f, 1.0f, 0.6f));
   ci::gl::drawStrokedRoundedRect(rect, 2.0, 10);
@@ -166,3 +165,10 @@ void Render::drawHands(const View& view) const {
   ci::gl::enableAlphaBlending();
 }
 
+ci::ColorA Render::blendColors(const ci::ColorA& c1, const ci::ColorA& c2, float blend) {
+  const float r = blend*c1.r + (1.0f-blend)*c2.r;
+  const float g = blend*c1.g + (1.0f-blend)*c2.g;
+  const float b = blend*c1.b + (1.0f-blend)*c2.b;
+  const float a = blend*c1.a + (1.0f-blend)*c2.a;
+  return ci::ColorA(r, g, b, a);  
+}

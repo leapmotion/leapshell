@@ -4,11 +4,13 @@
 #include "View.h"
 #include <algorithm>
 
+const double View::CAM_DISTANCE_FROM_PLANE = 50.0;
+
 View::View(std::shared_ptr<NavigationState> const &ownerNavigationState)
   :
   m_ownerNavigationState(ownerNavigationState)
 {
-  m_position = 50 * Vector3::UnitZ();
+  m_position = CAM_DISTANCE_FROM_PLANE * Vector3::UnitZ();
   m_lookat = Vector3::Zero();
   m_up = Vector3::UnitY();
   m_fov = 80.0f;
@@ -82,9 +84,11 @@ void View::ApplyVelocity(const Vector3& velocity, double timeSeconds, double del
   m_lookat += deltaPosition;
 
   static const double RUBBER_BAND_SPEED = 0.3333;
-  const Vector3 clampedPosition = clampCameraPosition(m_position);
+  Vector3 clampedPosition = clampCameraPosition(m_position);
+  clampedPosition.z() = CAM_DISTANCE_FROM_PLANE;
   const Vector3 positionRubberBandForce = RUBBER_BAND_SPEED * (clampedPosition - m_position);
-  const Vector3 clampedLookat = clampCameraPosition(m_lookat);
+  Vector3 clampedLookat = clampCameraPosition(m_lookat);
+  clampedLookat.z() = 0.0;
   const Vector3 lookatRubberBandForce = RUBBER_BAND_SPEED * (clampedLookat - m_lookat);
  
   m_position += positionRubberBandForce;

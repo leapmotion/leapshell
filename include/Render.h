@@ -15,6 +15,7 @@ private:
 
   void drawTile(const Tile& tile) const;
   void drawHands(const View& view) const;
+  static ci::ColorA blendColors(const ci::ColorA& c1, const ci::ColorA& c2, float blend);
 
   mutable ci::CameraPersp m_camera;
   mutable ci::gl::TextureRef m_background;

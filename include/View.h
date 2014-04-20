@@ -56,6 +56,8 @@ public:
   void SetPosition(const Vector3& position);
   void SetLookAt(const Vector3& lookat);
 
+  static const double CAM_DISTANCE_FROM_PLANE;
+
 private:
 
   Vector3 clampCameraPosition(const Vector3& position) const;
