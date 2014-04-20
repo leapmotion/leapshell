@@ -186,6 +186,14 @@ bool FileSystemNode::open(std::vector<std::string> const& parameters) const
   bool opened = false;
 
   if (!path.empty()) {
+#if _WIN32
+    if (is_leaf()) {
+      HINSTANCE instance = ShellExecuteA(nullptr, "open", path.c_str(), "", nullptr, SW_SHOWNORMAL);
+      opened = true;
+      int returnCode = reinterpret_cast<int>(instance);
+      opened = (returnCode >= 32);
+    }
+#else
     CFURLRef urlPathRef;
 
     if (path[0] != '/' && path[0] != '~') { // Relative Path
@@ -230,6 +238,7 @@ bool FileSystemNode::open(std::vector<std::string> const& parameters) const
     }
     CFRelease(stringRef);
     CFRelease(urlPathRef);
+#endif
   }
   return opened;
 }
