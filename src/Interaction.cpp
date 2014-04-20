@@ -118,7 +118,7 @@ Vector3 Interaction::forceFromHand(const Leap::Hand& hand) {
     const double dot = std::abs(normVelocity.dot(hand.palmNormal().toVector3<Vector3>()));
     const double match = direction.dot(handDirection);
     const float grabMultiplier = 1.0f - SmootherStep(std::max(hand.grabStrength(), hand.pinchStrength()));
-    totalForce += grabMultiplier * dot * dot * match * velocity;
+    totalForce += grabMultiplier * grabMultiplier * grabMultiplier * dot * dot * match * velocity;
   }
   return totalForce;
 }
