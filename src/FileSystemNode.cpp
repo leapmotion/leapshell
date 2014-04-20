@@ -182,7 +182,56 @@ ci::Surface8u FileSystemNode::icon()
 
 bool FileSystemNode::open(std::vector<std::string> const& parameters) const
 {
-  return false;
+  const std::string path = m_path.string();
+  bool opened = false;
+
+  if (!path.empty()) {
+    CFURLRef urlPathRef;
+
+    if (path[0] != '/' && path[0] != '~') { // Relative Path
+      CFBundleRef mainBundle = CFBundleGetMainBundle();
+      CFURLRef urlExecRef = CFBundleCopyExecutableURL(mainBundle);
+      CFURLRef urlRef = CFURLCreateCopyDeletingLastPathComponent(kCFAllocatorDefault, urlExecRef);
+      CFStringRef pathRef = CFStringCreateWithCString(kCFAllocatorDefault, path.c_str(), kCFStringEncodingUTF8);
+      urlPathRef = CFURLCreateCopyAppendingPathComponent(kCFAllocatorDefault, urlRef, pathRef, false);
+      CFRelease(pathRef);
+      CFRelease(urlRef);
+      CFRelease(urlExecRef);
+    } else {
+      urlPathRef = CFURLCreateFromFileSystemRepresentation(kCFAllocatorDefault, reinterpret_cast<const UInt8 *>(path.data()), path.size(), false);
+    }
+    CFStringRef stringRef = CFURLCopyPath(urlPathRef);
+
+    if (CFStringHasSuffix(stringRef, CFSTR(".app"))) {
+      FSRef fsRef;
+
+      if (CFURLGetFSRef(urlPathRef, &fsRef)) {
+        CFStringRef args[parameters.size()];
+        CFArrayRef argv = nullptr;
+
+        if (!parameters.empty()) {
+          for (size_t i = 0; i < parameters.size(); i++) {
+            args[i] = CFStringCreateWithCString(kCFAllocatorDefault, parameters[i].c_str(), kCFStringEncodingUTF8);
+          }
+          argv = CFArrayCreate(kCFAllocatorDefault, reinterpret_cast<const void**>(args), parameters.size(), nullptr);
+        }
+        LSApplicationParameters params = {0, kLSLaunchDefaults, &fsRef, nullptr, nullptr, argv, nullptr};
+        LSOpenApplication(&params, 0);
+        if (argv) {
+          CFRelease(argv);
+        }
+        for (size_t i = 0; i < parameters.size(); i++) {
+          CFRelease(args[i]);
+        }
+      }
+      opened = true; // Whether or not we actually launched the app, don't go snooping into .app files
+    } else if (!boost::filesystem::is_directory(m_path)) {
+      opened = !LSOpenCFURLRef(urlPathRef, 0);
+    }
+    CFRelease(stringRef);
+    CFRelease(urlPathRef);
+  }
+  return opened;
 }
 
 bool FileSystemNode::move(HierarchyNode& to_parent)
