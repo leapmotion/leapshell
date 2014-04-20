@@ -18,7 +18,9 @@
   return NSMakeSize(actualWidth, actualHeight);
 }
 
-- (NSImage*)imageByScalingProportionallyToSize:(NSSize)targetSize
+// Specify targetSize to set the desired size of the image (due to screen scaling, the actual size may still be scaled)
+// Specify fill to prevent "bars" on one axis due to different aspect ratios (instead, image data may be clipped)
+- (NSImage*)imageByScalingProportionallyToSize:(NSSize)targetSize fill:(BOOL)fill
 {
   NSImage* sourceImage = self;
   NSImage* newImage = nil;
@@ -43,17 +45,25 @@
       float heightFactor = targetHeight/height;
 
       if (widthFactor < heightFactor) {
-        scaleFactor = widthFactor;
+        scaleFactor = fill ? heightFactor : widthFactor;
       } else {
-        scaleFactor = heightFactor;
+        scaleFactor = fill ? widthFactor : heightFactor;
       }
       scaledWidth  = width*scaleFactor;
       scaledHeight = height*scaleFactor;
 
       if (widthFactor < heightFactor) {
-        thumbnailPoint.y = (targetHeight - scaledHeight)*0.5;
+        if (fill) {
+          thumbnailPoint.x = (targetWidth - scaledWidth)*0.5;
+        } else {
+          thumbnailPoint.y = (targetHeight - scaledHeight)*0.5;
+        }
       } else if (widthFactor > heightFactor) {
-        thumbnailPoint.x = (targetWidth - scaledWidth)*0.5;
+        if (fill) {
+          thumbnailPoint.y = (targetHeight - scaledHeight)*0.5;
+        } else {
+          thumbnailPoint.x = (targetWidth - scaledWidth)*0.5;
+        }
       }
     }
     newImage = [[NSImage alloc] initWithSize:targetSize];

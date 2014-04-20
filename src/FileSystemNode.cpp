@@ -92,7 +92,7 @@ ci::Surface8u FileSystemNode::icon()
     @autoreleasepool {
       NSString* path = [NSString stringWithUTF8String:m_path.string().c_str()];
       NSSize size = NSMakeSize(128, 128);
-      NSImage* nsImage = [[[NSWorkspace sharedWorkspace] iconForFile:path] imageByScalingProportionallyToSize:size];
+      NSImage* nsImage = [[[NSWorkspace sharedWorkspace] iconForFile:path] imageByScalingProportionallyToSize:size fill:NO];
       NSBitmapImageRep* nsBitmapImageRep = [NSBitmapImageRep imageRepWithData:[nsImage TIFFRepresentation]];
       NSBitmapFormat nsBitmapFormat = [nsBitmapImageRep bitmapFormat];
       unsigned char *srcBytes = [nsBitmapImageRep bitmapData];

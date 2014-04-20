@@ -299,18 +299,15 @@ void LeapShell::draw()
 
 void LeapShell::resize()
 {
-  const GLsizei width = static_cast<GLsizei>(getWindowWidth());
-  const GLsizei height = static_cast<GLsizei>(getWindowHeight());
-
-  Globals::handsFbo = ci::gl::Fbo(width, height);
-
-  glViewport(0, 0, width, height);
   updateGlobals();
+  Globals::handsFbo = ci::gl::Fbo(Globals::windowWidth, Globals::windowHeight);
+  glViewport(0, 0, Globals::windowWidth, Globals::windowHeight);
 #if defined(CINDER_COCOA)
   @autoreleasepool {
     NSScreen* screen = getDisplay()->getNsScreen();
-    NSSize size = NSMakeSize(width, height);
-    NSImage* nsImage = [[[NSImage alloc] initWithContentsOfURL:[[NSWorkspace sharedWorkspace] desktopImageURLForScreen:screen]] imageByScalingProportionallyToSize:size];
+    const CGFloat scale = [screen backingScaleFactor];
+    NSSize size = NSMakeSize(Globals::windowWidth/scale, Globals::windowHeight/scale);
+    NSImage* nsImage = [[[NSImage alloc] initWithContentsOfURL:[[NSWorkspace sharedWorkspace] desktopImageURLForScreen:screen]]  imageByScalingProportionallyToSize:size fill:YES];
     NSBitmapImageRep* nsBitmapImageRep = [NSBitmapImageRep imageRepWithData:[nsImage TIFFRepresentation]];
     NSBitmapFormat nsBitmapFormat = [nsBitmapImageRep bitmapFormat];
     unsigned char *srcBytes = [nsBitmapImageRep bitmapData];
