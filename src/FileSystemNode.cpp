@@ -3,6 +3,9 @@
 #if defined(CINDER_COCOA)
 #include "NSImageExt.h"
 #endif
+#if !defined(CINDER_MSW)
+#include <sys/stat.h>
+#endif
 
 FileSystemNode::FileSystemNode(std::string const& path, std::shared_ptr<FileSystemNode> const& parent) :
   m_path(boost::filesystem::canonical(path))
@@ -34,16 +37,25 @@ void FileSystemNode::init(std::shared_ptr<FileSystemNode> const& parent)
              std::shared_ptr<FileSystemNode>(new FileSystemNode(m_path.parent_path())) : parent;
   set_metadata_as("name", m_path.filename().string());
   uint64_t size = 0;
-  if (boost::filesystem::is_directory(m_path)) {
+  boost::filesystem::file_status file_status = boost::filesystem::status(m_path);
+  if (file_status.type() == boost::filesystem::directory_file) {
     m_isLeaf = false;
   } else {
     m_isLeaf = true;
-    if (boost::filesystem::is_regular_file(m_path)) {
+    if (file_status.type() == boost::filesystem::regular_file) {
       size = static_cast<uint64_t>(boost::filesystem::file_size(m_path));
     }
   }
   set_metadata_as("size", size);
   set_metadata_as("time", static_cast<uint64_t>(boost::filesystem::last_write_time(m_path)));
+  set_metadata_as("perms", static_cast<uint16_t>(file_status.permissions()));
+#if !defined(CINDER_MSW)
+  struct stat sb = {0};
+  if (::stat(m_path.c_str(), &sb) == 0) {
+    set_metadata_as("uid", sb.st_uid);
+    set_metadata_as("gid", sb.st_gid);
+  }
+#endif
 }
 
 bool FileSystemNode::is_leaf() const
@@ -55,12 +67,16 @@ HierarchyNodeVector FileSystemNode::child_nodes(FilterCriteria const& filter_cri
 {
   HierarchyNodeVector childNodes;
 
-  if (boost::filesystem::is_directory(m_path)) {
-    boost::filesystem::directory_iterator endIter; // default construction yields past-the-end
-    for (boost::filesystem::directory_iterator iter(m_path); iter != endIter; ++iter) {
-      childNodes.push_back(std::shared_ptr<FileSystemNode>(new FileSystemNode(*iter, std::static_pointer_cast<FileSystemNode>(shared_from_this()))));
+  try {
+    if (boost::filesystem::is_directory(m_path)) {
+      boost::filesystem::directory_iterator endIter; // default construction yields past-the-end
+      for (boost::filesystem::directory_iterator iter(m_path); iter != endIter; ++iter) {
+        try {
+          childNodes.push_back(std::shared_ptr<FileSystemNode>(new FileSystemNode(*iter, std::static_pointer_cast<FileSystemNode>(shared_from_this()))));
+        } catch (...) {}
+      }
     }
-  }
+  } catch (...) {}
   return childNodes; // ignore filter criteria for now
 }
 
