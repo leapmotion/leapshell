@@ -116,7 +116,7 @@ void Render::drawHands(const View& view) const {
   shader.uniform("projectionMatrix", projectionMatrix);
   shader.uniform("lightPosition1", ci::Vec3f(1000, 500, 0));
   shader.uniform("lightPosition2", ci::Vec3f(-1000, 500, 0));
-  shader.uniform("cameraPosition", ToVec3f(view.Position()));
+  shader.uniform("cameraPosition", ci::Vec3f(0, 0, 0));
   shader.uniform("ambientFactor", 0.0f);
   shader.uniform("specularPower", 1.0f);
   shader.uniform("specularFactor", 0.0f);
