@@ -74,7 +74,7 @@ void Interaction::applyInfluenceToTiles(const Leap::HandList& hands, View& view)
     Tile* closestTile = nullptr;
     for (TileVector::iterator it = tiles.begin(); it != tiles.end(); ++it) {
       Tile& tile = *it;
-      const float distSq = (hitPoint - tile.m_position).squaredNorm();
+      const float distSq = static_cast<float>((hitPoint - tile.m_position).squaredNorm());
       if (distSq < closestDistSq) {
         closestTile = &tile;
         closestDistSq = distSq;

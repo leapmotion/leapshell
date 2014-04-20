@@ -133,13 +133,13 @@ void Render::drawHands(const View& view) const {
   ci::gl::enableDepthWrite();
   ci::gl::disableAlphaBlending();
 
-  const float activeRatioL = 1.0f - SmootherStep(std::min(1.0, (Globals::curTimeSeconds - handL.LastUpdateTime())/FADE_TIME));
+  const float activeRatioL = 1.0f - SmootherStep(static_cast<float>(std::min(1.0, (Globals::curTimeSeconds - handL.LastUpdateTime())/FADE_TIME)));
   if (activeRatioL > 0.001f) {
     shader.uniform("opacity", activeRatioL);
     handL.Draw();
   }
 
-  const float activeRatioR = 1.0f - SmootherStep(std::min(1.0, (Globals::curTimeSeconds - handR.LastUpdateTime())/FADE_TIME));
+  const float activeRatioR = 1.0f - SmootherStep(static_cast<float>(std::min(1.0, (Globals::curTimeSeconds - handR.LastUpdateTime())/FADE_TIME)));
   if (activeRatioR > 0.001f) {
     shader.uniform("opacity", activeRatioR);
     handR.Draw();

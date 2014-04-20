@@ -304,8 +304,8 @@ void LeapShell::draw()
 void LeapShell::resize()
 {
   updateGlobals();
-  Globals::handsFbo = ci::gl::Fbo(Globals::windowWidth, Globals::windowHeight);
-  glViewport(0, 0, Globals::windowWidth, Globals::windowHeight);
+  Globals::handsFbo = ci::gl::Fbo(static_cast<int>(Globals::windowWidth), static_cast<int>(Globals::windowHeight));
+  glViewport(0, 0, static_cast<int>(Globals::windowWidth), static_cast<int>(Globals::windowHeight));
 #if defined(CINDER_COCOA)
   @autoreleasepool {
     NSScreen* screen = getDisplay()->getNsScreen();
