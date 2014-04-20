@@ -60,6 +60,7 @@ void Render::drawTile(const Tile& tile) const {
     // draw the icon
     glPushMatrix();
     glScaled(1, -1, 1);
+    ci::gl::color(ci::ColorA(1.0f, 1.0f, 1.0f, 1.0f));
     ci::gl::draw(tile.m_icon, rect);
     glPopMatrix();
   }
