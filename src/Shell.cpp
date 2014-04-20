@@ -256,6 +256,10 @@ void LeapShell::keyDown(ci::app::KeyEvent event)
     m_view->SetPositionLayout(std::shared_ptr<PositionLayout>(new ExponentialSpiralLayout())); 
     break;
 
+  case '`':
+    m_state->navigateUp();
+    break;
+
   case ci::app::KeyEvent::KEY_ESCAPE:
     quit();
     break;

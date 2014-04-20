@@ -63,7 +63,7 @@ void View::Update() {
      !selectedNode->open() &&
      !selectedNode->is_leaf()) {
     m_tiles.clear();
-    m_ownerNavigationState->setCurrentLocation(selectedNode);
+    m_ownerNavigationState->navigateDown(selectedNode);
   }
 }
 
