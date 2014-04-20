@@ -46,6 +46,11 @@ void NavigationState::update () {
   // if the current location is valid, re-query its child nodes
   if (m_currentLocation) {
     m_currentChildNodes = m_currentLocation->child_nodes();
+    std::cout << "NavigationState::update();\n";
+    for (auto it = m_currentChildNodes.begin(); it != m_currentChildNodes.end(); ++it) {
+      HierarchyNode const &node = **it;
+      std::cout << node.metadata().To<std::string>() << '\n';
+    }
   } 
 
   // inform all views that there has been an update

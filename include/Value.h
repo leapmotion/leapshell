@@ -124,12 +124,14 @@ class Value {
     }
 
     bool HashHas(const std::string& key) const {
+      assert(IsHash());
       const Hash* hash = boost::any_cast<Hash>(&m_value);
       return (hash && hash->find(key) != hash->end());
     }
 
     template<typename T>
     bool HashHasType(const std::string& key) const {
+      assert(IsHash());
       const Hash* hash = boost::any_cast<Hash>(&m_value);
       if (hash) {
         Hash::const_iterator iter = hash->find(key);
@@ -139,6 +141,7 @@ class Value {
     }
 
     Value HashGet(const std::string& key) const {
+      assert(IsHash());
       const Hash* hash = boost::any_cast<Hash>(&m_value);
       if (hash) {
         Hash::const_iterator iter = hash->find(key);
@@ -150,6 +153,7 @@ class Value {
     }
 
     bool HashSet(const std::string& key, const Value& value) {
+      assert(IsHash());
       Hash* hash = boost::any_cast<Hash>(&m_value);
       if (hash) {
         (*hash)[key] = value;

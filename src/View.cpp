@@ -31,10 +31,13 @@ View::~View () {
 }
 
 void View::Update() {
-  if (m_sortingCriteria.PrioritizedKeys().empty() && m_ownerNavigationState) {
-    std::shared_ptr<HierarchyNode> node = m_ownerNavigationState->currentLocation();
-    if (node) {
-      ExtractPrioritizedKeysFrom(*node, m_sortingCriteria);
+  m_sortedTiles.clear();
+  if (m_ownerNavigationState) {
+    if (m_sortingCriteria.PrioritizedKeys().empty()) {
+      std::shared_ptr<HierarchyNode> node = m_ownerNavigationState->currentLocation();
+      if (node) {
+        ExtractPrioritizedKeysFrom(*node, m_sortingCriteria);
+      }
     }
     RegenerateTilesAndTilePointers(m_ownerNavigationState->currentChildNodes(), m_tiles, m_sortedTiles);
     // NOTE: now the elements of m_sortedTiles point to elements of m_tiles, so m_sortedTiles
