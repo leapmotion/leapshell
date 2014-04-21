@@ -87,6 +87,8 @@ private:
   // for text drawing
   std::string m_textString;
   double m_lastTextChangeTime;
+  std::string m_pathString;
+  double m_lastPathChangeTime;
 };
 
 #endif

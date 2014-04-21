@@ -360,6 +360,27 @@ void LeapShell::draw()
     Globals::fontBold->drawString(m_textString, textRect);
     glPopMatrix();
   }
+
+  const std::string pathString = m_state->currentLocation()->path();
+  if (pathString != m_pathString) {
+    m_pathString = pathString;
+    m_lastPathChangeTime = Globals::curTimeSeconds;
+  }
+
+  // draw path text
+  static const float PATH_FADE_TIME = 3.0f;
+  const float timeSincePathChange = static_cast<float>(Globals::curTimeSeconds - m_lastPathChangeTime);
+  const float pathOpacity = SmootherStep(1.0f - std::min(1.0f, timeSincePathChange/PATH_FADE_TIME));
+  if (pathOpacity > 0.01f) {
+    const ci::ColorA pathColor = ci::ColorA(1.0f, 1.0f, 1.0f, pathOpacity);
+    const ci::Vec2f pathSize = Globals::fontBold->measureString(m_pathString);
+    const ci::Rectf pathRect(-pathSize.x/2.0f, 0.0f, pathSize.x/2.0f, 100.0f);
+    ci::gl::color(pathColor);
+    glPushMatrix();
+    glTranslated(Globals::windowWidth/2.0, 0.025 * Globals::windowHeight, 0.0);
+    Globals::fontBold->drawString(m_pathString, pathRect);
+    glPopMatrix();
+  }
 }
 
 void LeapShell::resize()
