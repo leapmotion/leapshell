@@ -334,13 +334,14 @@ void LeapShell::draw()
 {
   ci::gl::clear(ci::ColorA::gray(0.4f, 1.0f));
 
-  m_params->draw();
-
   m_interaction->UpdateView(*m_view);
   m_render->draw(*m_view);
 
+#if 0
+  m_params->draw();
   ci::gl::setMatricesWindow(getWindowSize());
   ci::gl::drawString("FPS: " + ci::toString(getAverageFps()), ci::Vec2f(10.0f, 10.0f), ci::ColorA::white(), ci::Font("Arial", 18));
+#endif
 
   // draw indicator text
   static const float TEXT_FADE_TIME = 2.0f;
