@@ -23,12 +23,13 @@ void Render::draw(const View& view) const {
   // draw tiles
   ci::gl::enableAlphaBlending();
   const TileVector& tiles = view.Tiles();
+  const float transitionOpacity = view.TransitionOpacity();
 
-  // draw backmost tiles after all others
+  // draw backmost tiles before all others
   for (TileVector::const_iterator it = tiles.begin(); it != tiles.end(); ++it) {
     const Tile& tile = *it;
     if (tile.Position().z() < 0 && tile.Activation() > 0.01f) {
-      drawTile(tile, view.Forces());
+      drawTile(tile, view.Forces(), transitionOpacity);
     }
   }
 
@@ -36,29 +37,29 @@ void Render::draw(const View& view) const {
   for (TileVector::const_iterator it = tiles.begin(); it != tiles.end(); ++it) {
     const Tile& tile = *it;
     if (tile.Activation() < 0.01f) {
-      drawTile(tile, view.Forces());
+      drawTile(tile, view.Forces(), transitionOpacity);
     }
   }
 
-  // draw frontmost tiles before all others
+  // draw frontmost tiles after all others
   for (TileVector::const_iterator it = tiles.begin(); it != tiles.end(); ++it) {
     const Tile& tile = *it;
     if (tile.Position().z() >= 0 && tile.Activation() > 0.01f) {
-      drawTile(tile, view.Forces());
+      drawTile(tile, view.Forces(), transitionOpacity);
     }
   }
 
   drawHands(view);
 }
 
-void Render::drawTile(const Tile& tile, const ForceVector& forces) const {
+void Render::drawTile(const Tile& tile, const ForceVector& forces, float transitionOpacity) const {
   if (!tile.Node()) {
     return;
   }
   glPushMatrix();
 
   // compute tile opacity
-  const float opacity = tile.CreationWarmupFactor();
+  const float opacity = tile.CreationWarmupFactor() * transitionOpacity;
 
   const Vector3 tileSize = tile.Size();
   float highlight = tile.Highlight();

@@ -71,6 +71,7 @@ public:
   MeshHand& RightHand() const { return *m_handR; }
   const ForceVector& Forces() const { return m_forces; }
   ForceVector& Forces() { return m_forces; }
+  float TransitionOpacity() const { return m_transitionOpacity; }
 
   // setters
   void SetSizeLayout(const std::shared_ptr<SizeLayout>& sizeLayout);
@@ -91,6 +92,8 @@ public:
   }
 
   static const double CAM_DISTANCE_FROM_PLANE;
+  static const double TILE_PULL_THRESHOLD;
+  static const double PUSH_THRESHOLD;
 
 private:
 
@@ -118,6 +121,7 @@ private:
   float m_far;
   ExponentialFilter<double> m_additionalZ;
   double m_lastSwitchTime;
+  float m_transitionOpacity;
 
   // hands
   mutable MeshHand* m_handL;

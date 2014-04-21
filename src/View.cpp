@@ -4,7 +4,9 @@
 #include "View.h"
 #include "Globals.h"
 
-const double View::CAM_DISTANCE_FROM_PLANE = 50.0;
+const double View::CAM_DISTANCE_FROM_PLANE = 50.0; // mm
+const double View::TILE_PULL_THRESHOLD = 30.0; // mm
+const double View::PUSH_THRESHOLD = 1.1 * CAM_DISTANCE_FROM_PLANE; // mm
 
 // TEMP for the 2014.04.21 demo
 void SortingCriteria::PrioritizeKey (const std::string &key) {
@@ -41,6 +43,7 @@ View::View(std::shared_ptr<NavigationState> const &ownerNavigationState)
   m_fov = 80.0f;
   m_near = 1.0f;
   m_far = 500.0f;
+  m_transitionOpacity = 1.0f;
   m_sizeLayout = std::shared_ptr<SizeLayout>(new UniformSizeLayout());
   m_positionLayout = std::shared_ptr<PositionLayout>(new GridLayout());
   m_lookatSmoother.Update(m_lookat, 0.0, 0.5f);
@@ -83,13 +86,22 @@ void View::PerFrameUpdate () {
   m_positionLayout->UpdateTilePositions(range(m_sortedTiles.begin(), m_sortedTiles.end()));
 
   std::shared_ptr<HierarchyNode> selectedNode(nullptr);
+  double maxTileZ = 0;
+  float maxActivation = 0;
   for (TileVector::iterator it = m_tiles.begin(); it != m_tiles.end(); ++it) {
     Tile& tile = *it;
-    if (tile.Activation() > 0.99f && tile.Position().z() > 10.0) {
+    maxTileZ = std::max(maxTileZ, tile.Position().z());
+    maxActivation = std::max(maxActivation, tile.Activation());
+    if (tile.Activation() > 0.95f && tile.Position().z() > TILE_PULL_THRESHOLD) {
       selectedNode = tile.Node();
       break;
     }
   }
+
+  // calculate a fade when about to change navigation state
+  const float pullOpacity = SmootherStep(std::max(1.0f - maxActivation, (maxTileZ > TILE_PULL_THRESHOLD ? 0.0f : std::max(0.0f, static_cast<float>(TILE_PULL_THRESHOLD - maxTileZ)/10.0f))));
+  const float pushOpacity = SmootherStep(m_position.z() > PUSH_THRESHOLD ? 0.0f : std::max(0.0f, static_cast<float>(PUSH_THRESHOLD - m_position.z())/3.0f));
+  m_transitionOpacity = std::min(pullOpacity, pushOpacity);
 
   static const double MIN_TIME_BETWEEN_SWITCH = 0.5; // in seconds, how much time must elapse between changes in navigation
   if (selectedNode &&
@@ -101,7 +113,7 @@ void View::PerFrameUpdate () {
     m_additionalZ.Update(CAM_DISTANCE_FROM_PLANE, Globals::curTimeSeconds, 0.1f);
     m_lastSwitchTime = Globals::curTimeSeconds;
     m_ownerNavigationState->navigateDown(selectedNode);
-  } else if (m_position.z() > 1.1*CAM_DISTANCE_FROM_PLANE && (Globals::curTimeSeconds - m_lastSwitchTime) > MIN_TIME_BETWEEN_SWITCH) {
+  } else if (m_position.z() > PUSH_THRESHOLD && (Globals::curTimeSeconds - m_lastSwitchTime) > MIN_TIME_BETWEEN_SWITCH) {
     resetView();
     m_additionalZ.Update(-CAM_DISTANCE_FROM_PLANE, Globals::curTimeSeconds, 0.1f);
     m_lastSwitchTime = Globals::curTimeSeconds;
@@ -109,6 +121,7 @@ void View::PerFrameUpdate () {
   } else {
     m_additionalZ.Update(0.0, Globals::curTimeSeconds, 0.965f);
   }
+
 }
 
 void View::SetSizeLayout(const std::shared_ptr<SizeLayout>& sizeLayout) {
