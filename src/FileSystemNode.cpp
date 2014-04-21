@@ -98,8 +98,9 @@ ci::Surface8u FileSystemNode::icon()
   if (!m_surface) {
 #if defined(CINDER_COCOA)
     @autoreleasepool {
+      const CGFloat scale = [[NSScreen mainScreen] backingScaleFactor];
       NSString* path = [NSString stringWithUTF8String:m_path.string().c_str()];
-      NSSize size = NSMakeSize(128, 128);
+      NSSize size = NSMakeSize(256/scale, 256/scale);
       NSImage* nsImage = [[[NSWorkspace sharedWorkspace] iconForFile:path] imageByScalingProportionallyToSize:size fill:NO];
       NSBitmapImageRep* nsBitmapImageRep = [NSBitmapImageRep imageRepWithData:[nsImage TIFFRepresentation]];
       NSBitmapFormat nsBitmapFormat = [nsBitmapImageRep bitmapFormat];
