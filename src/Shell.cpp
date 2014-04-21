@@ -335,13 +335,14 @@ void LeapShell::update()
 void LeapShell::draw()
 {
   ci::gl::clear(ci::ColorA::gray(0.4f, 1.0f));
+  ci::gl::color(ci::ColorA::white());
 
   m_interaction->UpdateView(*m_view);
   m_render->draw(*m_view);
 
+  ci::gl::setMatricesWindow(getWindowSize());
 #if 0
   m_params->draw();
-  ci::gl::setMatricesWindow(getWindowSize());
   ci::gl::drawString("FPS: " + ci::toString(getAverageFps()), ci::Vec2f(10.0f, 10.0f), ci::ColorA::white(), ci::Font("Arial", 18));
 #endif
 
