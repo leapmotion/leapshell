@@ -14,7 +14,7 @@ View::View(std::shared_ptr<NavigationState> const &ownerNavigationState)
   m_up = Vector3::UnitY();
   m_fov = 80.0f;
   m_near = 1.0f;
-  m_far = 10000.0f;
+  m_far = 500.0f;
   m_sizeLayout = std::shared_ptr<SizeLayout>(new UniformSizeLayout());
   m_positionLayout = std::shared_ptr<PositionLayout>(new GridLayout());
   m_lookatSmoother.Update(m_lookat, 0.0, 0.5f);
@@ -58,8 +58,8 @@ void View::PerFrameUpdate () {
   std::shared_ptr<HierarchyNode> selectedNode(nullptr);
   for (TileVector::iterator it = m_tiles.begin(); it != m_tiles.end(); ++it) {
     Tile& tile = *it;
-    if (tile.m_activationSmoother.value > 0.99f) {
-      selectedNode = tile.m_node;
+    if (tile.Activation() > 0.99f && tile.Position().z() > 10.0) {
+      selectedNode = tile.Node();
       break;
     }
   }
@@ -145,7 +145,7 @@ void View::RegenerateTilesAndTilePointers(const HierarchyNodeVector &nodes, Tile
   for ( ; tile_it != tile_it_end; ++tile_it, ++node_it) {
     assert(node_it != nodes.end() && "tiles and nodes should have the same length, so this should be impossible");
     Tile &tile = *tile_it;
-    tile.m_node = *node_it;
+    tile.Node() = *node_it;
     tilePointers.push_back(&tile);
   }
 }

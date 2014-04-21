@@ -61,12 +61,12 @@ void Interaction::applyInfluenceToTiles(const Leap::HandList& hands, View& view)
   forces.clear();
   const Vector3& lookat = view.LookAt();
   Vector3 hitPoint;
+
+  static const Vector3 origin = View::CAM_DISTANCE_FROM_PLANE * Vector3::UnitZ();
+  static const Vector3 normal = Vector3::UnitZ();
   for (int i=0; i<hands.count(); i++) {
-    // calculate projection point from camera to tiles
-    if (!projectToPlane(hands[i], hitPoint)) {
-      continue;
-    }
-    hitPoint += lookat;
+    const Vector3 position = hands[i].palmPosition().toVector3<Vector3>() + Globals::LEAP_OFFSET;
+    const Vector3 direction = (position - origin).normalized();
 
     // calculate grab/pinch strength
     const float grabMultiplier = SmootherStep(std::max(hands[i].grabStrength(), hands[i].pinchStrength()));
@@ -76,7 +76,14 @@ void Interaction::applyInfluenceToTiles(const Leap::HandList& hands, View& view)
     Tile* closestTile = nullptr;
     for (TileVector::iterator it = tiles.begin(); it != tiles.end(); ++it) {
       Tile& tile = *it;
-      const float distSq = static_cast<float>((hitPoint - tile.m_position).squaredNorm());
+
+      // calculate projection point from camera to tile
+      if (!RayPlaneIntersection(origin, direction, tile.Position(), normal, hitPoint)) {
+        continue;
+      }
+      hitPoint += lookat;
+
+      const float distSq = static_cast<float>((hitPoint - tile.Position()).squaredNorm());
       if (distSq < closestDistSq) {
         closestTile = &tile;
         closestDistSq = distSq;
@@ -86,34 +93,33 @@ void Interaction::applyInfluenceToTiles(const Leap::HandList& hands, View& view)
     // increase activation for closest tile to hand
     if (closestTile) {
       // only allow activating the tile if it's already highlighted
-      const float newActivation = closestTile->m_highlightSmoother.value > 0.95f ? grabMultiplier : 0.0f;
-      closestTile->m_activationSmoother.Update(newActivation, Globals::curTimeSeconds, Tile::ACTIVATION_SMOOTH);
-      closestTile->m_highlightSmoother.Update(1.0f, Globals::curTimeSeconds, Tile::ACTIVATION_SMOOTH);
-      forces.push_back(Force(closestTile->m_position, closestTile->m_highlightSmoother.value));
+      const float newActivation = closestTile->Highlight() > 0.95f ? grabMultiplier : 0.0f;
+      closestTile->UpdateActivation(newActivation, Tile::ACTIVATION_SMOOTH);
+      closestTile->UpdateHighlight(1.0f, Tile::ACTIVATION_SMOOTH);
+      
+      // calculate pulling force from hand
+      Vector3 grabDelta = closestTile->Activation()*(hitPoint - closestTile->OrigPosition());
+      static const double PULL_SPEED = 0.5;
+      grabDelta -= PULL_SPEED*closestTile->Activation()*hands[i].palmPosition().z*direction;
+      closestTile->UpdateGrabDelta(grabDelta, Tile::ACTIVATION_SMOOTH);
+
+      // add repulsive force from this tile to others
+      forces.push_back(Force(closestTile->Position(), closestTile->Highlight()));
     }
   }
 
   // decrease activation for all other tiles
   for (TileVector::iterator it = tiles.begin(); it != tiles.end(); ++it) {
     Tile& tile = *it;
-    if (tile.m_activationSmoother.lastTimeSeconds != Globals::curTimeSeconds) {
-      tile.m_activationSmoother.Update(0.0f, Globals::curTimeSeconds, Tile::ACTIVATION_SMOOTH);
-      tile.m_highlightSmoother.Update(0.0f, Globals::curTimeSeconds, Tile::ACTIVATION_SMOOTH);
-      if (tile.m_highlightSmoother.value > 0.01f) {
-        forces.push_back(Force(tile.m_position, tile.m_highlightSmoother.value));
+    if (tile.LastActivationUpdateTime() != Globals::curTimeSeconds) {
+      tile.UpdateActivation(0.0f, Tile::ACTIVATION_SMOOTH);
+      tile.UpdateHighlight(0.0f, Tile::ACTIVATION_SMOOTH);
+      tile.UpdateGrabDelta(Vector3::Zero(), Tile::ACTIVATION_SMOOTH);
+      if (tile.Highlight() > 0.01f) {
+        forces.push_back(Force(tile.Position(), tile.Highlight()));
       }
     }
   }
-}
-
-bool Interaction::projectToPlane(const Leap::Hand& hand, Vector3& hit) {
-  static const Vector3 origin = View::CAM_DISTANCE_FROM_PLANE * Vector3::UnitZ();
-  static const Vector3 center = Vector3::Zero();
-  static const Vector3 normal = Vector3::UnitZ();
-
-  const Vector3 position = hand.palmPosition().toVector3<Vector3>() + Globals::LEAP_OFFSET;
-  const Vector3 direction = (position - origin).normalized();
-  return RayPlaneIntersection(origin, direction, center, normal, hit);
 }
 
 Vector3 Interaction::forceFromHand(const Leap::Hand& hand) {

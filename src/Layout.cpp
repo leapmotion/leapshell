@@ -14,8 +14,7 @@ void SizeLayout::animateTileSize(Tile& tile, int idx, const Vector3& newSize) co
   const float mult = SmootherStep(static_cast<float>(std::min(1.0, 2 * (Globals::curTimeSeconds - m_creationTime))));
   const float smoothVariation = SMOOTH_VARIATION_RADIUS * static_cast<float>(std::cos(3*Globals::curTimeSeconds + idx));
   const float smooth = mult*(Tile::SIZE_SMOOTH + smoothVariation) + (1.0f - mult);
-  tile.m_sizeSmoother.Update(newSize, Globals::curTimeSeconds, smooth);
-  tile.m_size = tile.m_sizeSmoother.value;
+  tile.UpdateSize(newSize, smooth);
 }
 
 // UniformSizeLayout
@@ -40,8 +39,7 @@ void PositionLayout::animateTilePosition(Tile& tile, int idx, const Vector3& new
   const float mult = SmootherStep(static_cast<float>(std::min(1.0, 2 * (Globals::curTimeSeconds - m_creationTime))));
   const float smoothVariation = SMOOTH_VARIATION_RADIUS * static_cast<float>(std::cos(3*Globals::curTimeSeconds + idx));
   const float smooth = mult*(Tile::POSITION_SMOOTH + smoothVariation) + (1.0f - mult);
-  tile.m_positionSmoother.Update(newPosition, Globals::curTimeSeconds, smooth);
-  tile.m_position = tile.m_positionSmoother.value;
+  tile.UpdatePosition(newPosition, smooth);
 }
 
 // GridLayout
@@ -64,7 +62,7 @@ void GridLayout::UpdateTilePositions(const Range<TilePointerVector::iterator> &t
   double curHeight = halfHeight - inc/2.0;
   int idx = 0;
   for (auto t = tiles; t.is_not_at_end(); ++t, ++idx) {
-    animateTilePosition(**t, idx, Vector3(curWidth, curHeight, 0.0));
+    animateTilePosition(**t, idx, Vector3(curWidth, curHeight, 0.01*idx));
 
     curWidth += inc;
     if (curWidth > halfWidth) {
@@ -97,7 +95,7 @@ void RingLayout::UpdateTilePositions(const Range<TilePointerVector::iterator> &t
   for (auto t = tiles; t.is_not_at_end(); ++t, ++idx) {
     const double x = m_radius * std::cos(theta);
     const double y = m_radius * std::sin(theta);
-    animateTilePosition(**t, idx, Vector3(x, y, 0.0));
+    animateTilePosition(**t, idx, Vector3(x, y, 0.01*idx));
     theta += thetaInc;
   }
 }
@@ -125,12 +123,12 @@ void LinearSpiralLayout::UpdateTilePositions(const Range<TilePointerVector::iter
     radius = m_slope * theta;
     const double x = radius * std::cos(theta);
     const double y = radius * std::sin(theta);
-    animateTilePosition(tile, idx, Vector3(x, y, 0.0));
+    animateTilePosition(tile, idx, Vector3(x, y, 0.01*idx));
     // Calculate the next angle based on the speed at which the spiral is being swept out.
     // we want to go along the arc a length of about the tile diameter.  This should make
     // it so that the tiles don't overlap. 
     // length = radius * change_in_theta, so change_in_theta = length / radius.
-    Vector2 tileSizeIn2d(tile.m_size(0), tile.m_size(1));
+    Vector2 tileSizeIn2d(tile.Size()(0), tile.Size()(1));
     // divide by sqrt(2) to get a better approx of the shape of the icons we use
     double tile_diameter = tileSizeIn2d.norm() * 0.707;
     theta += tile_diameter / radius;
@@ -182,7 +180,7 @@ void ExponentialSpiralLayout::UpdateTilePositions(const Range<TilePointerVector:
     radius = m_baseRadius * baseTileRadius * ratio;
     const double x = radius * std::cos(theta);
     const double y = radius * std::sin(theta);
-    animateTilePosition(**t, idx, Vector3(x, y, 0.0));
+    animateTilePosition(**t, idx, Vector3(x, y, 0.01*idx));
   }
   m_boundingRadius = radius;
 }

@@ -7,11 +7,55 @@ const float Tile::SIZE_SMOOTH = 0.85f;
 const float Tile::ACTIVATION_SMOOTH = 0.95f;
 
 Tile::Tile() {
-  m_position = 100 * Vector3::Random();
-  m_position.z() = 0.0;
-  m_size = Vector3::Constant(15);
+  m_positionSmoother.Update(Vector3::Zero(), Globals::curTimeSeconds, 0.5f);
+  m_sizeSmoother.Update(Vector3::Constant(15), Globals::curTimeSeconds, 0.5f);
   m_highlightSmoother.Update(0.0f, Globals::curTimeSeconds, 0.5f);
   m_activationSmoother.Update(0.0f, Globals::curTimeSeconds, 0.5f);
+  m_grabDeltaSmoother.Update(Vector3::Zero(), Globals::curTimeSeconds, 0.5f);
+}
+
+Vector3 Tile::OrigPosition() const {
+  return m_positionSmoother.value;
+}
+
+Vector3 Tile::Position() const {
+  return m_positionSmoother.value + m_grabDeltaSmoother.value;
+}
+
+Vector3 Tile::Size() const {
+  return m_sizeSmoother.value;
+}
+
+float Tile::Highlight() const {
+  return m_highlightSmoother.value;
+}
+
+float Tile::Activation() const {
+  return m_activationSmoother.value;
+}
+
+double Tile::LastActivationUpdateTime() const {
+  return m_activationSmoother.lastTimeSeconds;
+}
+
+void Tile::UpdateSize(const Vector3& newSize, float smooth) {
+  m_sizeSmoother.Update(newSize, Globals::curTimeSeconds, smooth);
+}
+
+void Tile::UpdatePosition(const Vector3& newPosition, float smooth) {
+  m_positionSmoother.Update(newPosition, Globals::curTimeSeconds, smooth);
+}
+
+void Tile::UpdateHighlight(float newHighlight, float smooth) {
+  m_highlightSmoother.Update(newHighlight, Globals::curTimeSeconds, smooth);
+}
+
+void Tile::UpdateActivation(float newActivation, float smooth) {
+  m_activationSmoother.Update(newActivation, Globals::curTimeSeconds, smooth);
+}
+
+void Tile::UpdateGrabDelta(const Vector3& newGrabDelta, float smooth) {
+  m_grabDeltaSmoother.Update(newGrabDelta, Globals::curTimeSeconds, smooth);
 }
 
 struct TileOrder {
@@ -24,14 +68,14 @@ struct TileOrder {
       // use the paths of the hierarchy nodes for the tiles
       assert(rhs->m_node && "rhs Tile has invalid HierarchyNode member m_node (this should never happen)");
       assert(lhs->m_node && "lhs Tile has invalid HierarchyNode member m_node (this should never happen)");
-      return lhs->m_node->path() < rhs->m_node->path();
+      return lhs->Node()->path() < rhs->Node()->path();
     }
     // otherwise go through the keys in priority order and check ordering on those values
     int compareResult = 0;
     for (auto it = m_prioritizedKeys.begin(), it_end = m_prioritizedKeys.end(); it != it_end; ++it) {
       std::string const &key = *it;
-      Value const &lhs_metadata = lhs->m_node->metadata()[key];
-      Value const &rhs_metadata = rhs->m_node->metadata()[key];
+      Value const &lhs_metadata = lhs->Node()->metadata()[key];
+      Value const &rhs_metadata = rhs->Node()->metadata()[key];
       // the value for key in the hash might be IsNull, which is fine.  not all nodes
       // should be expected to have completely identical keys.  the compare function
       // also takes into account the Value type.
