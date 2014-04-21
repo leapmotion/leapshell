@@ -10,6 +10,7 @@ class SizeLayout {
 public:
   SizeLayout();
   virtual void UpdateTileSizes(const Range<TilePointerVector::iterator> &tiles) = 0;
+  EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 protected:
   void animateTileSize(Tile& tile, int idx, const Vector3& newSize) const;
   double m_creationTime;
@@ -20,6 +21,7 @@ public:
   UniformSizeLayout();
   virtual void UpdateTileSizes(const Range<TilePointerVector::iterator> &tiles) override;
   void SetSize(const Vector3 &size) { m_size = size; }
+  EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 protected:
   Vector3 m_size;
 };
@@ -31,6 +33,7 @@ public:
   virtual void UpdateTilePositions(const Range<TilePointerVector::iterator> &tiles, bool updatePhantomPosition = false) = 0;
   virtual Vector2 GetCameraMinBounds() const = 0;
   virtual Vector2 GetCameraMaxBounds() const = 0;
+  EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 protected:
   void animateTilePosition(Tile& tile, int idx, const Vector3& newPosition) const;
   double m_creationTime;
@@ -43,6 +46,7 @@ public:
   virtual Vector2 GetCameraMinBounds() const override;
   virtual Vector2 GetCameraMaxBounds() const override;
   void SetWidth(double width) { m_width = width; }
+  EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 private:
   double m_width;
   double m_height;
@@ -55,6 +59,7 @@ public:
   virtual Vector2 GetCameraMinBounds() const override;
   virtual Vector2 GetCameraMaxBounds() const override;
   void SetRadius(double radius) { m_radius = radius; }
+  EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 private:
   double m_radius;
 };
@@ -67,6 +72,7 @@ public:
   virtual Vector2 GetCameraMaxBounds() const override;
   void SetStartingAngle(double startingAngle) { m_startingAngle = startingAngle; }
   void SetSlope(double slope) { m_slope = slope; }
+  EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 private:
   double m_startingAngle;
   double m_slope;
@@ -82,6 +88,7 @@ public:
   virtual Vector2 GetCameraMaxBounds() const override;
   void SetBaseTileSize(const Vector3 &baseTileSize) { m_baseTileSize = baseTileSize; }
   void SetSpacing(double spacing);
+  EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 private:
   void SetBaseRadius(double baseRadius);
 
@@ -100,6 +107,7 @@ public:
   virtual Vector2 GetCameraMinBounds() const override;
   virtual Vector2 GetCameraMaxBounds() const override;
   void SetClusteringKey(const std::string &clusteringKey) { m_clusteringKey = clusteringKey; }
+  EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 private:
   // for now make these private
 
