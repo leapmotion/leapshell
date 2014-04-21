@@ -5,8 +5,9 @@
 #include "Globals.h"
 
 const double View::CAM_DISTANCE_FROM_PLANE = 50.0; // mm
-const double View::TILE_PULL_THRESHOLD = 30.0; // mm
+const double View::TILE_PULL_THRESHOLD = 20.0; // mm
 const double View::PUSH_THRESHOLD = 1.1 * CAM_DISTANCE_FROM_PLANE; // mm
+const double View::MIN_TIME_BETWEEN_SWITCH = 0.5; // in seconds, how much time must elapse between changes in navigation
 
 // TEMP for the 2014.04.21 demo
 void SortingCriteria::PrioritizeKey (const std::string &key) {
@@ -99,11 +100,14 @@ void View::PerFrameUpdate () {
   }
 
   // calculate a fade when about to change navigation state
-  const float pullOpacity = SmootherStep(std::max(1.0f - maxActivation, (maxTileZ > TILE_PULL_THRESHOLD ? 0.0f : std::max(0.0f, static_cast<float>(TILE_PULL_THRESHOLD - maxTileZ)/10.0f))));
-  const float pushOpacity = SmootherStep(m_position.z() > PUSH_THRESHOLD ? 0.0f : std::max(0.0f, static_cast<float>(PUSH_THRESHOLD - m_position.z())/3.0f));
+  float pullOpacity = 1.0f;
+  float pushOpacity = 1.0f;
+  if ((Globals::curTimeSeconds - m_lastSwitchTime) > MIN_TIME_BETWEEN_SWITCH) {
+    pullOpacity = SmootherStep(std::max(1.0f - maxActivation, (maxTileZ > TILE_PULL_THRESHOLD ? 0.0f : std::max(0.0f, std::min(1.0f, static_cast<float>(TILE_PULL_THRESHOLD - maxTileZ)/5.0f)))));
+    pushOpacity = SmootherStep(m_position.z() > PUSH_THRESHOLD ? 0.0f : std::max(0.0f, std::min(1.0f, static_cast<float>(PUSH_THRESHOLD - m_position.z())/3.0f)));
+  }
   m_transitionOpacity = std::min(pullOpacity, pushOpacity);
 
-  static const double MIN_TIME_BETWEEN_SWITCH = 0.5; // in seconds, how much time must elapse between changes in navigation
   if (selectedNode &&
      !selectedNode->open() &&
      !selectedNode->is_leaf() &&
@@ -112,8 +116,8 @@ void View::PerFrameUpdate () {
     m_tiles.clear();
     m_additionalZ.Update(CAM_DISTANCE_FROM_PLANE, Globals::curTimeSeconds, 0.1f);
     m_lastSwitchTime = Globals::curTimeSeconds;
-    m_ownerNavigationState->navigateDown(selectedNode);
     Globals::haveSeenOpenHand = false;
+    m_ownerNavigationState->navigateDown(selectedNode);
   } else if (m_position.z() > PUSH_THRESHOLD && (Globals::curTimeSeconds - m_lastSwitchTime) > MIN_TIME_BETWEEN_SWITCH) {
     resetView();
     m_additionalZ.Update(-CAM_DISTANCE_FROM_PLANE, Globals::curTimeSeconds, 0.1f);

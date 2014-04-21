@@ -61,6 +61,7 @@ void Interaction::UpdateView(View &view) {
 
 void Interaction::applyInfluenceToTiles(const Leap::HandList& hands, View& view) {
   static const float MAX_INFLUENCE_DISTANCE_SQ = 30 * 30;
+  static const float INFLUENCE_CHANGE_SPEED = 0.5f;
 
   TileVector& tiles = view.Tiles();
   ForceVector& forces = view.Forces();
@@ -101,7 +102,7 @@ void Interaction::applyInfluenceToTiles(const Leap::HandList& hands, View& view)
       // only allow activating the tile if it's already highlighted
       const float newActivation = closestTile->Highlight() > 0.95f ? grabMultiplier : 0.0f;
       closestTile->UpdateActivation(newActivation, Tile::ACTIVATION_SMOOTH);
-      closestTile->UpdateHighlight(1.0f, Tile::ACTIVATION_SMOOTH);
+      closestTile->UpdateHighlight(std::min(1.0f, closestTile->Highlight() + INFLUENCE_CHANGE_SPEED), Tile::ACTIVATION_SMOOTH);
       
       // calculate pulling force from hand
       Vector3 grabDelta = closestTile->Activation()*(hitPoint - closestTile->OrigPosition());
@@ -118,8 +119,8 @@ void Interaction::applyInfluenceToTiles(const Leap::HandList& hands, View& view)
   for (TileVector::iterator it = tiles.begin(); it != tiles.end(); ++it) {
     Tile& tile = *it;
     if (tile.LastActivationUpdateTime() != Globals::curTimeSeconds) {
-      tile.UpdateActivation(0.0f, Tile::ACTIVATION_SMOOTH);
-      tile.UpdateHighlight(0.0f, Tile::ACTIVATION_SMOOTH);
+      tile.UpdateActivation(std::max(0.0f, tile.Activation() - INFLUENCE_CHANGE_SPEED), Tile::ACTIVATION_SMOOTH);
+      tile.UpdateHighlight(std::max(0.0f, tile.Highlight() - INFLUENCE_CHANGE_SPEED), Tile::ACTIVATION_SMOOTH);
       tile.UpdateGrabDelta(Vector3::Zero(), Tile::ACTIVATION_SMOOTH);
       if (tile.Highlight() > 0.01f) {
         forces.push_back(Force(tile.Position(), tile.Activation() + tile.Highlight()));

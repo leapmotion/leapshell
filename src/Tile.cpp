@@ -44,7 +44,7 @@ double Tile::CreationTime() const {
 }
 
 float Tile::CreationWarmupFactor() const {
-  static const float FADE_IN_TIME = 0.5f;
+  static const float FADE_IN_TIME = 0.25f;
   return SmootherStep(static_cast<float>(std::min(1.0, (Globals::curTimeSeconds - m_creationTime)/FADE_IN_TIME)));
 }
 

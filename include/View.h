@@ -94,6 +94,7 @@ public:
   static const double CAM_DISTANCE_FROM_PLANE;
   static const double TILE_PULL_THRESHOLD;
   static const double PUSH_THRESHOLD;
+  static const double MIN_TIME_BETWEEN_SWITCH;
 
 private:
 

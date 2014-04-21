@@ -75,7 +75,7 @@ void Render::drawTile(const Tile& tile, const ForceVector& forces, float transit
   glTranslated(tilePosition.x(), tilePosition.y(), tilePosition.z());
 
   // add some bonus scaling depending on highlight strength
-  static const float HIGHLIGHT_BONUS_SCALE = 0.3f;
+  static const float HIGHLIGHT_BONUS_SCALE = 0.2f;
   const float scale = 1.0f + tile.Highlight()*HIGHLIGHT_BONUS_SCALE;
   glScalef(scale, scale, scale);
 
@@ -84,8 +84,8 @@ void Render::drawTile(const Tile& tile, const ForceVector& forces, float transit
   const ci::Rectf rect(-halfWidth, -halfHeight, halfWidth, halfHeight);
 
   // draw border
-  const ci::ColorA activeColor = ci::ColorA(0.85f, 0.85f, 0.85f, 0.8f * activation * opacity);
-  const ci::ColorA highlightColor = ci::ColorA(0.6f, 0.6f, 0.6f, 0.5f * highlight * opacity);
+  const ci::ColorA activeColor = ci::ColorA(0.9f, 0.9f, 0.9f, 0.65f * activation * opacity);
+  const ci::ColorA highlightColor = ci::ColorA(0.7f, 0.7f, 0.7f, 0.4f * highlight * opacity);
   const ci::ColorA blended = blendColors(activeColor, highlightColor, activation);
   ci::gl::color(blended);
   ci::gl::drawSolidRoundedRect(rect, 2.0, 10);
