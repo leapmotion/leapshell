@@ -12,6 +12,7 @@ Tile::Tile() {
   m_highlightSmoother.Update(0.0f, Globals::curTimeSeconds, 0.5f);
   m_activationSmoother.Update(0.0f, Globals::curTimeSeconds, 0.5f);
   m_grabDeltaSmoother.Update(Vector3::Zero(), Globals::curTimeSeconds, 0.5f);
+  m_creationTime = Globals::curTimeSeconds;
 }
 
 Vector3 Tile::OrigPosition() const {
@@ -38,12 +39,22 @@ double Tile::LastActivationUpdateTime() const {
   return m_activationSmoother.lastTimeSeconds;
 }
 
+double Tile::CreationTime() const {
+  return m_creationTime;
+}
+
+float Tile::CreationWarmupFactor() const {
+  static const float FADE_IN_TIME = 0.5f;
+  return SmootherStep(static_cast<float>(std::min(1.0, (Globals::curTimeSeconds - m_creationTime)/FADE_IN_TIME)));
+}
+
 void Tile::UpdateSize(const Vector3& newSize, float smooth) {
   m_sizeSmoother.Update(newSize, Globals::curTimeSeconds, smooth);
 }
 
 void Tile::UpdatePosition(const Vector3& newPosition, float smooth) {
-  m_positionSmoother.Update(newPosition, Globals::curTimeSeconds, smooth);
+  float warmupFactor = CreationWarmupFactor();
+  m_positionSmoother.Update(newPosition, Globals::curTimeSeconds, smooth + (1.0f-smooth)*(1.0f-warmupFactor));
 }
 
 void Tile::UpdateHighlight(float newHighlight, float smooth) {

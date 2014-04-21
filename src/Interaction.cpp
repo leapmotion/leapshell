@@ -19,12 +19,12 @@ void Interaction::Update(const Leap::Frame& frame) {
     force += forceFromHand(hands[i]);
   }
 
-  // scale the force by a constant to make sure we're not flying around the screen
-  static const double FORCE_POSITION_SCALE = -0.1;
-  force = FORCE_POSITION_SCALE * force;
+  // scale the force by a constant in each direction to make sure we're not flying around the screen
+  static const Vector3 FORCE_POSITION_SCALE(-0.065, -0.065, -0.12);
+  force = FORCE_POSITION_SCALE.cwiseProduct(force);
 
   // make speeding up have less lag than slowing down
-  static const float SPEED_UP_SMOOTH = 0.75f;
+  static const float SPEED_UP_SMOOTH = 0.8f;
   static const float SLOW_DOWN_SMOOTH = 0.95f;
   const Vector3 prevForce = m_panForce.value;
   const float curSmooth = force.squaredNorm() > prevForce.squaredNorm() ? SPEED_UP_SMOOTH : SLOW_DOWN_SMOOTH;
@@ -104,7 +104,7 @@ void Interaction::applyInfluenceToTiles(const Leap::HandList& hands, View& view)
       closestTile->UpdateGrabDelta(grabDelta, Tile::ACTIVATION_SMOOTH);
 
       // add repulsive force from this tile to others
-      forces.push_back(Force(closestTile->Position(), closestTile->Highlight()));
+      forces.push_back(Force(closestTile->Position(), closestTile->Activation() + closestTile->Highlight()));
     }
   }
 
@@ -116,7 +116,7 @@ void Interaction::applyInfluenceToTiles(const Leap::HandList& hands, View& view)
       tile.UpdateHighlight(0.0f, Tile::ACTIVATION_SMOOTH);
       tile.UpdateGrabDelta(Vector3::Zero(), Tile::ACTIVATION_SMOOTH);
       if (tile.Highlight() > 0.01f) {
-        forces.push_back(Force(tile.Position(), tile.Highlight()));
+        forces.push_back(Force(tile.Position(), tile.Activation() + tile.Highlight()));
       }
     }
   }

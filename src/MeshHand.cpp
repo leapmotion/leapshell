@@ -86,7 +86,7 @@ void MeshHand::Draw() {
   ss << "Bip01 " << handStr << " Hand";
   FbxNode* handNode = getNodeByName(root, ss.str());
 
-  double distancePalmToWrist = 50;
+  double distancePalmToWrist = 0;
 
   const Vector3 direction = m_Hand.direction().toVector3<Vector3>();
   const Vector3 position = m_Hand.palmPosition().toVector3<Vector3>();

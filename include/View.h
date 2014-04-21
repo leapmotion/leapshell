@@ -56,7 +56,7 @@ public:
   // getters
   const TileVector& Tiles() const { return m_tiles; }
   TileVector& Tiles() { return m_tiles; }
-  const Vector3& Position() const { return m_position; }
+  const Vector3 Position() const { return m_position + m_additionalZ.value*Vector3::UnitZ(); }
   const Vector3& LookAt() const { return m_lookatSmoother.value; }
   const Vector3& Up() const { return m_up; }
   float FOV() const { return m_fov; }
@@ -78,6 +78,7 @@ public:
 
 private:
 
+  void resetView();
   Vector3 clampCameraPosition(const Vector3& position) const;
   static void ExtractPrioritizedKeysFrom(const HierarchyNode &node, SortingCriteria &sortingCriteria);
   static void RegenerateTilesAndTilePointers(const HierarchyNodeVector &nodes, TileVector &tiles, TilePointerVector &tilePointers);
@@ -99,6 +100,8 @@ private:
   float m_fov;
   float m_near;
   float m_far;
+  ExponentialFilter<double> m_additionalZ;
+  double m_lastSwitchTime;
 
   // hands
   mutable MeshHand* m_handL;

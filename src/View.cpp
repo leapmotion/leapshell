@@ -2,6 +2,7 @@
 #include "NavigationState.h"
 #include "Value.h"
 #include "View.h"
+#include "Globals.h"
 
 const double View::CAM_DISTANCE_FROM_PLANE = 50.0;
 
@@ -9,8 +10,7 @@ View::View(std::shared_ptr<NavigationState> const &ownerNavigationState)
   :
   m_ownerNavigationState(ownerNavigationState)
 {
-  m_position = CAM_DISTANCE_FROM_PLANE * Vector3::UnitZ();
-  m_lookat = Vector3::Zero();
+  resetView();
   m_up = Vector3::UnitY();
   m_fov = 80.0f;
   m_near = 1.0f;
@@ -18,6 +18,7 @@ View::View(std::shared_ptr<NavigationState> const &ownerNavigationState)
   m_sizeLayout = std::shared_ptr<SizeLayout>(new UniformSizeLayout());
   m_positionLayout = std::shared_ptr<PositionLayout>(new GridLayout());
   m_lookatSmoother.Update(m_lookat, 0.0, 0.5f);
+  m_lastSwitchTime = 0.0;
 
   m_handL = new MeshHand("Left Hand", MeshHand::LEFT);
   m_handR = new MeshHand("Right Hand", MeshHand::RIGHT);
@@ -64,11 +65,23 @@ void View::PerFrameUpdate () {
     }
   }
 
+  static const double MIN_TIME_BETWEEN_SWITCH = 0.5; // in seconds, how much time must elapse between changes in navigation
   if (selectedNode &&
      !selectedNode->open() &&
-     !selectedNode->is_leaf()) {
+     !selectedNode->is_leaf() &&
+     (Globals::curTimeSeconds - m_lastSwitchTime) > MIN_TIME_BETWEEN_SWITCH) {
+    resetView();
     m_tiles.clear();
+    m_additionalZ.Update(CAM_DISTANCE_FROM_PLANE, Globals::curTimeSeconds, 0.1f);
+    m_lastSwitchTime = Globals::curTimeSeconds;
     m_ownerNavigationState->navigateDown(selectedNode);
+  } else if (m_position.z() > 1.1*CAM_DISTANCE_FROM_PLANE && (Globals::curTimeSeconds - m_lastSwitchTime) > MIN_TIME_BETWEEN_SWITCH) {
+    resetView();
+    m_additionalZ.Update(-CAM_DISTANCE_FROM_PLANE, Globals::curTimeSeconds, 0.1f);
+    m_lastSwitchTime = Globals::curTimeSeconds;
+    m_ownerNavigationState->navigateUp();
+  } else {
+    m_additionalZ.Update(0.0, Globals::curTimeSeconds, 0.965f);
   }
 }
 
@@ -106,6 +119,11 @@ void View::SetPosition(const Vector3& position) {
 
 void View::SetLookAt(const Vector3& lookat) {
   m_lookat = clampCameraPosition(lookat);
+}
+
+void View::resetView() {
+  m_position = CAM_DISTANCE_FROM_PLANE * Vector3::UnitZ();
+  m_lookat = Vector3::Zero();
 }
 
 Vector3 View::clampCameraPosition(const Vector3& position) const {

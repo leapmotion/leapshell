@@ -57,6 +57,9 @@ void Render::drawTile(const Tile& tile, const ForceVector& forces) const {
   }
   glPushMatrix();
 
+  // compute tile opacity
+  const float opacity = tile.CreationWarmupFactor();
+
   const Vector3 tileSize = tile.Size();
   float highlight = tile.Highlight();
   float activation = tile.Activation();
@@ -80,12 +83,12 @@ void Render::drawTile(const Tile& tile, const ForceVector& forces) const {
   const ci::Rectf rect(-halfWidth, -halfHeight, halfWidth, halfHeight);
 
   // draw border
-  const ci::ColorA activeColor = ci::ColorA(1.0f, 0.3f, 0.1f, 0.8f * activation);
-  const ci::ColorA highlightColor = ci::ColorA(0.7f, 0.7f, 0.7f, 0.5f * highlight);
+  const ci::ColorA activeColor = ci::ColorA(0.85f, 0.85f, 0.85f, 0.8f * activation * opacity);
+  const ci::ColorA highlightColor = ci::ColorA(0.6f, 0.6f, 0.6f, 0.5f * highlight * opacity);
   const ci::ColorA blended = blendColors(activeColor, highlightColor, activation);
   ci::gl::color(blended);
   ci::gl::drawSolidRoundedRect(rect, 2.0, 10);
-  ci::gl::color(ci::ColorA(1.0f, 1.0f, 1.0f, 0.6f));
+  ci::gl::color(ci::ColorA(1.0f, 1.0f, 1.0f, 0.6f * opacity * std::max(activation, highlight)));
   ci::gl::drawStrokedRoundedRect(rect, 2.0, 10);
 
   if (!tile.Icon()) {
@@ -98,14 +101,14 @@ void Render::drawTile(const Tile& tile, const ForceVector& forces) const {
     // draw the icon
     glPushMatrix();
     glScaled(1, -1, 1);
-    ci::gl::color(ci::ColorA(1.0f, 1.0f, 1.0f, 1.0f));
+    ci::gl::color(ci::ColorA(1.0f, 1.0f, 1.0f, opacity));
     ci::gl::draw(tile.Icon(), rect);
     glPopMatrix();
   }
 
   // draw text
-  static const ci::ColorA nameColor = ci::ColorA::white();
-  static const ci::ColorA shadowColor = ci::ColorA(0.1f, 0.1f, 0.1f);
+  const ci::ColorA nameColor = ci::ColorA(1.0f, 1.0f, 1.0f, opacity);
+  const ci::ColorA shadowColor = ci::ColorA(0.1f, 0.1f, 0.1f, opacity);
   static const ci::Vec2f shadowOffset = ci::Vec2f(5.0, 7.0f);
   glPushMatrix();
   const std::string name = tile.Node()->get_metadata_as<std::string>("name");

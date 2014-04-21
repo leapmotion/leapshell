@@ -18,6 +18,8 @@ public:
   float Highlight() const;
   float Activation() const;
   double LastActivationUpdateTime() const;
+  double CreationTime() const;
+  float CreationWarmupFactor() const;
 
   ci::gl::TextureRef& Icon() const { return m_icon; }
   std::shared_ptr<HierarchyNode>& Node() { return m_node; }
@@ -41,6 +43,7 @@ private:
 
   mutable ci::gl::TextureRef m_icon;
   std::shared_ptr<HierarchyNode> m_node;
+  double m_creationTime;
 };
 
 typedef std::vector<Tile, Eigen::aligned_allocator<Tile>> TileVector;
