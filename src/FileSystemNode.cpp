@@ -71,6 +71,9 @@ HierarchyNodeVector FileSystemNode::child_nodes(FilterCriteria const& filter_cri
     if (boost::filesystem::is_directory(m_path)) {
       boost::filesystem::directory_iterator endIter; // default construction yields past-the-end
       for (boost::filesystem::directory_iterator iter(m_path); iter != endIter; ++iter) {
+        if (iter->path().stem().empty()) { // Ignore dot (hidden) files for now
+          continue;
+        }
         try {
           childNodes.push_back(std::shared_ptr<FileSystemNode>(new FileSystemNode(*iter, std::static_pointer_cast<FileSystemNode>(shared_from_this()))));
         } catch (...) {}
@@ -186,14 +189,14 @@ bool FileSystemNode::open(std::vector<std::string> const& parameters) const
   bool opened = false;
 
   if (!path.empty()) {
-#if _WIN32
+#if defined(CINDER_MSW)
     if (is_leaf()) {
       HINSTANCE instance = ShellExecuteA(nullptr, "open", path.c_str(), "", nullptr, SW_SHOWNORMAL);
       opened = true;
       int returnCode = reinterpret_cast<int>(instance);
       opened = (returnCode >= 32);
     }
-#else
+#elif defined(CINDER_COCOA)
     CFURLRef urlPathRef;
 
     if (path[0] != '/' && path[0] != '~') { // Relative Path
