@@ -115,6 +115,8 @@ Vector3 View::clampCameraPosition(const Vector3& position) const {
 }
 
 void View::ExtractPrioritizedKeysFrom (const HierarchyNode &node, SortingCriteria &sortingCriteria) {
+  // Hard-code the list for the demo
+#if 0
   // for now, use the keys of the given HierarchyNode as the SearchCriteria
   // prioritized keys.  Note that SearchCriteria is constructed with an empty
   // prioritizedKeys vector, which indicates that no sorting should be done.
@@ -128,6 +130,13 @@ void View::ExtractPrioritizedKeysFrom (const HierarchyNode &node, SortingCriteri
     std::cout << "    key = \"" << it->first << "\"\n";
   }
   std::cout << '\n';
+#else
+  std::vector<std::string> prioritizedKeys;
+  prioritizedKeys.push_back("name");
+  prioritizedKeys.push_back("ext");
+  prioritizedKeys.push_back("time");
+  prioritizedKeys.push_back("size");
+#endif
   sortingCriteria.SetPrioritizedKeys(prioritizedKeys);
 }
 
