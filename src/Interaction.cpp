@@ -16,6 +16,9 @@ void Interaction::Update(const Leap::Frame& frame) {
   // accumulate force from all hands
   Vector3 force(Vector3::Zero());
   for (int i=0; i<hands.count(); i++) {
+    if (!hands[i].isValid()) {
+      continue;
+    }
     if (!Globals::haveSeenOpenHand) {
       const float grabPinchStrength = SmootherStep(std::max(hands[i].grabStrength(), hands[i].pinchStrength()));
       if (grabPinchStrength < 0.1f) {
@@ -130,6 +133,8 @@ void Interaction::applyInfluenceToTiles(const Leap::HandList& hands, View& view)
 }
 
 Vector3 Interaction::forceFromHand(const Leap::Hand& hand) {
+  static float HAND_WARMUP_TIME = 2.0f;
+  const float warmupMultiplier = SmootherStep(std::min(1.0f, hand.timeVisible() / HAND_WARMUP_TIME));
   Vector3 totalForce = Vector3::Zero();
   const Vector3 handDirection = hand.direction().toVector3<Vector3>();
   const Leap::FingerList fingers = hand.fingers();
@@ -141,9 +146,11 @@ Vector3 Interaction::forceFromHand(const Leap::Hand& hand) {
     const Vector3 direction = fingers[i].direction().toVector3<Vector3>();
     const Vector3 velocity = fingers[i].tipVelocity().toVector3<Vector3>();
     const Vector3 normVelocity = velocity.normalized();
+    const double ratio = normVelocity.x()*normVelocity.x() + normVelocity.y()*normVelocity.y();
     const double dot = std::abs(normVelocity.dot(hand.palmNormal().toVector3<Vector3>()));
     const double match = direction.dot(handDirection);
-    totalForce += grabMultiplier * grabMultiplier * grabMultiplier * dot * dot * match * velocity;
+    const Vector3 modifiedVelocity(ratio*velocity.x(), ratio*velocity.y(), (1.0-ratio)*velocity.z());
+    totalForce += warmupMultiplier * warmupMultiplier * grabMultiplier * grabMultiplier * grabMultiplier * dot * dot * match * modifiedVelocity;
   }
   return totalForce;
 }
