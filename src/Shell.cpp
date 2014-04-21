@@ -212,6 +212,14 @@ void LeapShell::setup()
   m_view = std::shared_ptr<View>(new View(m_state));
   m_state->registerView(m_view);
 
+  // initial sorting criteria keys TEMP HACK for 2014.04.21 demo
+  std::vector<std::string> prioritizedKeys;
+  prioritizedKeys.push_back("name");
+  prioritizedKeys.push_back("ext");
+  prioritizedKeys.push_back("time");
+  prioritizedKeys.push_back("size");
+  m_view->SetPrioritizedKeys(prioritizedKeys);
+
   unit_test_Value(); // TEMP until this is verified to work on all platforms
 }
 
@@ -255,6 +263,14 @@ void LeapShell::keyDown(ci::app::KeyEvent event)
     m_view->SetPositionLayout(std::shared_ptr<PositionLayout>(new ExponentialSpiralLayout())); 
     break;
   case '5':
+    { // for clustering layout only TEMP HACK for 2014.04.21 demo
+      std::vector<std::string> prioritizedKeys;
+      prioritizedKeys.push_back("ext");
+      prioritizedKeys.push_back("name");
+      prioritizedKeys.push_back("time");
+      prioritizedKeys.push_back("size");
+      m_view->SetPrioritizedKeys(prioritizedKeys);
+    }
     m_view->SetSizeLayout(std::shared_ptr<SizeLayout>(new UniformSizeLayout()));
     m_view->SetPositionLayout(std::shared_ptr<PositionLayout>(new BlobClusterLayout()));
     break;

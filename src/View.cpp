@@ -51,14 +51,6 @@ View::View(std::shared_ptr<NavigationState> const &ownerNavigationState)
 
   m_handL->SetScale(0.75f);
   m_handR->SetScale(0.75f);
-
-  // initial sorting criteria keys TEMP HACK for 2014.04.21 demo
-  std::vector<std::string> prioritizedKeys;
-  prioritizedKeys.push_back("name");
-  prioritizedKeys.push_back("ext");
-  prioritizedKeys.push_back("time");
-  prioritizedKeys.push_back("size");
-  m_sortingCriteria.SetPrioritizedKeys(prioritizedKeys);
 }
 
 View::~View () {

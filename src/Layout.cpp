@@ -279,9 +279,14 @@ void BlobClusterLayout::UpdateTilePositions(const Range<TilePointerVector::itera
     m_clusterInnerPositionLayout->UpdateTilePositions(r, true);
     Vector2 cameraMinBounds(m_clusterInnerPositionLayout->GetCameraMinBounds());
     Vector2 cameraMaxBounds(m_clusterInnerPositionLayout->GetCameraMaxBounds());
-    clusterSize(0) = std::max(clusterSize(0), std::abs(cameraMaxBounds(0) - cameraMinBounds(0)));
-    clusterSize(1) = std::max(clusterSize(1), std::abs(cameraMaxBounds(1) - cameraMinBounds(1)));
+    Vector2 boundSize(std::abs(cameraMaxBounds(0) - cameraMinBounds(0)),
+                      std::abs(cameraMaxBounds(1) - cameraMinBounds(1)));
+    // std::cout << "bound size = " << boundSize.transpose() << '\n';
+    clusterSize(0) = std::max(clusterSize(0), boundSize(0));
+    clusterSize(1) = std::max(clusterSize(1), boundSize(0));
   }
+  // std::cout << "cluster size = " << clusterSize.transpose() << '\n';
+  // std::cout << '\n';
 
   // next, because we now know how big the clusters are, lay the clusters out.
   // for now, just do a vertical linear layout.  also compute the camera bounds

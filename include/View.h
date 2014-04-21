@@ -80,6 +80,11 @@ public:
   void SetLookAt(const Vector3& lookat);
 
   // TEMPORARY HACK for 2014.04.21 demo
+  void SetPrioritizedKeys (const std::vector<std::string> &prioritizedKeys) {
+    m_sortingCriteria.SetPrioritizedKeys(prioritizedKeys);
+    SortTiles(m_sortedTiles, m_sortingCriteria.PrioritizedKeys());
+  }
+  // TEMPORARY HACK for 2014.04.21 demo
   void PrioritizeKey (const std::string &key) {
     m_sortingCriteria.PrioritizeKey(key);
     SortTiles(m_sortedTiles, m_sortingCriteria.PrioritizedKeys());
