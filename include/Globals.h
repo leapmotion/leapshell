@@ -10,6 +10,8 @@ public:
 
   // timing info
   static double curTimeSeconds;
+  static double lastTileSwitchTime;
+  static double lastTileTransitionTime;
 
   // fonts
   static const float FONT_SIZE;

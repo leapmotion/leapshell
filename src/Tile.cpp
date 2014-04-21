@@ -12,7 +12,6 @@ Tile::Tile() {
   m_highlightSmoother.value = 0.0f;
   m_activationSmoother.value = 0.0f;
   m_grabDeltaSmoother.value = Vector3::Zero();
-  m_creationTime = Globals::curTimeSeconds;
 }
 
 Vector3 Tile::OrigPosition() const {
@@ -39,13 +38,14 @@ double Tile::LastActivationUpdateTime() const {
   return m_activationSmoother.lastTimeSeconds;
 }
 
-double Tile::CreationTime() const {
-  return m_creationTime;
+float Tile::SwitchWarmupFactor() {
+  static const float FADE_IN_TIME = 0.25f;
+  return SmootherStep(static_cast<float>(std::min(1.0, (Globals::curTimeSeconds - Globals::lastTileSwitchTime)/FADE_IN_TIME)));
 }
 
-float Tile::CreationWarmupFactor() const {
+float Tile::TransitionWarmupFactor() {
   static const float FADE_IN_TIME = 0.25f;
-  return SmootherStep(static_cast<float>(std::min(1.0, (Globals::curTimeSeconds - m_creationTime)/FADE_IN_TIME)));
+  return SmootherStep(static_cast<float>(std::min(1.0, (Globals::curTimeSeconds - Globals::lastTileTransitionTime)/FADE_IN_TIME)));
 }
 
 void Tile::UpdateSize(const Vector3& newSize, float smooth) {
@@ -53,7 +53,7 @@ void Tile::UpdateSize(const Vector3& newSize, float smooth) {
 }
 
 void Tile::UpdatePosition(const Vector3& newPosition, float smooth) {
-  float warmupFactor = CreationWarmupFactor();
+  float warmupFactor = SwitchWarmupFactor();
   m_positionSmoother.Update(newPosition, Globals::curTimeSeconds, smooth + (1.0f-smooth)*(1.0f-warmupFactor));
 }
 

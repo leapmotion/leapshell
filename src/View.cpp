@@ -7,7 +7,7 @@
 const double View::CAM_DISTANCE_FROM_PLANE = 50.0; // mm
 const double View::TILE_PULL_THRESHOLD = 20.0; // mm
 const double View::PUSH_THRESHOLD = 1.1 * CAM_DISTANCE_FROM_PLANE; // mm
-const double View::MIN_TIME_BETWEEN_SWITCH = 0.5; // in seconds, how much time must elapse between changes in navigation
+const double View::MIN_TIME_BETWEEN_SWITCH = 1.5; // in seconds, how much time must elapse between changes in navigation
 
 // TEMP for the 2014.04.21 demo
 void SortingCriteria::PrioritizeKey (const std::string &key) {
@@ -27,6 +27,8 @@ void SortingCriteria::PrioritizeKey (const std::string &key) {
     }
     *m_prioritizedKeys.begin() = key;
   }
+
+  Globals::lastTileSwitchTime = Globals::curTimeSeconds;
 
   // std::cout << "after: m_prioritizedKeys = { ";
   // for (auto it = m_prioritizedKeys.begin(); it != m_prioritizedKeys.end(); ++it) {
@@ -113,13 +115,17 @@ void View::PerFrameUpdate () {
      !selectedNode->is_leaf() &&
      (Globals::curTimeSeconds - m_lastSwitchTime) > MIN_TIME_BETWEEN_SWITCH) {
     resetView();
+    Globals::lastTileSwitchTime = Globals::curTimeSeconds;
+    Globals::lastTileTransitionTime = Globals::curTimeSeconds;
     m_tiles.clear();
     m_additionalZ.Update(CAM_DISTANCE_FROM_PLANE, Globals::curTimeSeconds, 0.1f);
     m_lastSwitchTime = Globals::curTimeSeconds;
     Globals::haveSeenOpenHand = false;
     m_ownerNavigationState->navigateDown(selectedNode);
-  } else if (m_position.z() > PUSH_THRESHOLD && (Globals::curTimeSeconds - m_lastSwitchTime) > MIN_TIME_BETWEEN_SWITCH) {
+  } else if ((m_position.z() > PUSH_THRESHOLD) && (Globals::curTimeSeconds - m_lastSwitchTime) > MIN_TIME_BETWEEN_SWITCH) {
     resetView();
+    Globals::lastTileSwitchTime = Globals::curTimeSeconds;
+    Globals::lastTileTransitionTime = Globals::curTimeSeconds;
     m_additionalZ.Update(-CAM_DISTANCE_FROM_PLANE, Globals::curTimeSeconds, 0.1f);
     m_lastSwitchTime = Globals::curTimeSeconds;
     m_ownerNavigationState->navigateUp();
@@ -198,6 +204,8 @@ void View::RegenerateTilesAndTilePointers(const HierarchyNodeVector &nodes, Tile
   // create a Tile for each node
   tiles.clear();
   tiles.resize(nodes.size());
+  Globals::lastTileSwitchTime = Globals::curTimeSeconds;
+  Globals::lastTileTransitionTime = Globals::curTimeSeconds;
   // iterate through the tile and node vectors in parallel
   auto tile_it = tiles.begin();
   auto tile_it_end = tiles.end();

@@ -59,7 +59,7 @@ void Render::drawTile(const Tile& tile, const ForceVector& forces, float transit
   glPushMatrix();
 
   // compute tile opacity
-  const float opacity = tile.CreationWarmupFactor() * transitionOpacity;
+  const float opacity = Tile::TransitionWarmupFactor() * transitionOpacity;
 
   const Vector3 tileSize = tile.Size();
   float highlight = tile.Highlight();
