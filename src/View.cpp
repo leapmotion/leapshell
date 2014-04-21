@@ -6,6 +6,32 @@
 
 const double View::CAM_DISTANCE_FROM_PLANE = 50.0;
 
+// TEMP for the 2014.04.21 demo
+void SortingCriteria::PrioritizeKey (const std::string &key) {
+  // std::cout << "SortingCriteria::PrioritizeKey(\"" << key << "\");\nbefore: m_prioritizedKeys = { ";
+  // for (auto it = m_prioritizedKeys.begin(); it != m_prioritizedKeys.end(); ++it) {
+  //   std::cout << *it << ", ";
+  // }
+  // std::cout << "}\n";
+
+  std::vector<std::string>::iterator match_it = std::find(m_prioritizedKeys.begin(), m_prioritizedKeys.end(), key);
+  assert(match_it != m_prioritizedKeys.end() && "this should never happen");
+  // if we found the key, shift it to the front
+  if (match_it != m_prioritizedKeys.end()) {
+    for (auto it = match_it; it != m_prioritizedKeys.begin(); --it) {
+      auto prev_it = it-1;
+      *it = *prev_it;
+    }
+    *m_prioritizedKeys.begin() = key;
+  }
+
+  // std::cout << "after: m_prioritizedKeys = { ";
+  // for (auto it = m_prioritizedKeys.begin(); it != m_prioritizedKeys.end(); ++it) {
+  //   std::cout << *it << ", ";
+  // }
+  // std::cout << "}\n\n";
+}
+
 View::View(std::shared_ptr<NavigationState> const &ownerNavigationState)
   :
   m_ownerNavigationState(ownerNavigationState)
@@ -25,6 +51,14 @@ View::View(std::shared_ptr<NavigationState> const &ownerNavigationState)
 
   m_handL->SetScale(0.75f);
   m_handR->SetScale(0.75f);
+
+  // initial sorting criteria keys TEMP HACK for 2014.04.21 demo
+  std::vector<std::string> prioritizedKeys;
+  prioritizedKeys.push_back("name");
+  prioritizedKeys.push_back("ext");
+  prioritizedKeys.push_back("time");
+  prioritizedKeys.push_back("size");
+  m_sortingCriteria.SetPrioritizedKeys(prioritizedKeys);
 }
 
 View::~View () {
@@ -37,17 +71,9 @@ void View::UpdateFromChangedNavigationState() {
   if (m_ownerNavigationState) {
     if (m_sortingCriteria.PrioritizedKeys().empty()) {
       std::shared_ptr<HierarchyNode> node = m_ownerNavigationState->currentLocation();
-      if (node) {
-        // Hard-code the list for the demo
-        std::vector<std::string> prioritizedKeys;
-        prioritizedKeys.push_back("ext");
-        prioritizedKeys.push_back("name");
-        prioritizedKeys.push_back("time");
-        prioritizedKeys.push_back("size");
-        m_sortingCriteria.SetPrioritizedKeys(prioritizedKeys);
-
-        //ExtractPrioritizedKeysFrom(*node, m_sortingCriteria);
-      }
+      // if (node) {
+      //   ExtractPrioritizedKeysFrom(*node, m_sortingCriteria);
+      // }
     }
     RegenerateTilesAndTilePointers(m_ownerNavigationState->currentChildNodes(), m_tiles, m_sortedTiles);
     // NOTE: now the elements of m_sortedTiles point to elements of m_tiles, so m_sortedTiles
@@ -141,8 +167,6 @@ Vector3 View::clampCameraPosition(const Vector3& position) const {
 }
 
 void View::ExtractPrioritizedKeysFrom (const HierarchyNode &node, SortingCriteria &sortingCriteria) {
-  // Hard-code the list for the demo
-#if 0
   // for now, use the keys of the given HierarchyNode as the SearchCriteria
   // prioritized keys.  Note that SearchCriteria is constructed with an empty
   // prioritizedKeys vector, which indicates that no sorting should be done.
@@ -156,14 +180,6 @@ void View::ExtractPrioritizedKeysFrom (const HierarchyNode &node, SortingCriteri
     std::cout << "    key = \"" << it->first << "\"\n";
   }
   std::cout << '\n';
-#else
-  std::vector<std::string> prioritizedKeys;
-  prioritizedKeys.push_back("name");
-  prioritizedKeys.push_back("ext");
-  prioritizedKeys.push_back("time");
-  prioritizedKeys.push_back("size");
-#endif
-
   sortingCriteria.SetPrioritizedKeys(prioritizedKeys);
 }
 

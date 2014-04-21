@@ -21,6 +21,9 @@ public:
   std::vector<std::string> const &PrioritizedKeys () const { return m_prioritizedKeys; }
   void SetPrioritizedKeys (std::vector<std::string> const &prioritizedKeys) { m_prioritizedKeys = prioritizedKeys; }
 
+  // TEMP for 2014.04.21 demo
+  void PrioritizeKey (const std::string &key);
+
 private:
 
   std::vector<std::string> m_prioritizedKeys;
@@ -75,6 +78,12 @@ public:
   void ApplyVelocity(const Vector3& velocity, double timeSeconds, double deltaTime);
   void SetPosition(const Vector3& position);
   void SetLookAt(const Vector3& lookat);
+
+  // TEMPORARY HACK for 2014.04.21 demo
+  void PrioritizeKey (const std::string &key) {
+    m_sortingCriteria.PrioritizeKey(key);
+    SortTiles(m_sortedTiles, m_sortingCriteria.PrioritizedKeys());
+  }
 
   static const double CAM_DISTANCE_FROM_PLANE;
 

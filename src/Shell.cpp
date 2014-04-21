@@ -263,6 +263,11 @@ void LeapShell::keyDown(ci::app::KeyEvent event)
     m_state->navigateUp();
     break;
 
+  case '7': m_view->PrioritizeKey("name"); break;
+  case '8': m_view->PrioritizeKey("ext"); break;
+  case '9': m_view->PrioritizeKey("time"); break;
+  case '0': m_view->PrioritizeKey("size"); break;
+
   case ci::app::KeyEvent::KEY_ESCAPE:
     quit();
     break;
