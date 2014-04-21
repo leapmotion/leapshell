@@ -38,6 +38,7 @@ public:
 private:
 
   void updateGlobals();
+  void setText(const std::string& text);
 
 #if defined(CINDER_COCOA)
   ci::DataSourceRef loadResource(const std::string& macPath) {
@@ -82,6 +83,10 @@ private:
   Interaction* m_interaction;
 
   std::shared_ptr<HierarchyNode> m_root;
+
+  // for text drawing
+  std::string m_textString;
+  double m_lastTextChangeTime;
 };
 
 #endif

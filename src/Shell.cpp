@@ -144,7 +144,8 @@ LeapShell::LeapShell()
   :
   m_view(nullptr),
   m_state(new NavigationState()),
-  m_render(nullptr)
+  m_render(nullptr),
+  m_lastTextChangeTime(0.0)
 {
 #if defined(CINDER_MSW)
   CoInitializeEx(nullptr, COINIT_MULTITHREADED);
@@ -249,18 +250,22 @@ void LeapShell::keyDown(ci::app::KeyEvent event)
   case '1':
     m_view->SetSizeLayout(std::shared_ptr<SizeLayout>(new UniformSizeLayout()));
     m_view->SetPositionLayout(std::shared_ptr<PositionLayout>(new GridLayout()));
+    setText("Grid Layout");
     break;
   case '2':
     m_view->SetSizeLayout(std::shared_ptr<SizeLayout>(new UniformSizeLayout()));
     m_view->SetPositionLayout(std::shared_ptr<PositionLayout>(new RingLayout()));
+    setText("Ring Layout");
     break;
   case '3':
     m_view->SetSizeLayout(std::shared_ptr<SizeLayout>(new UniformSizeLayout()));
     m_view->SetPositionLayout(std::shared_ptr<PositionLayout>(new LinearSpiralLayout()));
+    setText("Spiral Layout");
     break;
   case '4':
     m_view->SetSizeLayout(std::shared_ptr<SizeLayout>(new ExponentialSpiralLayout()));
     m_view->SetPositionLayout(std::shared_ptr<PositionLayout>(new ExponentialSpiralLayout())); 
+    setText("Exponential Spiral Layout");
     break;
   case '5':
     { // for clustering layout only TEMP HACK for 2014.04.21 demo
@@ -273,16 +278,29 @@ void LeapShell::keyDown(ci::app::KeyEvent event)
     }
     m_view->SetSizeLayout(std::shared_ptr<SizeLayout>(new UniformSizeLayout()));
     m_view->SetPositionLayout(std::shared_ptr<PositionLayout>(new BlobClusterLayout()));
+    setText("Cluster Layout");
     break;
 
   case '`':
     m_state->navigateUp();
     break;
 
-  case '7': m_view->PrioritizeKey("name"); break;
-  case '8': m_view->PrioritizeKey("ext"); break;
-  case '9': m_view->PrioritizeKey("time"); break;
-  case '0': m_view->PrioritizeKey("size"); break;
+  case '7':
+    m_view->PrioritizeKey("name");
+    setText("Sort by Name");
+    break;
+  case '8':
+    m_view->PrioritizeKey("ext");
+    setText("Sort by Extension");
+    break;
+  case '9':
+    m_view->PrioritizeKey("time");
+    setText("Sort by Time");
+    break;
+  case '0':
+    m_view->PrioritizeKey("size");
+    setText("Sort by Size");
+    break;
 
   case ci::app::KeyEvent::KEY_ESCAPE:
     quit();
@@ -323,6 +341,21 @@ void LeapShell::draw()
 
   ci::gl::setMatricesWindow(getWindowSize());
   ci::gl::drawString("FPS: " + ci::toString(getAverageFps()), ci::Vec2f(10.0f, 10.0f), ci::ColorA::white(), ci::Font("Arial", 18));
+
+  // draw indicator text
+  static const float TEXT_FADE_TIME = 2.0f;
+  const float timeSinceTextChange = static_cast<float>(Globals::curTimeSeconds - m_lastTextChangeTime);
+  const float textOpacity = SmootherStep(1.0f - std::min(1.0f, timeSinceTextChange/TEXT_FADE_TIME));
+  if (textOpacity > 0.01f) {
+    const ci::ColorA textColor = ci::ColorA(1.0f, 1.0f, 1.0f, textOpacity);
+    const ci::Vec2f textSize = Globals::fontBold->measureString(m_textString);
+    const ci::Rectf textRect(-textSize.x/2.0f, 0.0f, textSize.x/2.0f, 100.0f);
+    ci::gl::color(textColor);
+    glPushMatrix();
+    glTranslated(Globals::windowWidth/2.0, 0.875 * Globals::windowHeight, 0.0);
+    Globals::fontBold->drawString(m_textString, textRect);
+    glPopMatrix();
+  }
 }
 
 void LeapShell::resize()
@@ -366,6 +399,11 @@ void LeapShell::updateGlobals() {
   Globals::windowHeight = getWindowHeight();
   Globals::windowWidth = getWindowWidth();
   Globals::aspectRatio = getWindowAspectRatio();
+}
+
+void LeapShell::setText(const std::string& text) {
+  m_textString = text;
+  m_lastTextChangeTime = Globals::curTimeSeconds;
 }
 
 CINDER_APP_BASIC(LeapShell, ci::app::RendererGl)
