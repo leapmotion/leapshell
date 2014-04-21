@@ -36,6 +36,11 @@ void FileSystemNode::init(std::shared_ptr<FileSystemNode> const& parent)
   m_parent = (!parent && m_path.has_parent_path()) ?
              std::shared_ptr<FileSystemNode>(new FileSystemNode(m_path.parent_path())) : parent;
   set_metadata_as("name", m_path.filename().string());
+  std::string extension = m_path.extension().string();
+  if (!extension.empty() && extension[0] == '.') {
+    extension.erase(0, 1); // Remove leading '.' in extension (e.g., '.txt' => 'txt')
+  }
+  set_metadata_as("ext", extension);
   uint64_t size = 0;
   boost::filesystem::file_status file_status = boost::filesystem::status(m_path);
   if (file_status.type() == boost::filesystem::directory_file) {
