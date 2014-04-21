@@ -198,8 +198,6 @@ bool FileSystemNode::open(std::vector<std::string> const& parameters) const
     if (is_leaf()) {
       HINSTANCE instance = ShellExecuteA(nullptr, "open", path.c_str(), "", nullptr, SW_SHOWNORMAL);
       opened = true;
-      int returnCode = reinterpret_cast<int>(instance);
-      opened = (returnCode >= 32);
     }
 #elif defined(CINDER_COCOA)
     CFURLRef urlPathRef;
