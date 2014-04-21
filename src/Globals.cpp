@@ -11,3 +11,4 @@ ci::gl::TextureFontRef Globals::fontBold;
 ci::gl::GlslProg Globals::handsShader;
 const Vector3 Globals::LEAP_OFFSET(0, -200, -100);
 ci::gl::Fbo Globals::handsFbo;
+bool Globals::haveSeenOpenHand = true;

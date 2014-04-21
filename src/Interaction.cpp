@@ -16,6 +16,12 @@ void Interaction::Update(const Leap::Frame& frame) {
   // accumulate force from all hands
   Vector3 force(Vector3::Zero());
   for (int i=0; i<hands.count(); i++) {
+    if (!Globals::haveSeenOpenHand) {
+      const float grabPinchStrength = SmootherStep(std::max(hands[i].grabStrength(), hands[i].pinchStrength()));
+      if (grabPinchStrength < 0.1f) {
+        Globals::haveSeenOpenHand = true;
+      }
+    }
     force += forceFromHand(hands[i]);
   }
 
@@ -91,7 +97,7 @@ void Interaction::applyInfluenceToTiles(const Leap::HandList& hands, View& view)
     }
 
     // increase activation for closest tile to hand
-    if (closestTile) {
+    if (closestTile && Globals::haveSeenOpenHand) {
       // only allow activating the tile if it's already highlighted
       const float newActivation = closestTile->Highlight() > 0.95f ? grabMultiplier : 0.0f;
       closestTile->UpdateActivation(newActivation, Tile::ACTIVATION_SMOOTH);

@@ -113,6 +113,7 @@ void View::PerFrameUpdate () {
     m_additionalZ.Update(CAM_DISTANCE_FROM_PLANE, Globals::curTimeSeconds, 0.1f);
     m_lastSwitchTime = Globals::curTimeSeconds;
     m_ownerNavigationState->navigateDown(selectedNode);
+    Globals::haveSeenOpenHand = false;
   } else if (m_position.z() > PUSH_THRESHOLD && (Globals::curTimeSeconds - m_lastSwitchTime) > MIN_TIME_BETWEEN_SWITCH) {
     resetView();
     m_additionalZ.Update(-CAM_DISTANCE_FROM_PLANE, Globals::curTimeSeconds, 0.1f);
@@ -121,7 +122,6 @@ void View::PerFrameUpdate () {
   } else {
     m_additionalZ.Update(0.0, Globals::curTimeSeconds, 0.965f);
   }
-
 }
 
 void View::SetSizeLayout(const std::shared_ptr<SizeLayout>& sizeLayout) {

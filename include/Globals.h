@@ -25,6 +25,9 @@ public:
   // leap
   static const Vector3 LEAP_OFFSET;
 
+  // restricting interaction
+  static bool haveSeenOpenHand;
+
 };
 
 #endif
