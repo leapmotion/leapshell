@@ -26,6 +26,24 @@ private:
   std::vector<std::string> m_prioritizedKeys;
 };
 
+struct Force {
+  Force(const Vector3& position, float strength) : m_position(position), m_strength(strength) { }
+  Vector3 ForceAt(const Vector3& position) const {
+    static const float FORCE_DISTANCE = 75.0f;
+    const Vector3 diff = position - m_position;
+    const double normSq = diff.squaredNorm();
+    if (normSq > 0.001) {
+      return FORCE_DISTANCE * m_strength * diff / normSq;
+    } else {
+      return Vector3::Zero();
+    }
+  }
+  Vector3 m_position;
+  float m_strength;
+};
+
+typedef std::vector<Force, Eigen::aligned_allocator<Force> > ForceVector;
+
 class View {
 public:
 
@@ -45,6 +63,8 @@ public:
   float Far() const { return m_far; }
   MeshHand& LeftHand() const { return *m_handL; }
   MeshHand& RightHand() const { return *m_handR; }
+  const ForceVector& Forces() const { return m_forces; }
+  ForceVector& Forces() { return m_forces; }
 
   // setters
   void SetSizeLayout(const std::shared_ptr<SizeLayout>& sizeLayout);
@@ -68,6 +88,7 @@ private:
   std::shared_ptr<PositionLayout> m_positionLayout;
   TileVector m_tiles;
   TilePointerVector m_sortedTiles;
+  ForceVector m_forces;
 
   // render parameters
   ExponentialFilter<Vector3> m_lookatSmoother;

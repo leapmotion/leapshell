@@ -23,18 +23,32 @@ void Render::draw(const View& view) const {
   // draw tiles
   const TileVector& tiles = view.Tiles();
   for (TileVector::const_iterator it = tiles.begin(); it != tiles.end(); ++it) {
-    drawTile(*it);
+    drawTile(*it, view.Forces());
   }
 
   drawHands(view);
 }
 
-void Render::drawTile(const Tile& tile) const {
+void Render::drawTile(const Tile& tile, const ForceVector& forces) const {
   if (!tile.m_node) {
     return;
   }
   glPushMatrix();
-  glTranslated(tile.m_position.x(), tile.m_position.y(), tile.m_position.z());
+  Vector3 tilePosition = tile.m_position;
+  
+  // add forces from other tiles
+  Vector3 totalForce = Vector3::Zero();
+  for (size_t i=0; i<forces.size(); i++) {
+    totalForce += forces[i].ForceAt(tilePosition);
+  }
+  tilePosition += totalForce;
+
+  glTranslated(tilePosition.x(), tilePosition.y(), tilePosition.z());
+
+  // add some bonus scaling depending on highlight strength
+  static const float HIGHLIGHT_BONUS_SCALE = 0.3f;
+  const float scale = 1.0f + tile.m_highlightSmoother.value*HIGHLIGHT_BONUS_SCALE;
+  glScalef(scale, scale, scale);
 
   const float halfWidth = static_cast<float>(tile.m_size.x()/2.0f);
   const float halfHeight = static_cast<float>(tile.m_size.y()/2.0f);

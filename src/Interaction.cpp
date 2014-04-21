@@ -57,6 +57,8 @@ void Interaction::applyInfluenceToTiles(const Leap::HandList& hands, View& view)
   static const float MAX_INFLUENCE_DISTANCE_SQ = 30 * 30;
 
   TileVector& tiles = view.Tiles();
+  ForceVector& forces = view.Forces();
+  forces.clear();
   const Vector3& lookat = view.LookAt();
   Vector3 hitPoint;
   for (int i=0; i<hands.count(); i++) {
@@ -87,6 +89,7 @@ void Interaction::applyInfluenceToTiles(const Leap::HandList& hands, View& view)
       const float newActivation = closestTile->m_highlightSmoother.value > 0.95f ? grabMultiplier : 0.0f;
       closestTile->m_activationSmoother.Update(newActivation, Globals::curTimeSeconds, Tile::ACTIVATION_SMOOTH);
       closestTile->m_highlightSmoother.Update(1.0f, Globals::curTimeSeconds, Tile::ACTIVATION_SMOOTH);
+      forces.push_back(Force(closestTile->m_position, closestTile->m_highlightSmoother.value));
     }
   }
 
@@ -96,6 +99,9 @@ void Interaction::applyInfluenceToTiles(const Leap::HandList& hands, View& view)
     if (tile.m_activationSmoother.lastTimeSeconds != Globals::curTimeSeconds) {
       tile.m_activationSmoother.Update(0.0f, Globals::curTimeSeconds, Tile::ACTIVATION_SMOOTH);
       tile.m_highlightSmoother.Update(0.0f, Globals::curTimeSeconds, Tile::ACTIVATION_SMOOTH);
+      if (tile.m_highlightSmoother.value > 0.01f) {
+        forces.push_back(Force(tile.m_position, tile.m_highlightSmoother.value));
+      }
     }
   }
 }

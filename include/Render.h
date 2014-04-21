@@ -13,7 +13,7 @@ public:
 
 private:
 
-  void drawTile(const Tile& tile) const;
+  void drawTile(const Tile& tile, const ForceVector& forces) const;
   void drawHands(const View& view) const;
   static ci::ColorA blendColors(const ci::ColorA& c1, const ci::ColorA& c2, float blend);
 
