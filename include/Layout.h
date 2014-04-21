@@ -6,6 +6,10 @@
 #include "Tile.h"
 #include "Utilities.h"
 
+/// @brief Interface class for setting the layout-specific sizes of tiles.
+/// @details The sizes of a View's tiles are determined before their positions,
+/// because their sizes may affect how the positions are computed.
+/// @see UniformSizeLayout
 class SizeLayout {
 public:
   SizeLayout();
@@ -16,6 +20,7 @@ protected:
   double m_creationTime;
 };
 
+/// @brief Sets all tile sizes to the same, pre-specified size.  The default is Vector3::Constant(15).
 class UniformSizeLayout : public SizeLayout {
 public:
   UniformSizeLayout();
@@ -26,10 +31,14 @@ protected:
   Vector3 m_size;
 };
 
-// the tiles' sizes will have been updated before their positions are updated.
+/// @brief Interface class for setting the layout-specific positions of tiles.
+/// @details The sizes of a View's tiles are determined before their positions,
+/// because their sizes may affect how the positions are computed.
 class PositionLayout {
 public:
   PositionLayout();
+  // TEMP HACK: updatePhantomPosition is an artifact of the first-pass, hacky version of clustering, and
+  // will go away once "real" clustering is implemented via HierarchyNode.
   virtual void UpdateTilePositions(const Range<TilePointerVector::iterator> &tiles, bool updatePhantomPosition = false) = 0;
   virtual Vector2 GetCameraMinBounds() const = 0;
   virtual Vector2 GetCameraMaxBounds() const = 0;
@@ -39,6 +48,7 @@ protected:
   double m_creationTime;
 };
 
+/// @brief Lays tiles out in a fixed-width grid, row-major, in the given order.
 class GridLayout : public PositionLayout {
 public:
   GridLayout();
@@ -52,6 +62,7 @@ private:
   double m_height;
 };
 
+/// @brief Lays tiles out in a (possibly densely-packed) ring, in the given order.
 class RingLayout : public PositionLayout {
 public:
   RingLayout();
@@ -64,6 +75,7 @@ private:
   double m_radius;
 };
 
+/// @brief Lays tiles out in a tightly-packed, but non-overlapping, linear spiral, in the given order.
 class LinearSpiralLayout : public PositionLayout {
 public:
   LinearSpiralLayout();
@@ -79,6 +91,9 @@ private:
   double m_boundingRadius;
 };
 
+/// @brief Lays tiles out in a tightly-packed exponential spiral.
+/// @details This implements both SizeLayout and PositionLayout, because the tiles that
+/// are closer to the center have to be proportionally smaller.
 class ExponentialSpiralLayout : public SizeLayout, public PositionLayout {
 public:
   ExponentialSpiralLayout();
@@ -100,6 +115,11 @@ private:
   double m_thetaIncrement;
 };
 
+/// @brief Lays tiles out in clusters based on the first key in the prioritized sorting criteria.
+/// @details The clusters are layed out in a vertical line.
+/// @note This is a first-pass, hacky, and somewhat crappy version.  Real clustering will be
+/// implemented by another implementation of HierarchyNode, so that recursive clusters can be
+/// computed, and layouts can be used to position each cluster.
 class BlobClusterLayout : public PositionLayout {
 public:
   BlobClusterLayout();
