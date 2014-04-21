@@ -358,6 +358,7 @@
 		C01FCF4B08A954540054247B /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				BOOST_PATH = "/opt/local/Libraries/boost_1_55_0-libc++";
 				COMBINE_HIDPI_IMAGES = YES;
 				COPY_PHASE_STRIP = NO;
 				DEAD_CODE_STRIPPING = YES;
@@ -376,10 +377,12 @@
 				LIBRARY_SEARCH_PATHS = (
 					"\"$(LEAPSDK_PATH)/lib/libc++\"",
 					"\"$(FBXSDK_PATH)/lib/clang/ub/release\"",
+					"\"$(BOOST_PATH)/lib\"",
 				);
 				OTHER_LDFLAGS = (
 					"\"$(CINDER_PATH)/lib/libcinder_d.a\"",
 					"\"$(FBXSDK_PATH)/lib/clang/ub/release/libfbxsdk.a\"",
+					"-lboost_thread",
 					"-lLeap",
 					"-sectcreate",
 					__DATA,
@@ -399,6 +402,7 @@
 		C01FCF4C08A954540054247B /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				BOOST_PATH = "/opt/local/Libraries/boost_1_55_0-libc++";
 				COMBINE_HIDPI_IMAGES = YES;
 				DEAD_CODE_STRIPPING = YES;
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
@@ -414,10 +418,12 @@
 				LIBRARY_SEARCH_PATHS = (
 					"\"$(LEAPSDK_PATH)/lib/libc++\"",
 					"\"$(FBXSDK_PATH)/lib/clang/ub/release\"",
+					"\"$(BOOST_PATH)/lib\"",
 				);
 				OTHER_LDFLAGS = (
 					"\"$(CINDER_PATH)/lib/libcinder.a\"",
 					"\"$(FBXSDK_PATH)/lib/clang/ub/release/libfbxsdk.a\"",
+					"-lboost_thread",
 					"-lLeap",
 					"-sectcreate",
 					__DATA,

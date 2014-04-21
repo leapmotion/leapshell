@@ -8,11 +8,15 @@ class View;
 class NavigationState {
 public:
 
-	// starts in a not-pointing-at-anything state.
-  NavigationState() { }
+  // starts in a not-pointing-at-anything state.
+  NavigationState();
+  ~NavigationState();
 
   std::shared_ptr<HierarchyNode> currentLocation() const { return m_currentLocation; }
-  HierarchyNodeVector const &currentChildNodes() { return m_currentChildNodes; }
+  HierarchyNodeVector const &currentChildNodes() {
+    boost::lock_guard<boost::mutex> lock(m_mutex);
+    return m_currentChildNodes;
+  }
 
   void setCurrentLocation (std::shared_ptr<HierarchyNode> const &newLocation);
 
@@ -23,11 +27,22 @@ public:
   void unregisterView(std::weak_ptr<View> const &view);
 
   void update();
+  bool updateChildren();
 
 private:
+  void updateThread();
 
   std::shared_ptr<HierarchyNode> m_currentLocation;
   HierarchyNodeVector m_currentChildNodes;
+
+  bool m_running;
+  bool m_dirty;
+  bool m_first;
+  uint32_t m_updateNumber;
+  boost::thread m_updateThread;
+  boost::thread m_childThread;
+  boost::condition_variable m_cond;
+  boost::mutex m_mutex;
 
   typedef std::set<std::weak_ptr<View>, std::owner_less<std::weak_ptr<View>>> ViewSet;
   ViewSet m_views;

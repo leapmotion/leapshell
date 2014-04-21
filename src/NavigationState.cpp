@@ -2,6 +2,26 @@
 #include "NavigationState.h"
 #include "View.h"
 
+NavigationState::NavigationState() :
+  m_running(false),
+  m_dirty(false),
+  m_first(false),
+  m_updateNumber(0),
+  m_updateThread(boost::bind(&NavigationState::updateThread, this))
+{
+  boost::unique_lock<boost::mutex> lock(m_mutex);
+  m_cond.wait(lock, [this] { return m_running; });
+}
+
+NavigationState::~NavigationState()
+{
+  boost::unique_lock<boost::mutex> lock(m_mutex);
+  m_running = false;
+  m_cond.notify_all();
+  lock.unlock();
+  m_updateThread.join();
+}
+
 void NavigationState::setCurrentLocation (std::shared_ptr<HierarchyNode> const &newLocation) {
   // do nothing if this is a no-op.
   if (m_currentLocation != newLocation) {
@@ -42,26 +62,63 @@ void NavigationState::unregisterView (std::weak_ptr<View> const &view) {
 }
 
 void NavigationState::update () {
-  m_currentChildNodes.clear();
-  // if the current location is valid, re-query its child nodes
-  if (m_currentLocation) {
-    m_currentChildNodes = m_currentLocation->child_nodes();
-    // std::cout << "NavigationState::update();\n";
-    // for (auto it = m_currentChildNodes.begin(); it != m_currentChildNodes.end(); ++it) {
-      // HierarchyNode const &node = **it;
-      // std::cout << node.metadata().To<std::string>() << '\n';
-    // }
-  } 
+  boost::unique_lock<boost::mutex> lock(m_mutex);
+  ++m_updateNumber;
+  m_cond.notify_all();
+}
+
+void NavigationState::updateThread() {
+  boost::unique_lock<boost::mutex> lock(m_mutex);
+  m_running = true;
+  m_cond.notify_all();
+  uint32_t updateNumber = m_updateNumber;
+  while (m_running) {
+    m_cond.wait(lock, [this, updateNumber] { return !m_running || updateNumber != m_updateNumber; });
+    if (m_running) {
+      updateNumber = m_updateNumber;
+      m_dirty = true;
+      m_first = true;
+      m_currentChildNodes.clear();
+
+      // if the current location is valid, query its child nodes
+      if (m_currentLocation) {
+        m_currentLocation->child_nodes([this, updateNumber] (std::shared_ptr<HierarchyNode>&& child) -> bool {
+          boost::lock_guard<boost::mutex> lock(m_mutex);
+          if (updateNumber != m_updateNumber) {
+            return false;
+          }
+          m_currentChildNodes.push_back(std::move(child));
+          m_dirty = true;
+          return true;
+        });
+      }
+    }
+  }
+}
+
+bool NavigationState::updateChildren()
+{
+  boost::unique_lock<boost::mutex> lock(m_mutex);
+  if (!m_dirty) {
+    return false;
+  }
+  m_dirty = false;
+  bool isFirst = m_first;
+  if (!m_currentChildNodes.empty()) {
+    m_first = false;
+  }
+  lock.unlock();
 
   // inform all views that there has been an update
   auto it = m_views.begin();
   while (it != m_views.end()) {
     auto v = it->lock();
     if (v) {
-      v->UpdateFromChangedNavigationState();
+      v->UpdateFromChangedNavigationState(isFirst);
       ++it;
     } else {
       m_views.erase(it++);
     }
   }
+  return true;
 }

@@ -54,7 +54,7 @@ public:
   ~View ();
 
   // this is a "heavy" update that happens only when the NavigationState changes
-  void UpdateFromChangedNavigationState();
+  void UpdateFromChangedNavigationState(bool fadeIn = true);
   // this is a "light" update that happens every frame
   void PerFrameUpdate();
 
@@ -101,7 +101,7 @@ private:
   void resetView();
   Vector3 clampCameraPosition(const Vector3& position) const;
   static void ExtractPrioritizedKeysFrom(const HierarchyNode &node, SortingCriteria &sortingCriteria);
-  static void RegenerateTilesAndTilePointers(const HierarchyNodeVector &nodes, TileVector &tiles, TilePointerVector &tilePointers);
+  static void RegenerateTilesAndTilePointers(const HierarchyNodeVector &nodes, TileVector &tiles, TilePointerVector &tilePointers, bool fadeIn);
 
   std::shared_ptr<NavigationState> m_ownerNavigationState;
 

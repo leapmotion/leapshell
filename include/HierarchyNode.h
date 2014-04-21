@@ -26,7 +26,7 @@ public:
   // Returns the parent node if it exists, otherwise nullptr.
   virtual std::shared_ptr<HierarchyNode> parent () = 0;
   // Returns a list of the child nodes of this item.
-  virtual HierarchyNodeVector child_nodes (FilterCriteria const &filter_criteria = FilterCriteria::NONE) = 0;
+  virtual void child_nodes (std::function<bool(std::shared_ptr<HierarchyNode>&&)> callback, FilterCriteria const &filter_criteria = FilterCriteria::NONE) = 0;
   // Returns whether this is a leaf node
   virtual bool is_leaf () const = 0;
 

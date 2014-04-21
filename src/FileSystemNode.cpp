@@ -68,24 +68,30 @@ bool FileSystemNode::is_leaf() const
   return m_isLeaf;
 }
 
-HierarchyNodeVector FileSystemNode::child_nodes(FilterCriteria const& filter_criteria)
+void FileSystemNode::child_nodes (std::function<bool(std::shared_ptr<HierarchyNode>&&)> callback, FilterCriteria const& filter_criteria)
 {
-  HierarchyNodeVector childNodes;
-
-  try {
-    if (boost::filesystem::is_directory(m_path)) {
-      boost::filesystem::directory_iterator endIter; // default construction yields past-the-end
-      for (boost::filesystem::directory_iterator iter(m_path); iter != endIter; ++iter) {
-        if (iter->path().stem().empty()) { // Ignore dot (hidden) files for now
-          continue;
+  auto path = m_path;
+  auto parent = std::static_pointer_cast<FileSystemNode>(shared_from_this());
+  auto thread = boost::thread([callback, parent, path] {
+    try {
+      if (boost::filesystem::is_directory(path)) {
+        boost::filesystem::directory_iterator endIter; // default construction yields past-the-end
+        for (boost::filesystem::directory_iterator iter(path); iter != endIter; ++iter) {
+          if (iter->path().stem().empty()) { // Ignore dot (hidden) files for now
+            continue;
+          }
+          try {
+            auto node = std::shared_ptr<FileSystemNode>(new FileSystemNode(*iter, parent));
+            node->icon();
+            if (!callback(node)) {
+              break;
+            }
+          } catch (...) {}
         }
-        try {
-          childNodes.push_back(std::shared_ptr<FileSystemNode>(new FileSystemNode(*iter, std::static_pointer_cast<FileSystemNode>(shared_from_this()))));
-        } catch (...) {}
       }
-    }
-  } catch (...) {}
-  return childNodes; // ignore filter criteria for now
+    } catch (...) {}
+  });
+  thread.detach();
 }
 
 std::string FileSystemNode::path() const

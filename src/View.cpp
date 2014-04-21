@@ -64,7 +64,7 @@ View::~View () {
   delete m_handR;
 }
 
-void View::UpdateFromChangedNavigationState() {
+void View::UpdateFromChangedNavigationState(bool fadeIn) {
   m_sortedTiles.clear();
   if (m_ownerNavigationState) {
     if (m_sortingCriteria.PrioritizedKeys().empty()) {
@@ -73,7 +73,7 @@ void View::UpdateFromChangedNavigationState() {
       //   ExtractPrioritizedKeysFrom(*node, m_sortingCriteria);
       // }
     }
-    RegenerateTilesAndTilePointers(m_ownerNavigationState->currentChildNodes(), m_tiles, m_sortedTiles);
+    RegenerateTilesAndTilePointers(m_ownerNavigationState->currentChildNodes(), m_tiles, m_sortedTiles, false);
     // NOTE: now the elements of m_sortedTiles point to elements of m_tiles, so m_sortedTiles
     // should be cleared and regenerated if m_tiles is changed.
   }
@@ -198,14 +198,16 @@ void View::ExtractPrioritizedKeysFrom (const HierarchyNode &node, SortingCriteri
   sortingCriteria.SetPrioritizedKeys(prioritizedKeys);
 }
 
-void View::RegenerateTilesAndTilePointers(const HierarchyNodeVector &nodes, TileVector &tiles, TilePointerVector &tilePointers) {
+void View::RegenerateTilesAndTilePointers(const HierarchyNodeVector &nodes, TileVector &tiles, TilePointerVector &tilePointers, bool fadeIn) {
   // clear the vector of Tile pointers BEFORE tiles is changed, because they point to elements of tiles.
   tilePointers.clear();
   // create a Tile for each node
   tiles.clear();
   tiles.resize(nodes.size());
-  Globals::lastTileSwitchTime = Globals::curTimeSeconds;
-  Globals::lastTileTransitionTime = Globals::curTimeSeconds;
+  if (fadeIn) {
+    Globals::lastTileSwitchTime = Globals::curTimeSeconds;
+    Globals::lastTileTransitionTime = Globals::curTimeSeconds;
+  }
   // iterate through the tile and node vectors in parallel
   auto tile_it = tiles.begin();
   auto tile_it_end = tiles.end();

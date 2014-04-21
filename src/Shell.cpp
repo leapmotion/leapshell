@@ -327,7 +327,9 @@ void LeapShell::update()
     }
   }
 
-  m_view->PerFrameUpdate();
+  if (!m_state->updateChildren()) {
+    m_view->PerFrameUpdate();
+  }
 }
 
 void LeapShell::draw()
