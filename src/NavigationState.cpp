@@ -31,7 +31,7 @@ void NavigationState::registerView (std::weak_ptr<View> const &view) {
   assert(!view.expired() && "view must be a valid weak_ptr");
   m_views.insert(view);
   auto v = view.lock();
-  v->Update();
+  v->UpdateFromChangedNavigationState();
 }
 
 void NavigationState::unregisterView (std::weak_ptr<View> const &view) {
@@ -58,7 +58,7 @@ void NavigationState::update () {
   while (it != m_views.end()) {
     auto v = it->lock();
     if (v) {
-      v->Update();
+      v->UpdateFromChangedNavigationState();
       ++it;
     } else {
       m_views.erase(it++);

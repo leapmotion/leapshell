@@ -31,7 +31,7 @@ View::~View () {
   delete m_handR;
 }
 
-void View::Update() {
+void View::UpdateFromChangedNavigationState() {
   m_sortedTiles.clear();
   if (m_ownerNavigationState) {
     if (m_sortingCriteria.PrioritizedKeys().empty()) {
@@ -46,6 +46,10 @@ void View::Update() {
   }
   SortTiles(m_sortedTiles, m_sortingCriteria.PrioritizedKeys());
 
+  PerFrameUpdate();
+}
+
+void View::PerFrameUpdate () {
   // update the sizes first (a PositionLayout implementation often depends on the sizes)
   m_sizeLayout->UpdateTileSizes(range(m_sortedTiles.begin(), m_sortedTiles.end()));
   // then update the positions
@@ -131,6 +135,7 @@ void View::RegenerateTilesAndTilePointers(const HierarchyNodeVector &nodes, Tile
   // clear the vector of Tile pointers BEFORE tiles is changed, because they point to elements of tiles.
   tilePointers.clear();
   // create a Tile for each node
+  tiles.clear();
   tiles.resize(nodes.size());
   // iterate through the tile and node vectors in parallel
   auto tile_it = tiles.begin();

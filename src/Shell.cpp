@@ -284,7 +284,7 @@ void LeapShell::update()
     }
   }
 
-  m_view->Update();
+  m_view->PerFrameUpdate();
 }
 
 void LeapShell::draw()

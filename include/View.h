@@ -50,7 +50,8 @@ public:
   View (std::shared_ptr<NavigationState> const &ownerNavigationState);
   ~View ();
 
-  void Update();
+  void UpdateFromChangedNavigationState();
+  void PerFrameUpdate();
 
   // getters
   const TileVector& Tiles() const { return m_tiles; }
