@@ -2,13 +2,14 @@
 #define __LAYOUT_H__
 
 #include "HierarchyNode.h"
+#include "Range.h"
 #include "Tile.h"
 #include "Utilities.h"
 
 class SizeLayout {
 public:
   SizeLayout();
-  virtual void UpdateTileSizes(TilePointerVector::iterator tile_start, TilePointerVector::iterator tile_end) = 0;
+  virtual void UpdateTileSizes(const Range<TilePointerVector::iterator> &tiles) = 0;
 protected:
   void animateTileSize(Tile& tile, int idx, const Vector3& newSize) const;
   double m_creationTime;
@@ -17,7 +18,7 @@ protected:
 class UniformSizeLayout : public SizeLayout {
 public:
   UniformSizeLayout();
-  virtual void UpdateTileSizes(TilePointerVector::iterator tile_start, TilePointerVector::iterator tile_end) override;
+  virtual void UpdateTileSizes(const Range<TilePointerVector::iterator> &tiles) override;
   void SetSize(const Vector3 &size) { m_size = size; }
 protected:
   Vector3 m_size;
@@ -27,7 +28,7 @@ protected:
 class PositionLayout {
 public:
   PositionLayout();
-  virtual void UpdateTilePositions(TilePointerVector::iterator tile_start, TilePointerVector::iterator tile_end) = 0;
+  virtual void UpdateTilePositions(const Range<TilePointerVector::iterator> &tiles) = 0;
   virtual Vector2 GetCameraMinBounds() const = 0;
   virtual Vector2 GetCameraMaxBounds() const = 0;
 protected:
@@ -38,7 +39,7 @@ protected:
 class GridLayout : public PositionLayout {
 public:
   GridLayout();
-  virtual void UpdateTilePositions(TilePointerVector::iterator tile_start, TilePointerVector::iterator tile_end) override;
+  virtual void UpdateTilePositions(const Range<TilePointerVector::iterator> &tiles) override;
   virtual Vector2 GetCameraMinBounds() const override;
   virtual Vector2 GetCameraMaxBounds() const override;
   void SetWidth(double width) { m_width = width; }
@@ -50,7 +51,7 @@ private:
 class RingLayout : public PositionLayout {
 public:
   RingLayout();
-  virtual void UpdateTilePositions(TilePointerVector::iterator tile_start, TilePointerVector::iterator tile_end) override;
+  virtual void UpdateTilePositions(const Range<TilePointerVector::iterator> &tiles) override;
   virtual Vector2 GetCameraMinBounds() const override;
   virtual Vector2 GetCameraMaxBounds() const override;
   void SetRadius(double radius) { m_radius = radius; }
@@ -61,7 +62,7 @@ private:
 class LinearSpiralLayout : public PositionLayout {
 public:
   LinearSpiralLayout();
-  virtual void UpdateTilePositions(TilePointerVector::iterator tile_start, TilePointerVector::iterator tile_end) override;
+  virtual void UpdateTilePositions(const Range<TilePointerVector::iterator> &tiles) override;
   virtual Vector2 GetCameraMinBounds() const override;
   virtual Vector2 GetCameraMaxBounds() const override;
   void SetStartingAngle(double startingAngle) { m_startingAngle = startingAngle; }
@@ -75,8 +76,8 @@ private:
 class ExponentialSpiralLayout : public SizeLayout, public PositionLayout {
 public:
   ExponentialSpiralLayout();
-  virtual void UpdateTileSizes(TilePointerVector::iterator tile_start, TilePointerVector::iterator tile_end) override;
-  virtual void UpdateTilePositions(TilePointerVector::iterator tile_start, TilePointerVector::iterator tile_end) override;
+  virtual void UpdateTileSizes(const Range<TilePointerVector::iterator> &tiles) override;
+  virtual void UpdateTilePositions(const Range<TilePointerVector::iterator> &tiles) override;
   virtual Vector2 GetCameraMinBounds() const override;
   virtual Vector2 GetCameraMaxBounds() const override;
   void SetBaseTileSize(const Vector3 &baseTileSize) { m_baseTileSize = baseTileSize; }
@@ -91,4 +92,28 @@ private:
   double m_exponentialRate;
   double m_thetaIncrement;
 };
+
+// class BlobClusterLayout : public PositionLayout {
+// public:
+//   BlobClusterLayout();
+  // virtual void UpdateTilePositions(const Range<TilePointerVector::iterator> &tiles) override;
+//   virtual Vector2 GetCameraMinBounds() const override;
+//   virtual Vector2 GetCameraMaxBounds() const override;
+//   void SetClusteringKey(const std::string &clusteringKey) { m_clusteringKey = clusteringKey; }
+// private:
+//   // for now make these private
+
+//   // the cluster outer layout decides how each cluster (as a whole) should be positioned.
+//   void SetClusterOuterLayout(const std::shared_ptr<Layout> &clusterOuterLayout) { m_clusterOuterLayout = clusterOuterLayout; }
+//   // the cluster inner layout decides how the elements of each cluster should be layed out.
+//   void SetClusterInnerLayout(const std::shared_ptr<Layout> &clusterInnerLayout) { m_clusterInnerLayout = clusterInnerLayout; }
+  
+//   // TODO: cache clustering iterator ranges
+//   std::string m_clusteringKey;
+//   std::shared_ptr<Layout> m_clusterOuterLayout;
+//   std::shared_ptr<Layout> m_clusterInnerLayout;
+
+//   std::vector<Range<
+// };
+
 #endif

@@ -22,10 +22,10 @@ void SizeLayout::animateTileSize(Tile& tile, int idx, const Vector3& newSize) co
 
 UniformSizeLayout::UniformSizeLayout() : m_size(Vector3::Constant(15.0)) { }
 
-void UniformSizeLayout::UpdateTileSizes(TilePointerVector::iterator tile_start, TilePointerVector::iterator tile_end) {
+void UniformSizeLayout::UpdateTileSizes(const Range<TilePointerVector::iterator> &tiles) {
   int idx = 0;
-  for (auto it = tile_start; it != tile_end; ++it, ++idx) {
-    animateTileSize(**it, idx, m_size);
+  for (auto t = tiles; t.is_not_at_end(); ++t, ++idx) {
+    animateTileSize(**t, idx, m_size);
   }
 }
 
@@ -50,11 +50,11 @@ GridLayout::GridLayout() : m_width(100), m_height(m_width) {
 
 }
 
-void GridLayout::UpdateTilePositions(TilePointerVector::iterator tile_start, TilePointerVector::iterator tile_end) {
+void GridLayout::UpdateTilePositions(const Range<TilePointerVector::iterator> &tiles) {
   // compute number of rows and height of the layout
   static const int TILES_PER_ROW = 6;
   const double inc = m_width / (TILES_PER_ROW-1);
-  const int NUM_ROWS = static_cast<int>(std::ceil(static_cast<double>(tile_end - tile_start) / TILES_PER_ROW));
+  const int NUM_ROWS = static_cast<int>(std::ceil(static_cast<double>(tiles.length()) / TILES_PER_ROW));
   m_height = inc * NUM_ROWS;
 
   // start placing tiles
@@ -63,8 +63,8 @@ void GridLayout::UpdateTilePositions(TilePointerVector::iterator tile_start, Til
   double curWidth = -halfWidth;
   double curHeight = halfHeight - inc/2.0;
   int idx = 0;
-  for (auto it = tile_start; it != tile_end; ++it, ++idx) {
-    animateTilePosition(**it, idx, Vector3(curWidth, curHeight, 0.0));
+  for (auto t = tiles; t.is_not_at_end(); ++t, ++idx) {
+    animateTilePosition(**t, idx, Vector3(curWidth, curHeight, 0.0));
 
     curWidth += inc;
     if (curWidth > halfWidth) {
@@ -90,14 +90,14 @@ RingLayout::RingLayout() : m_radius(50) {
 
 }
 
-void RingLayout::UpdateTilePositions(TilePointerVector::iterator tile_start, TilePointerVector::iterator tile_end) {
+void RingLayout::UpdateTilePositions(const Range<TilePointerVector::iterator> &tiles) {
   double theta = 0;
-  const double thetaInc = 2*M_PI / static_cast<double>(tile_end - tile_start);
+  const double thetaInc = 2*M_PI / static_cast<double>(tiles.length());
   int idx = 0;
-  for (auto it = tile_start; it != tile_end; ++it, ++idx) {
+  for (auto t = tiles; t.is_not_at_end(); ++t, ++idx) {
     const double x = m_radius * std::cos(theta);
     const double y = m_radius * std::sin(theta);
-    animateTilePosition(**it, idx, Vector3(x, y, 0.0));
+    animateTilePosition(**t, idx, Vector3(x, y, 0.0));
     theta += thetaInc;
   }
 }
@@ -116,12 +116,12 @@ LinearSpiralLayout::LinearSpiralLayout() : m_startingAngle(2.0*M_PI), m_slope(3.
 
 }
 
-void LinearSpiralLayout::UpdateTilePositions(TilePointerVector::iterator tile_start, TilePointerVector::iterator tile_end) {
+void LinearSpiralLayout::UpdateTilePositions(const Range<TilePointerVector::iterator> &tiles) {
   double theta = m_startingAngle;
   double radius;
   int idx = 0;
-  for (auto it = tile_start; it != tile_end; ++it, ++idx) {
-    Tile &tile = **it;
+  for (auto t = tiles; t.is_not_at_end(); ++t, ++idx) {
+    Tile &tile = **t;
     radius = m_slope * theta;
     const double x = radius * std::cos(theta);
     const double y = radius * std::sin(theta);
@@ -130,9 +130,9 @@ void LinearSpiralLayout::UpdateTilePositions(TilePointerVector::iterator tile_st
     // we want to go along the arc a length of about the tile diameter.  This should make
     // it so that the tiles don't overlap. 
     // length = radius * change_in_theta, so change_in_theta = length / radius.
-    Vector2 tile_size_in_2d(tile.m_size(0), tile.m_size(1));
+    Vector2 tileSizeIn2d(tile.m_size(0), tile.m_size(1));
     // divide by sqrt(2) to get a better approx of the shape of the icons we use
-    double tile_diameter = tile_size_in_2d.norm() * 0.707;
+    double tile_diameter = tileSizeIn2d.norm() * 0.707;
     theta += tile_diameter / radius;
   }
   m_boundingRadius = radius;
@@ -156,33 +156,33 @@ ExponentialSpiralLayout::ExponentialSpiralLayout()
   SetBaseRadius(5.0);
 }
 
-void ExponentialSpiralLayout::UpdateTileSizes(TilePointerVector::iterator tile_start, TilePointerVector::iterator tile_end) {
-  int tile_count = tile_end - tile_start;
+void ExponentialSpiralLayout::UpdateTileSizes(const Range<TilePointerVector::iterator> &tiles) {
+  int tile_count = tiles.length();
   int idx = 0;
-  for (auto it = tile_start; it != tile_end; ++it, ++idx) {
+  for (auto t = tiles; t.is_not_at_end(); ++t, ++idx) {
     double centeredIndex = (idx - tile_count/2.0);
     double theta = m_thetaIncrement*centeredIndex;
     double ratio = std::exp(m_exponentialRate*theta);
-    animateTileSize(**it, idx, ratio*m_baseTileSize);
+    animateTileSize(**t, idx, ratio*m_baseTileSize);
   }
 }
 
-void ExponentialSpiralLayout::UpdateTilePositions(TilePointerVector::iterator tile_start, TilePointerVector::iterator tile_end) {
+void ExponentialSpiralLayout::UpdateTilePositions(const Range<TilePointerVector::iterator> &tiles) {
   Vector2 baseTileSizeIn2d(m_baseTileSize(0), m_baseTileSize(1));
   // divide by sqrt(2) to get a better approx of the shape of the icons we use
   double baseTileDiameter = baseTileSizeIn2d.norm() * 0.707;
   double baseTileRadius = baseTileDiameter / 2.0;
-  int tile_count = tile_end - tile_start;
+  int tile_count = tiles.length();
   int idx = 0;
   double radius = 0.0;
-  for (auto it = tile_start; it != tile_end; ++it, ++idx) {
+  for (auto t = tiles; t.is_not_at_end(); ++t, ++idx) {
     double centeredIndex = (idx - tile_count/2.0);
     double theta = m_thetaIncrement*centeredIndex;
     double ratio = m_spacing * std::exp(m_exponentialRate*theta);
     radius = m_baseRadius * baseTileRadius * ratio;
     const double x = radius * std::cos(theta);
     const double y = radius * std::sin(theta);
-    animateTilePosition(**it, idx, Vector3(x, y, 0.0));
+    animateTilePosition(**t, idx, Vector3(x, y, 0.0));
   }
   m_boundingRadius = radius;
 }
@@ -207,3 +207,50 @@ void ExponentialSpiralLayout::SetBaseRadius(double baseRadius) {
   double c = (m_baseRadius + 1.0) / (m_baseRadius - 1.0);
   m_exponentialRate = std::log(c) / (2.0*M_PI);
 }
+
+// BlobClusterLayout
+
+// BlobClusterLayout::BlobClusterLayout ()
+//   :
+//   m_clusteringKey("name"),
+//   m_clusterOuterLayout(new GridLayout()),
+//   m_clusterInnerLayout(new LinearSpiralLayout())
+// { }
+
+// void BlobClusterLayout::UpdateTilePositions(const Range<TilePointerVector::iterator> &tiles) {
+
+//   // compute iterator ranges for each cluster, because we need to know how many there are.
+
+
+//   // calculate the maximum bounding box size of each cluster
+
+
+//   Vector2 baseTileSizeIn2d(m_baseTileSize(0), m_baseTileSize(1));
+//   // divide by sqrt(2) to get a better approx of the shape of the icons we use
+//   double baseTileDiameter = baseTileSizeIn2d.norm() * 0.707;
+//   double baseTileRadius = baseTileDiameter / 2.0;
+//   int tile_count = tiles.length();
+//   int idx = 0;
+//   double radius = 0.0;
+//   for (auto t = tiles; t.is_not_at_end(); ++t, ++idx) {
+//     double centeredIndex = (idx - tile_count/2.0);
+//     double theta = m_thetaIncrement*centeredIndex;
+//     double ratio = m_spacing * std::exp(m_exponentialRate*theta);
+//     radius = m_baseRadius * baseTileRadius * ratio;
+//     const double x = radius * std::cos(theta);
+//     const double y = radius * std::sin(theta);
+//     animateTilePosition(**t, idx, Vector3(x, y, 0.0));
+//   }
+//   m_boundingRadius = radius;
+// }
+
+// Vector2 BlobClusterLayout::GetCameraMinBounds() const {
+//   return Vector2(-m_boundingRadius/2.0, -m_boundingRadius/2.0);
+// }
+
+// Vector2 BlobClusterLayout::GetCameraMaxBounds() const {
+//   return Vector2(m_boundingRadius/2.0, m_boundingRadius/2.0);
+// }
+
+
+

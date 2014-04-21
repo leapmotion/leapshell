@@ -47,9 +47,9 @@ void View::Update() {
   SortTiles(m_sortedTiles, m_sortingCriteria.PrioritizedKeys());
 
   // update the sizes first (a PositionLayout implementation often depends on the sizes)
-  m_sizeLayout->UpdateTileSizes(m_sortedTiles.begin(), m_sortedTiles.end());
+  m_sizeLayout->UpdateTileSizes(range(m_sortedTiles.begin(), m_sortedTiles.end()));
   // then update the positions
-  m_positionLayout->UpdateTilePositions(m_sortedTiles.begin(), m_sortedTiles.end());
+  m_positionLayout->UpdateTilePositions(range(m_sortedTiles.begin(), m_sortedTiles.end()));
 
   std::shared_ptr<HierarchyNode> selectedNode(nullptr);
   for (TileVector::iterator it = m_tiles.begin(); it != m_tiles.end(); ++it) {
@@ -118,12 +118,12 @@ void View::ExtractPrioritizedKeysFrom (const HierarchyNode &node, SortingCriteri
   assert(metadata.IsHash() && "HierarchyNode metadata should always be a Hash type Value");
   std::map<std::string,Value> const &hash = metadata.Cast<Value::Hash>();
   std::vector<std::string> prioritizedKeys;
-  // std::cout << "prioritized keys:\n";
+  std::cout << "prioritized keys:\n";
   for (auto it = hash.begin(), it_end = hash.end(); it != it_end; ++it) {
     prioritizedKeys.push_back(it->first);
-    // std::cout << "    key = \"" << it->first << "\"\n";
+    std::cout << "    key = \"" << it->first << "\"\n";
   }
-  // std::cout << '\n';
+  std::cout << '\n';
   sortingCriteria.SetPrioritizedKeys(prioritizedKeys);
 }
 
