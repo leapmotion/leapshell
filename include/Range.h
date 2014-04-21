@@ -45,7 +45,7 @@ public:
 
 private:
 
-  Range () = delete; // disallowed
+  Range() { }
 
   Iterator m_start;
   Iterator m_end;
