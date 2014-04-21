@@ -77,7 +77,8 @@ void FileSystemNode::child_nodes (std::function<bool(std::shared_ptr<HierarchyNo
       if (boost::filesystem::is_directory(path)) {
         boost::filesystem::directory_iterator endIter; // default construction yields past-the-end
         for (boost::filesystem::directory_iterator iter(path); iter != endIter; ++iter) {
-          if (iter->path().stem().empty()) { // Ignore dot (hidden) files for now
+          const std::string filename = iter->path().filename().string();
+          if (filename.empty() || filename[0] == '.') { // Ignore dot (hidden) files for now
             continue;
           }
           try {
