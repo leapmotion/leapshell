@@ -254,6 +254,10 @@ void LeapShell::keyDown(ci::app::KeyEvent event)
     m_view->SetSizeLayout(std::shared_ptr<SizeLayout>(new ExponentialSpiralLayout()));
     m_view->SetPositionLayout(std::shared_ptr<PositionLayout>(new ExponentialSpiralLayout())); 
     break;
+  case '5':
+    m_view->SetSizeLayout(std::shared_ptr<SizeLayout>(new UniformSizeLayout()));
+    m_view->SetPositionLayout(std::shared_ptr<PositionLayout>(new BlobClusterLayout()));
+    break;
 
   case '`':
     m_state->navigateUp();

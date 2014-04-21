@@ -21,6 +21,8 @@ public:
   double CreationTime() const;
   float CreationWarmupFactor() const;
 
+  Vector3 m_phantomPosition;
+
   ci::gl::TextureRef& Icon() const { return m_icon; }
   std::shared_ptr<HierarchyNode>& Node() { return m_node; }
   const std::shared_ptr<HierarchyNode>& Node() const { return m_node; }

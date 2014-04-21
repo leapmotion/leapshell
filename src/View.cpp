@@ -38,7 +38,15 @@ void View::UpdateFromChangedNavigationState() {
     if (m_sortingCriteria.PrioritizedKeys().empty()) {
       std::shared_ptr<HierarchyNode> node = m_ownerNavigationState->currentLocation();
       if (node) {
-        ExtractPrioritizedKeysFrom(*node, m_sortingCriteria);
+        // Hard-code the list for the demo
+        std::vector<std::string> prioritizedKeys;
+        prioritizedKeys.push_back("ext");
+        prioritizedKeys.push_back("name");
+        prioritizedKeys.push_back("time");
+        prioritizedKeys.push_back("size");
+        m_sortingCriteria.SetPrioritizedKeys(prioritizedKeys);
+
+        //ExtractPrioritizedKeysFrom(*node, m_sortingCriteria);
       }
     }
     RegenerateTilesAndTilePointers(m_ownerNavigationState->currentChildNodes(), m_tiles, m_sortedTiles);
@@ -155,6 +163,7 @@ void View::ExtractPrioritizedKeysFrom (const HierarchyNode &node, SortingCriteri
   prioritizedKeys.push_back("time");
   prioritizedKeys.push_back("size");
 #endif
+
   sortingCriteria.SetPrioritizedKeys(prioritizedKeys);
 }
 

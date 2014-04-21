@@ -50,7 +50,9 @@ public:
   View (std::shared_ptr<NavigationState> const &ownerNavigationState);
   ~View ();
 
+  // this is a "heavy" update that happens only when the NavigationState changes
   void UpdateFromChangedNavigationState();
+  // this is a "light" update that happens every frame
   void PerFrameUpdate();
 
   // getters

@@ -29,8 +29,8 @@ public:
 
   Range &operator = (Range const &r) { m_start = r.m_start; m_end = r.m_end; return *this; }
 
-  bool operator == (Range const &r) { return m_start == r.m_start && m_end == r.m_end; }
-  bool operator != (Range const &r) { return m_start != r.m_start || m_end != r.m_end; }
+  bool operator == (Range const &r) const { return m_start == r.m_start && m_end == r.m_end; }
+  bool operator != (Range const &r) const { return m_start != r.m_start || m_end != r.m_end; }
 
   size_t length () const { return m_end - m_start; } // only defined for random-access iterators
   bool is_at_end () const { return m_start == m_end; }
@@ -38,8 +38,8 @@ public:
   bool is_empty () const { return m_start == m_end; }
   bool is_nonempty () const { return m_start != m_end; }
   Range &operator ++ () { ++m_start; return *this; }
-  T_ &operator * () { return m_start.operator*(); }
-  T_ *operator -> () { return m_start.operator->(); }
+  T_ &operator * () const { return m_start.operator*(); }
+  T_ *operator -> () const { return m_start.operator->(); }
   Iterator_ start () const { return m_start; }
   Iterator_ end () const { return m_end; }
 
