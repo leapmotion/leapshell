@@ -7,11 +7,11 @@ const float Tile::SIZE_SMOOTH = 0.85f;
 const float Tile::ACTIVATION_SMOOTH = 0.95f;
 
 Tile::Tile() {
-  m_positionSmoother.Update(Vector3::Zero(), Globals::curTimeSeconds, 0.5f);
-  m_sizeSmoother.Update(Vector3::Constant(15), Globals::curTimeSeconds, 0.5f);
-  m_highlightSmoother.Update(0.0f, Globals::curTimeSeconds, 0.5f);
-  m_activationSmoother.Update(0.0f, Globals::curTimeSeconds, 0.5f);
-  m_grabDeltaSmoother.Update(Vector3::Zero(), Globals::curTimeSeconds, 0.5f);
+  m_positionSmoother.value = Vector3::Zero();
+  m_sizeSmoother.value = Vector3::Constant(15);
+  m_highlightSmoother.value = 0.0f;
+  m_activationSmoother.value = 0.0f;
+  m_grabDeltaSmoother.value = Vector3::Zero();
   m_creationTime = Globals::curTimeSeconds;
 }
 
