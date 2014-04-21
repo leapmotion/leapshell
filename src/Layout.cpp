@@ -62,7 +62,7 @@ void GridLayout::UpdateTilePositions(const Range<TilePointerVector::iterator> &t
   double curHeight = halfHeight - inc/2.0;
   int idx = 0;
   for (auto t = tiles; t.is_not_at_end(); ++t, ++idx) {
-    animateTilePosition(**t, idx, Vector3(curWidth, curHeight, 0.01*idx));
+    animateTilePosition(**t, idx, Vector3(curWidth, curHeight, 0.0));
 
     curWidth += inc;
     if (curWidth > halfWidth) {
@@ -95,7 +95,7 @@ void RingLayout::UpdateTilePositions(const Range<TilePointerVector::iterator> &t
   for (auto t = tiles; t.is_not_at_end(); ++t, ++idx) {
     const double x = m_radius * std::cos(theta);
     const double y = m_radius * std::sin(theta);
-    animateTilePosition(**t, idx, Vector3(x, y, 0.01*idx));
+    animateTilePosition(**t, idx, Vector3(x, y, 0.0));
     theta += thetaInc;
   }
 }
@@ -123,7 +123,7 @@ void LinearSpiralLayout::UpdateTilePositions(const Range<TilePointerVector::iter
     radius = m_slope * theta;
     const double x = radius * std::cos(theta);
     const double y = radius * std::sin(theta);
-    animateTilePosition(tile, idx, Vector3(x, y, 0.01*idx));
+    animateTilePosition(tile, idx, Vector3(x, y, 0.0));
     // Calculate the next angle based on the speed at which the spiral is being swept out.
     // we want to go along the arc a length of about the tile diameter.  This should make
     // it so that the tiles don't overlap. 
@@ -180,7 +180,7 @@ void ExponentialSpiralLayout::UpdateTilePositions(const Range<TilePointerVector:
     radius = m_baseRadius * baseTileRadius * ratio;
     const double x = radius * std::cos(theta);
     const double y = radius * std::sin(theta);
-    animateTilePosition(**t, idx, Vector3(x, y, 0.01*idx));
+    animateTilePosition(**t, idx, Vector3(x, y, 0.0));
   }
   m_boundingRadius = radius;
 }

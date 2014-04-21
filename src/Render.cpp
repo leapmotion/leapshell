@@ -22,11 +22,30 @@ void Render::draw(const View& view) const {
 
   // draw tiles
   ci::gl::enableAlphaBlending();
-  ci::gl::enableDepthWrite();
-  ci::gl::enableDepthRead();
   const TileVector& tiles = view.Tiles();
+
+  // draw backmost tiles after all others
   for (TileVector::const_iterator it = tiles.begin(); it != tiles.end(); ++it) {
-    drawTile(*it, view.Forces());
+    const Tile& tile = *it;
+    if (tile.Position().z() < 0 && tile.Activation() > 0.01f) {
+      drawTile(tile, view.Forces());
+    }
+  }
+
+  // draw most of the tiles
+  for (TileVector::const_iterator it = tiles.begin(); it != tiles.end(); ++it) {
+    const Tile& tile = *it;
+    if (tile.Activation() < 0.01f) {
+      drawTile(tile, view.Forces());
+    }
+  }
+
+  // draw frontmost tiles before all others
+  for (TileVector::const_iterator it = tiles.begin(); it != tiles.end(); ++it) {
+    const Tile& tile = *it;
+    if (tile.Position().z() >= 0 && tile.Activation() > 0.01f) {
+      drawTile(tile, view.Forces());
+    }
   }
 
   drawHands(view);
@@ -61,8 +80,6 @@ void Render::drawTile(const Tile& tile, const ForceVector& forces) const {
   const ci::Rectf rect(-halfWidth, -halfHeight, halfWidth, halfHeight);
 
   // draw border
-  glPushMatrix();
-  glTranslated(0, 0, -0.1);
   const ci::ColorA activeColor = ci::ColorA(1.0f, 0.3f, 0.1f, 0.8f * activation);
   const ci::ColorA highlightColor = ci::ColorA(0.7f, 0.7f, 0.7f, 0.5f * highlight);
   const ci::ColorA blended = blendColors(activeColor, highlightColor, activation);
@@ -70,7 +87,6 @@ void Render::drawTile(const Tile& tile, const ForceVector& forces) const {
   ci::gl::drawSolidRoundedRect(rect, 2.0, 10);
   ci::gl::color(ci::ColorA(1.0f, 1.0f, 1.0f, 0.6f));
   ci::gl::drawStrokedRoundedRect(rect, 2.0, 10);
-  glPopMatrix();
 
   if (!tile.Icon()) {
     ci::Surface8u icon = tile.Node()->icon();
@@ -100,10 +116,9 @@ void Render::drawTile(const Tile& tile, const ForceVector& forces) const {
   static const double NAME_OFFSET = 1.0;
   glTranslated(0.0, -tileSize.y()/2.0 - NAME_OFFSET, 0.0);
   glScaled(TEXT_SCALE, -TEXT_SCALE, TEXT_SCALE);
-  glTranslated(0, -Globals::FONT_SIZE/2.0, 0.1);
+  glTranslated(0, -Globals::FONT_SIZE/2.0, 0.0);
   ci::gl::color(shadowColor);
   Globals::fontRegular->drawString(name, nameRect, shadowOffset);
-  glTranslated(0, 0, 0.1);
   ci::gl::color(nameColor);
   Globals::fontRegular->drawString(name, nameRect);
   glPopMatrix();
