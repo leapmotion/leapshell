@@ -66,8 +66,8 @@ struct TileOrder {
     if (m_prioritizedKeys.empty()) {
       // we have to set a fallback ordering which is used if there are no prioritized keys.
       // use the paths of the hierarchy nodes for the tiles
-      assert(rhs->m_node && "rhs Tile has invalid HierarchyNode member m_node (this should never happen)");
-      assert(lhs->m_node && "lhs Tile has invalid HierarchyNode member m_node (this should never happen)");
+      assert(rhs->Node() && "rhs Tile has invalid HierarchyNode member m_node (this should never happen)");
+      assert(lhs->Node() && "lhs Tile has invalid HierarchyNode member m_node (this should never happen)");
       return lhs->Node()->path() < rhs->Node()->path();
     }
     // otherwise go through the keys in priority order and check ordering on those values
