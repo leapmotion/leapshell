@@ -220,18 +220,17 @@ float Render::getSearchFilterMult(const std::string& name, const std::string& se
   if (searchFilter.empty()) {
     return 1.0f;
   }
-  std::string lowerName = name;
-  for (size_t i=0; i<lowerName.size(); i++) {
-    lowerName[i] = tolower(lowerName[i]);
-  }
+  std::string lowerSearch = searchFilter, lowerName = name;
+  std::transform(lowerSearch.begin(), lowerSearch.end(), lowerSearch.begin(), ::tolower);
+  std::transform(lowerName.begin(), lowerName.end(), lowerName.begin(), ::tolower);
   if (anywhere) {
     // search filter can be anywhere in the name
-    if (lowerName.find(searchFilter) == std::string::npos) {
+    if (lowerName.find(lowerSearch) == std::string::npos) {
       return NOT_FOUND_MULTIPLIER;
     }
   } else {
     // search filter must be at the beginning of the name
-    if (lowerName.compare(0, searchFilter.length(), searchFilter) != 0) {
+    if (lowerName.compare(0, lowerSearch.length(), lowerSearch) != 0) {
       return NOT_FOUND_MULTIPLIER;
     }
   }

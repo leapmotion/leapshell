@@ -306,9 +306,12 @@ void LeapShell::keyDown(ci::app::KeyEvent event)
     quit();
     break;
   case ci::app::KeyEvent::KEY_BACKSPACE:
+  case ci::app::KeyEvent::KEY_DELETE:
     if (!m_searchString.empty()) {
       m_searchString.pop_back();
     }
+    break;
+  case ci::app::KeyEvent::KEY_UNKNOWN:
     break;
   default:
     m_searchString += event.getChar();
