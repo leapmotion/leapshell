@@ -84,6 +84,9 @@ private:
 
   std::shared_ptr<HierarchyNode> m_root;
 
+  // for search highlight
+  std::string m_searchString;
+
   // for text drawing
   std::string m_textString;
   double m_lastTextChangeTime;

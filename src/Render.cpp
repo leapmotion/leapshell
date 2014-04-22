@@ -29,7 +29,7 @@ void Render::draw(const View& view) const {
   for (TileVector::const_iterator it = tiles.begin(); it != tiles.end(); ++it) {
     const Tile& tile = *it;
     if (tile.Position().z() < 0 && tile.Activation() > 0.01f) {
-      drawTile(tile, view.Forces(), transitionOpacity);
+      drawTile(tile, view.Forces(), transitionOpacity, view.SearchFilter());
     }
   }
 
@@ -37,7 +37,7 @@ void Render::draw(const View& view) const {
   for (TileVector::const_iterator it = tiles.begin(); it != tiles.end(); ++it) {
     const Tile& tile = *it;
     if (tile.Activation() < 0.01f) {
-      drawTile(tile, view.Forces(), transitionOpacity);
+      drawTile(tile, view.Forces(), transitionOpacity, view.SearchFilter());
     }
   }
 
@@ -45,21 +45,24 @@ void Render::draw(const View& view) const {
   for (TileVector::const_iterator it = tiles.begin(); it != tiles.end(); ++it) {
     const Tile& tile = *it;
     if (tile.Position().z() >= 0 && tile.Activation() > 0.01f) {
-      drawTile(tile, view.Forces(), transitionOpacity);
+      drawTile(tile, view.Forces(), transitionOpacity, view.SearchFilter());
     }
   }
 
   drawHands(view);
 }
 
-void Render::drawTile(const Tile& tile, const ForceVector& forces, float transitionOpacity) const {
+void Render::drawTile(const Tile& tile, const ForceVector& forces, float transitionOpacity, const std::string& searchFilter) const {
   if (!tile.Node()) {
     return;
   }
   glPushMatrix();
 
+  const std::string name = tile.Node()->get_metadata_as<std::string>("name");
+  const float searchMult = getSearchFilterMult(name, searchFilter, true);
+
   // compute tile opacity
-  const float opacity = Tile::TransitionWarmupFactor() * transitionOpacity;
+  const float opacity = searchMult * Tile::TransitionWarmupFactor() * transitionOpacity;
 
   const Vector3 tileSize = tile.Size();
   float highlight = tile.Highlight();
@@ -112,7 +115,6 @@ void Render::drawTile(const Tile& tile, const ForceVector& forces, float transit
   const ci::ColorA shadowColor = ci::ColorA(0.1f, 0.1f, 0.1f, opacity);
   static const ci::Vec2f shadowOffset = ci::Vec2f(5.0, 7.0f);
   glPushMatrix();
-  const std::string name = tile.Node()->get_metadata_as<std::string>("name");
   const ci::Vec2f nameSize = Globals::fontRegular->measureString(name);
   const ci::Rectf nameRect(-nameSize.x/2.0f, 0.0f, nameSize.x/2.0f + shadowOffset.x, 100.0f);
 
@@ -211,4 +213,27 @@ ci::ColorA Render::blendColors(const ci::ColorA& c1, const ci::ColorA& c2, float
   const float b = blend*c1.b + (1.0f-blend)*c2.b;
   const float a = blend*c1.a + (1.0f-blend)*c2.a;
   return ci::ColorA(r, g, b, a);  
+}
+
+float Render::getSearchFilterMult(const std::string& name, const std::string& searchFilter, bool anywhere) {
+  static const float NOT_FOUND_MULTIPLIER = 0.33f;
+  if (searchFilter.empty()) {
+    return 1.0f;
+  }
+  std::string lowerName = name;
+  for (size_t i=0; i<lowerName.size(); i++) {
+    lowerName[i] = tolower(lowerName[i]);
+  }
+  if (anywhere) {
+    // search filter can be anywhere in the name
+    if (lowerName.find(searchFilter) == std::string::npos) {
+      return NOT_FOUND_MULTIPLIER;
+    }
+  } else {
+    // search filter must be at the beginning of the name
+    if (lowerName.compare(0, searchFilter.length(), searchFilter) != 0) {
+      return NOT_FOUND_MULTIPLIER;
+    }
+  }
+  return 1.0f;
 }

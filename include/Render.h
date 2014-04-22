@@ -13,9 +13,10 @@ public:
 
 private:
 
-  void drawTile(const Tile& tile, const ForceVector& forces, float transitionOpacity) const;
+  void drawTile(const Tile& tile, const ForceVector& forces, float transitionOpacity, const std::string& searchFilter) const;
   void drawHands(const View& view) const;
   static ci::ColorA blendColors(const ci::ColorA& c1, const ci::ColorA& c2, float blend);
+  static float getSearchFilterMult(const std::string& name, const std::string& searchFilter, bool anywhere);
 
   mutable ci::CameraPersp m_camera;
   mutable ci::gl::TextureRef m_background;

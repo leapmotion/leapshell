@@ -170,6 +170,10 @@ void View::SetLookAt(const Vector3& lookat) {
   m_lookat = clampCameraPosition(lookat);
 }
 
+void View::SetSearchFilter(const std::string& searchFilter) {
+  m_searchFilter = searchFilter;
+}
+
 void View::resetView() {
   m_position = CAM_DISTANCE_FROM_PLANE * Vector3::UnitZ();
   m_lookat = Vector3::Zero();

@@ -72,6 +72,7 @@ public:
   const ForceVector& Forces() const { return m_forces; }
   ForceVector& Forces() { return m_forces; }
   float TransitionOpacity() const { return m_transitionOpacity; }
+  const std::string& SearchFilter() const { return m_searchFilter; }
 
   // setters
   void SetSizeLayout(const std::shared_ptr<SizeLayout>& sizeLayout);
@@ -79,6 +80,7 @@ public:
   void ApplyVelocity(const Vector3& velocity, double timeSeconds, double deltaTime);
   void SetPosition(const Vector3& position);
   void SetLookAt(const Vector3& lookat);
+  void SetSearchFilter(const std::string& searchFilter);
 
   // TEMPORARY HACK for 2014.04.21 demo
   void SetPrioritizedKeys (const std::vector<std::string> &prioritizedKeys) {
@@ -111,6 +113,7 @@ private:
   TileVector m_tiles;
   TilePointerVector m_sortedTiles;
   ForceVector m_forces;
+  std::string m_searchFilter;
 
   // render parameters
   ExponentialFilter<Vector3> m_lookatSmoother;

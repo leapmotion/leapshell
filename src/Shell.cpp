@@ -305,7 +305,13 @@ void LeapShell::keyDown(ci::app::KeyEvent event)
   case ci::app::KeyEvent::KEY_ESCAPE:
     quit();
     break;
+  case ci::app::KeyEvent::KEY_BACKSPACE:
+    if (!m_searchString.empty()) {
+      m_searchString.pop_back();
+    }
+    break;
   default:
+    m_searchString += event.getChar();
     break;
   }
 }
@@ -330,6 +336,8 @@ void LeapShell::update()
   if (!m_state->updateChildren()) {
     m_view->PerFrameUpdate();
   }
+
+  m_view->SetSearchFilter(m_searchString);
 }
 
 void LeapShell::draw()
@@ -345,6 +353,17 @@ void LeapShell::draw()
   m_params->draw();
   ci::gl::drawString("FPS: " + ci::toString(getAverageFps()), ci::Vec2f(10.0f, 10.0f), ci::ColorA::white(), ci::Font("Arial", 18));
 #endif
+
+  // draw search text
+  if (!m_searchString.empty()) {
+    const ci::Vec2f searchSize = Globals::fontRegular->measureString(m_searchString);
+    const ci::Rectf searchRect(0.0f, 0.0f, searchSize.x, 100.0f);
+    ci::gl::color(ci::ColorA::white());
+    glPushMatrix();
+    glTranslated(0.05*Globals::windowWidth, 0.025 * Globals::windowHeight, 0.0);
+    Globals::fontRegular->drawString(m_searchString, searchRect);
+    glPopMatrix();
+  }
 
   // draw indicator text
   static const float TEXT_FADE_TIME = 2.0f;
