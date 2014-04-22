@@ -46,7 +46,7 @@ public:
   virtual std::shared_ptr<HierarchyNode> parent () = 0;
   /// @brief Returns a list of the child nodes of this item.
   /// @note The FilterCriteria stuff is currently unimplemented.
-  virtual void child_nodes (std::function<bool(std::shared_ptr<HierarchyNode>&&)> callback, FilterCriteria const &filter_criteria = FilterCriteria::NONE) = 0;
+  virtual void child_nodes (std::function<bool(const std::shared_ptr<HierarchyNode>&)> callback, FilterCriteria const &filter_criteria = FilterCriteria::NONE) = 0;
   /// @brief Returns true if and only if this is a leaf node.
   virtual bool is_leaf () const = 0;
 

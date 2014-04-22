@@ -68,7 +68,7 @@ bool FileSystemNode::is_leaf() const
   return m_isLeaf;
 }
 
-void FileSystemNode::child_nodes (std::function<bool(std::shared_ptr<HierarchyNode>&&)> callback, FilterCriteria const& filter_criteria)
+void FileSystemNode::child_nodes (std::function<bool(const std::shared_ptr<HierarchyNode>&)> callback, FilterCriteria const& filter_criteria)
 {
   auto path = m_path;
   auto parent = std::static_pointer_cast<FileSystemNode>(shared_from_this());

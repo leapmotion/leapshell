@@ -82,12 +82,12 @@ void NavigationState::updateThread() {
 
       // if the current location is valid, query its child nodes
       if (m_currentLocation) {
-        m_currentLocation->child_nodes([this, updateNumber] (std::shared_ptr<HierarchyNode>&& child) -> bool {
+        m_currentLocation->child_nodes([this, updateNumber] (const std::shared_ptr<HierarchyNode>& child) -> bool {
           boost::lock_guard<boost::mutex> lock(m_mutex);
           if (updateNumber != m_updateNumber) {
             return false;
           }
-          m_currentChildNodes.push_back(std::move(child));
+          m_currentChildNodes.push_back(child);
           m_dirty = true;
           return true;
         });

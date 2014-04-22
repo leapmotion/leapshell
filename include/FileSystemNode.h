@@ -19,7 +19,7 @@ public:
   // Returns whether this is a leaf node
   virtual bool is_leaf () const override;
   // Returns a list of the child nodes of this item.
-  virtual void child_nodes (std::function<bool(std::shared_ptr<HierarchyNode>&&)> callback, FilterCriteria const& filter_criteria = FilterCriteria::NONE) override;
+  virtual void child_nodes (std::function<bool(const std::shared_ptr<HierarchyNode>&)> callback, FilterCriteria const& filter_criteria = FilterCriteria::NONE) override;
 
   // Uniquely identifies this item in the hierarchy.  This item's ancestry should be derivable from the path.
   virtual std::string path() const override;
