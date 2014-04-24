@@ -35,11 +35,16 @@ void FileSystemNode::init(std::shared_ptr<FileSystemNode> const& parent)
 {
   bool hasParent = (!parent && m_path.has_parent_path());
 #if defined(CINDER_MSW)
-  const auto path = m_path.wstring();
+  auto path = m_path.wstring();
   const auto pathLength = path.length();
   if (pathLength <= 3) {
-    if (pathLength == 2 && path[1] == ':') {
-      m_path += '/';
+    if (pathLength >= 2 && path[1] == ':') {
+      if (pathLength == 2) {
+        m_path += '\\';
+      } else if (path[2] == '/') {
+        path[2] = '\\';
+        m_path = path;
+      }
     }
     hasParent = false;
   }
