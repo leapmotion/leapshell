@@ -236,11 +236,11 @@ bool FileSystemNode::open(std::vector<std::string> const& parameters) const
     bool isOtherBundle = false;
 
     @autoreleasepool {
-      NSString* filename = [NSString stringWithUTF8String:m_path.string().c_str()];
+      NSString* filename = [NSString stringWithUTF8String:path.c_str()];
       NSBundle* bundle = [NSBundle bundleWithPath:filename];
       NSString* execPath = [bundle executablePath];
       NSString* resourcePath = [bundle resourcePath];
-      isAppBundle = (execPath != nil);
+      isAppBundle = (execPath != nil && m_path.extension() == ".app");
       isOtherBundle = (resourcePath != nil && ![filename isEqualToString:resourcePath]);
     }
     if (isAppBundle) {
