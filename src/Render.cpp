@@ -14,7 +14,27 @@ void Render::update_background(const ci::Surface8u& surface) {
 
 void Render::draw(const View& view) const {
   if (m_background) {
-    ci::gl::draw(m_background);
+    // compute ratios for where we are in the bounds
+    const Vector2 cameraMin = view.GetPositionLayout()->GetCameraMinBounds();
+    const Vector2 cameraMax = view.GetPositionLayout()->GetCameraMaxBounds();
+    const double sizeX = cameraMax.x() - cameraMin.x();
+    const double sizeY = cameraMax.y() - cameraMin.y();
+    const double ratioX = sizeX > 0 ? (view.LookAt().x() - cameraMin.x()) / sizeX : 0.5;
+    const double ratioY = sizeY > 0 ? (view.LookAt().y() - cameraMin.y()) / sizeY : 0.5;
+
+    // compute the amount of wiggle room available for parallax
+    const float diffX = static_cast<float>(m_background->getWidth() - Globals::windowWidth);
+    const float diffY = static_cast<float>(m_background->getHeight() - Globals::windowHeight);
+
+    // draw a rectangle translated by the current ratios
+    ci::gl::color(ci::ColorA::white());
+    m_background->bind();
+    glPushMatrix();
+    glTranslated((ratioX-1.0)*diffX, (ratioY-1.0)*diffY, 0);
+    glScaled(1.1, 1.1, 1.1); // add some more padding to compensate for rubber banding
+    ci::gl::drawSolidRect(ci::Rectf(0.0f, 0.0f, m_background->getWidth(), m_background->getHeight()));
+    glPopMatrix();
+    m_background->unbind();
   }
   m_camera.lookAt(ToVec3f(view.Position()), ToVec3f(view.LookAt()), ToVec3f(view.Up()));
   m_camera.setPerspective(view.FOV(), static_cast<float>(Globals::aspectRatio), view.Near(), view.Far());

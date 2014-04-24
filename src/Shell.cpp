@@ -170,11 +170,9 @@ void LeapShell::prepareSettings(Settings* settings)
   //settings->setAlwaysOnTop(true);
   settings->setFullScreen(true);
   settings->setFrameRate(60.0f);
-  settings->disableFrameRate();
 #if defined(CINDER_MSW)
   settings->enableConsoleWindow(true);
 #endif
-  ci::gl::enableVerticalSync(false);
 }
 
 void LeapShell::setup()
@@ -405,8 +403,25 @@ void LeapShell::draw()
   }
 }
 
+ci::Vec2f getScaledSizeWithAspect(const ci::Vec2f& windowSize, const ci::Vec2f& imageSize, float scale) {
+  const float windowAspect = windowSize.y / windowSize.x;
+  const float imageAspect = imageSize.y / imageSize.x;
+  float width, height;
+  if (windowAspect > imageAspect) {
+    // window is relatively taller than image, need to enlarge y more
+    height = scale * windowSize.y;
+    width = height / imageAspect;
+  } else {
+    // image is relatively taller than window, need to enlarge x more
+    width = scale * windowSize.x;
+    height = width * imageAspect;
+  }
+  return ci::Vec2f(width, height);
+}
+
 void LeapShell::resize()
 {
+  const float SCALE_FACTOR = 1.2f; // must be a bit larger than 1.0 to ensure parallax is OK
   updateGlobals();
   Globals::handsFbo = ci::gl::Fbo(static_cast<int>(Globals::windowWidth), static_cast<int>(Globals::windowHeight));
   glViewport(0, 0, static_cast<int>(Globals::windowWidth), static_cast<int>(Globals::windowHeight));
@@ -437,7 +452,28 @@ void LeapShell::resize()
       srcBytes += srcRowBytes;
     }
     m_render->update_background(surface);
-  }
+#else
+  ci::Surface8u surface = loadImage(loadResource(RES_WINTER_JPG));
+
+  //ci::Vec2i size = surface.getSize();
+  const ci::Vec2f windowSize(static_cast<float>(Globals::windowWidth), static_cast<float>(Globals::windowHeight));
+  const ci::Vec2f imageSize(static_cast<float>(surface.getWidth()), static_cast<float>(surface.getHeight()));
+  const ci::Vec2f scaledSize = getScaledSizeWithAspect(windowSize, imageSize, SCALE_FACTOR);
+
+  const float croppedX = std::min(static_cast<float>(SCALE_FACTOR*Globals::windowWidth), scaledSize.x);
+  const float croppedY = std::min(static_cast<float>(SCALE_FACTOR*Globals::windowHeight), scaledSize.y);
+  const ci::Vec2i croppedSize(static_cast<int>(croppedX), static_cast<int>(croppedY));
+
+  const float diffX = (scaledSize.x - croppedX)/SCALE_FACTOR;
+  const float diffY = (scaledSize.y - croppedY)/SCALE_FACTOR;
+
+  ci::Area origArea = surface.getBounds();
+  origArea.x1 += static_cast<int>(diffX/2.0f);
+  origArea.x2 -= static_cast<int>(diffX/2.0f);
+  origArea.y1 += static_cast<int>(diffY/2.0f);
+  origArea.y2 -= static_cast<int>(diffY/2.0f);
+
+  m_render->update_background(ci::ip::resizeCopy(surface, origArea, croppedSize));
 #endif
 }
 

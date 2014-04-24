@@ -15,3 +15,4 @@
 #define RES_HANDS_VERT_GLSL                   CINDER_RESOURCE( ../resources/, shaders/hands-vert.glsl, 131, GLSL )
 
 // images
+#define RES_WINTER_JPG                        CINDER_RESOURCE( ../resources/, images/winter.jpg, 140, JPG )

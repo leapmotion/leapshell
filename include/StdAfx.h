@@ -17,6 +17,7 @@
 #include <cinder/Thread.h>
 #include <cinder/ImageIo.h>
 #include <cinder/Timeline.h>
+#include <cinder/ip/Resize.h>
 
 // leap
 #include "Leap.h"
