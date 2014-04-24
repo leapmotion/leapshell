@@ -1,7 +1,7 @@
 #include "StdAfx.h"
 #include "FileSystemNode.h"
 #if defined(CINDER_COCOA)
-#include "NSImageExt.h"
+#include <QuickLook/QuickLook.h>
 #endif
 #if !defined(CINDER_MSW)
 #include <sys/stat.h>
@@ -94,9 +94,11 @@ void FileSystemNode::child_nodes (std::function<bool(const std::shared_ptr<Hiera
         boost::filesystem::directory_iterator endIter; // default construction yields past-the-end
         for (boost::filesystem::directory_iterator iter(path); iter != endIter; ++iter) {
           const std::string filename = iter->path().filename().string();
+#if !defined(CINDER_MSW)
           if (filename.empty() || filename[0] == '.') { // Ignore dot (hidden) files for now
             continue;
           }
+#endif
           try {
             auto node = std::shared_ptr<FileSystemNode>(new FileSystemNode(*iter, parent));
             node->icon();
@@ -122,29 +124,40 @@ ci::Surface8u FileSystemNode::icon()
     m_surfaceAttempted = true;
 #if defined(CINDER_COCOA)
     @autoreleasepool {
-      const CGFloat scale = [[NSScreen mainScreen] backingScaleFactor];
-      NSString* path = [NSString stringWithUTF8String:m_path.string().c_str()];
-      NSSize size = NSMakeSize(256/scale, 256/scale);
-      NSImage* nsImage = [[[NSWorkspace sharedWorkspace] iconForFile:path] imageByScalingProportionallyToSize:size fill:NO];
-      NSBitmapImageRep* nsBitmapImageRep = [NSBitmapImageRep imageRepWithData:[nsImage TIFFRepresentation]];
-      NSBitmapFormat nsBitmapFormat = [nsBitmapImageRep bitmapFormat];
-      unsigned char *srcBytes = [nsBitmapImageRep bitmapData];
+      NSString* filename = [NSString stringWithUTF8String:m_path.string().c_str()];
+      NSURL* filenameURL = [NSURL fileURLWithPath:filename];
+      NSDictionary* options = [NSDictionary dictionaryWithObject:[NSNumber numberWithBool:NO] forKey:(NSString *)kQLThumbnailOptionIconModeKey];
+      NSImage* nsImage = nil;
+      const size_t dimension = 256;
+      CGFloat xoffset = 0, yoffset = 0, width = dimension, height = dimension;
 
-      size = [nsImage pixelSize];
-      const int32_t width = static_cast<int32_t>(size.width);
-      const int32_t height = static_cast<int32_t>(size.height);
-      const int32_t srcRowBytes = [nsBitmapImageRep bytesPerRow];
-
-      m_surface = ci::Surface8u(width, height, true,
-          (nsBitmapFormat & NSAlphaFirstBitmapFormat) ? ci::SurfaceChannelOrder::ARGB :ci::SurfaceChannelOrder::RGBA);
-      m_surface.setPremultiplied((nsBitmapFormat & NSAlphaNonpremultipliedBitmapFormat) == 0);
+      m_surface = ci::Surface8u(dimension, dimension, true, ci::SurfaceChannelOrder::RGBA);
       unsigned char* dstBytes = m_surface.getData();
-      int32_t dstRowBytes = width*4;
 
-      for (int32_t i = 0; i < height; i++) {
-        ::memcpy(dstBytes, srcBytes, dstRowBytes);
-        dstBytes += dstRowBytes;
-        srcBytes += srcRowBytes;
+      CGImageRef cgImageRef = QLThumbnailImageCreate(kCFAllocatorDefault, (CFURLRef)filenameURL, CGSizeMake(dimension, dimension), (CFDictionaryRef)options);
+      if (cgImageRef) {
+        width = CGImageGetWidth(cgImageRef);
+        height = CGImageGetHeight(cgImageRef);
+        xoffset = (dimension - width)/2.0;
+        yoffset = (dimension - height)/2.0;
+        nsImage = [[NSImage alloc] initWithCGImage:cgImageRef size:NSZeroSize];
+        CFRelease(cgImageRef);
+      } else {
+        nsImage = [[NSWorkspace sharedWorkspace] iconForFile:filename];
+      }
+      if (nsImage) {
+        ::memset(dstBytes, 0, dimension*dimension*4);
+        CGColorSpaceRef rgb = CGColorSpaceCreateDeviceRGB();
+        CGContextRef cgContextRef =
+          CGBitmapContextCreate(dstBytes, dimension, dimension, 8, 4*dimension, rgb, kCGImageAlphaPremultipliedLast);
+        NSGraphicsContext* gc = [NSGraphicsContext graphicsContextWithGraphicsPort:cgContextRef flipped:NO];
+        [NSGraphicsContext saveGraphicsState];
+        [NSGraphicsContext setCurrentContext:gc];
+        [nsImage drawInRect:NSMakeRect(xoffset, yoffset, width, height)];
+        [NSGraphicsContext restoreGraphicsState];
+        CGContextRelease(cgContextRef);
+        CGColorSpaceRelease(rgb);
+        m_surface.setPremultiplied(true);
       }
     }
 #else
@@ -219,9 +232,18 @@ bool FileSystemNode::open(std::vector<std::string> const& parameters) const
     } else {
       urlPathRef = CFURLCreateFromFileSystemRepresentation(kCFAllocatorDefault, reinterpret_cast<const UInt8 *>(path.data()), path.size(), false);
     }
-    CFStringRef stringRef = CFURLCopyPath(urlPathRef);
+    bool isAppBundle = false;
+    bool isOtherBundle = false;
 
-    if (CFStringHasSuffix(stringRef, CFSTR(".app"))) {
+    @autoreleasepool {
+      NSString* filename = [NSString stringWithUTF8String:m_path.string().c_str()];
+      NSBundle* bundle = [NSBundle bundleWithPath:filename];
+      NSString* execPath = [bundle executablePath];
+      NSString* resourcePath = [bundle resourcePath];
+      isAppBundle = (execPath != nil);
+      isOtherBundle = (resourcePath != nil && ![filename isEqualToString:resourcePath]);
+    }
+    if (isAppBundle) {
       FSRef fsRef;
 
       if (CFURLGetFSRef(urlPathRef, &fsRef)) {
@@ -244,10 +266,9 @@ bool FileSystemNode::open(std::vector<std::string> const& parameters) const
         }
       }
       opened = true; // Whether or not we actually launched the app, don't go snooping into .app files
-    } else if (!boost::filesystem::is_directory(m_path)) {
+    } else if (isOtherBundle || !boost::filesystem::is_directory(m_path)) {
       opened = !LSOpenCFURLRef(urlPathRef, 0);
     }
-    CFRelease(stringRef);
     CFRelease(urlPathRef);
 #endif
   }

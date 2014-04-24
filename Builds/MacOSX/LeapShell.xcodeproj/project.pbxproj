@@ -12,6 +12,7 @@
 		00B784B40FF439BC000DE1D7 /* AudioToolbox.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 00B784B00FF439BC000DE1D7 /* AudioToolbox.framework */; };
 		00B784B50FF439BC000DE1D7 /* AudioUnit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 00B784B10FF439BC000DE1D7 /* AudioUnit.framework */; };
 		00B784B60FF439BC000DE1D7 /* CoreAudio.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 00B784B20FF439BC000DE1D7 /* CoreAudio.framework */; };
+		4E185CA8190970E8009728D7 /* QuickLook.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 4E185CA7190970E8009728D7 /* QuickLook.framework */; };
 		4E8D8B4519008B3D00A2003E /* CinderFbxStream.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4E8D8B3F19008B3D00A2003E /* CinderFbxStream.cpp */; };
 		4E8D8B4619008B3D00A2003E /* GLBuffer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4E8D8B4019008B3D00A2003E /* GLBuffer.cpp */; };
 		4E8D8B4719008B3D00A2003E /* LeapListener.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4E8D8B4119008B3D00A2003E /* LeapListener.cpp */; };
@@ -62,6 +63,7 @@
 		29B97324FDCFA39411CA2CEA /* AppKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AppKit.framework; path = /System/Library/Frameworks/AppKit.framework; sourceTree = "<absolute>"; };
 		29B97325FDCFA39411CA2CEA /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = /System/Library/Frameworks/Foundation.framework; sourceTree = "<absolute>"; };
 		4422BBF42B584FBA8C8ECD34 /* Shell.cpp */ = {isa = PBXFileReference; explicitFileType = sourcecode.cpp.objcpp; name = Shell.cpp; path = ../../src/Shell.cpp; sourceTree = "<group>"; };
+		4E185CA7190970E8009728D7 /* QuickLook.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = QuickLook.framework; path = System/Library/Frameworks/QuickLook.framework; sourceTree = SDKROOT; };
 		4E8D8B3719008B1000A2003E /* CinderFbxStream.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = CinderFbxStream.h; path = ../../include/CinderFbxStream.h; sourceTree = "<group>"; };
 		4E8D8B3819008B1000A2003E /* DataTypes.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = DataTypes.h; path = ../../include/DataTypes.h; sourceTree = "<group>"; };
 		4E8D8B3919008B1000A2003E /* GLBuffer.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = GLBuffer.h; path = ../../include/GLBuffer.h; sourceTree = "<group>"; };
@@ -95,7 +97,6 @@
 		4EB187611900B87700803428 /* Interaction.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Interaction.cpp; path = ../../src/Interaction.cpp; sourceTree = "<group>"; };
 		4EB187651900FD4500803428 /* FileSystemNode.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = FileSystemNode.h; path = ../../include/FileSystemNode.h; sourceTree = "<group>"; };
 		4EB187661900FD5200803428 /* FileSystemNode.cpp */ = {isa = PBXFileReference; explicitFileType = sourcecode.cpp.objcpp; fileEncoding = 4; name = FileSystemNode.cpp; path = ../../src/FileSystemNode.cpp; sourceTree = "<group>"; };
-		4EEBAB251901D40600A7ED74 /* NSImageExt.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = NSImageExt.h; path = ../../include/NSImageExt.h; sourceTree = "<group>"; };
 		5323E6B10EAFCA74003A9687 /* CoreVideo.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreVideo.framework; path = /System/Library/Frameworks/CoreVideo.framework; sourceTree = "<absolute>"; };
 		5323E6B50EAFCA7E003A9687 /* QTKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = QTKit.framework; path = /System/Library/Frameworks/QTKit.framework; sourceTree = "<absolute>"; };
 		6D885E5CC2C64D9895194BC6 /* Resources.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = Resources.h; path = ../../include/Resources.h; sourceTree = "<group>"; };
@@ -110,6 +111,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				4E185CA8190970E8009728D7 /* QuickLook.framework in Frameworks */,
 				8D11072F0486CEB800E47090 /* Cocoa.framework in Frameworks */,
 				0091D8F90E81B9330029341E /* OpenGL.framework in Frameworks */,
 				5323E6B20EAFCA74003A9687 /* CoreVideo.framework in Frameworks */,
@@ -203,7 +205,6 @@
 		29B97315FDCFA39411CA2CEA /* Headers */ = {
 			isa = PBXGroup;
 			children = (
-				4EEBAB251901D40600A7ED74 /* NSImageExt.h */,
 				4EB187651900FD4500803428 /* FileSystemNode.h */,
 				4EB187601900B86D00803428 /* Interaction.h */,
 				4EB1875B1900A92500803428 /* Tile.h */,
@@ -240,6 +241,7 @@
 		29B97323FDCFA39411CA2CEA /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
+				4E185CA7190970E8009728D7 /* QuickLook.framework */,
 				4E8D8B4C1900911000A2003E /* libLeap.dylib */,
 				1058C7A0FEA54F0111CA2CBB /* Linked Frameworks */,
 				1058C7A2FEA54F0111CA2CBB /* Other Frameworks */,

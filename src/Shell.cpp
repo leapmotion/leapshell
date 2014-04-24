@@ -3,9 +3,6 @@
 #include "Shell.h"
 #include "Globals.h"
 #include "Value.h"
-#if defined(CINDER_COCOA)
-#include "NSImageExt.h"
-#endif
 
 // this doesn't test all possible types, but tests that different types are
 // distinguishable via Value::compare, and that values of the same type are
@@ -427,31 +424,40 @@ void LeapShell::resize()
   glViewport(0, 0, static_cast<int>(Globals::windowWidth), static_cast<int>(Globals::windowHeight));
 #if defined(CINDER_COCOA)
   @autoreleasepool {
-    NSScreen* screen = getDisplay()->getNsScreen();
-    const CGFloat scale = [[NSScreen mainScreen] backingScaleFactor];
-    NSSize size = NSMakeSize(Globals::windowWidth/scale, Globals::windowHeight/scale);
-    NSImage* nsImage = [[[NSImage alloc] initWithContentsOfURL:[[NSWorkspace sharedWorkspace] desktopImageURLForScreen:screen]]  imageByScalingProportionallyToSize:size fill:YES];
-    NSBitmapImageRep* nsBitmapImageRep = [NSBitmapImageRep imageRepWithData:[nsImage TIFFRepresentation]];
-    NSBitmapFormat nsBitmapFormat = [nsBitmapImageRep bitmapFormat];
-    unsigned char *srcBytes = [nsBitmapImageRep bitmapData];
+    int scaledWindowWidth = static_cast<int>(Globals::windowWidth*SCALE_FACTOR);
+    int scaledWindowHeight = static_cast<int>(Globals::windowHeight*SCALE_FACTOR);
 
-    size = [nsImage pixelSize];
-    const int32_t width = static_cast<int32_t>(size.width);
-    const int32_t height = static_cast<int32_t>(size.height);
-    const int32_t srcRowBytes = [nsBitmapImageRep bytesPerRow];
-
-    ci::Surface8u surface = ci::Surface8u(width, height, true,
-        (nsBitmapFormat & NSAlphaFirstBitmapFormat) ? ci::SurfaceChannelOrder::ARGB :ci::SurfaceChannelOrder::RGBA);
-    surface.setPremultiplied((nsBitmapFormat & NSAlphaNonpremultipliedBitmapFormat) == 0);
+    ci::Surface8u surface = ci::Surface8u(scaledWindowWidth, scaledWindowHeight, true, ci::SurfaceChannelOrder::RGBA);
+    surface.setPremultiplied(true);
     unsigned char* dstBytes = surface.getData();
-    int32_t dstRowBytes = width*4;
+    ::memset(dstBytes, 0, scaledWindowWidth*scaledWindowHeight*4);
 
-    for (int32_t i = 0; i < height; i++) {
-      ::memcpy(dstBytes, srcBytes, dstRowBytes);
-      dstBytes += dstRowBytes;
-      srcBytes += srcRowBytes;
+    NSScreen* screen = getDisplay()->getNsScreen();
+    NSImage* nsImage = [[NSImage alloc] initWithContentsOfURL:[[NSWorkspace sharedWorkspace] desktopImageURLForScreen:screen]];
+    if (nsImage) {
+      CGColorSpaceRef rgb = CGColorSpaceCreateDeviceRGB();
+      CGContextRef cgContextRef =
+        CGBitmapContextCreate(dstBytes, scaledWindowWidth, scaledWindowHeight, 8, 4*scaledWindowWidth, rgb, kCGImageAlphaPremultipliedLast);
+      NSGraphicsContext* gc = [NSGraphicsContext graphicsContextWithGraphicsPort:cgContextRef flipped:NO];
+      [NSGraphicsContext saveGraphicsState];
+      [NSGraphicsContext setCurrentContext:gc];
+
+      const NSSize imageSize = [nsImage size];
+      const CGFloat scaleX = scaledWindowWidth/imageSize.width;
+      const CGFloat scaleY = scaledWindowHeight/imageSize.height;
+      const CGFloat scale = (scaleX >= scaleY) ? scaleX : scaleY;
+      const NSSize scaledImageSize = NSMakeSize(imageSize.width * scale, imageSize.height * scale);
+      const CGFloat xoffset = (imageSize.width*scaleX - scaledImageSize.width)/2.0;
+      const CGFloat yoffset = (imageSize.height*scaleY - scaledImageSize.height)/2.0;
+      const NSRect rect = NSMakeRect(xoffset, yoffset, scaledImageSize.width, scaledImageSize.height);
+
+      [nsImage drawInRect:rect];
+      [NSGraphicsContext restoreGraphicsState];
+      CGContextRelease(cgContextRef);
+      CGColorSpaceRelease(rgb);
     }
     m_render->update_background(surface);
+  }
 #else
   ci::Surface8u surface = loadImage(loadResource(RES_WINTER_JPG));
 
