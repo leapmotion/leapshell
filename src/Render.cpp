@@ -15,12 +15,15 @@ void Render::update_background(const ci::Surface8u& surface) {
 void Render::draw(const View& view) const {
   if (m_background) {
     // compute ratios for where we are in the bounds
-    const Vector2 cameraMin = view.GetPositionLayout()->GetCameraMinBounds();
-    const Vector2 cameraMax = view.GetPositionLayout()->GetCameraMaxBounds();
-    const double sizeX = cameraMax.x() - cameraMin.x();
-    const double sizeY = cameraMax.y() - cameraMin.y();
-    const double ratioX = sizeX > 0 ? (view.LookAt().x() - cameraMin.x()) / sizeX : 0.5;
-    const double ratioY = sizeY > 0 ? (view.LookAt().y() - cameraMin.y()) / sizeY : 0.5;
+    static const double PADDING_SCALE = 1.5; // to compensate for rubber banding
+    Vector2 cameraMin = view.GetPositionLayout()->GetCameraMinBounds();
+    Vector2 cameraMax = view.GetPositionLayout()->GetCameraMaxBounds();
+    const Vector2 center = (cameraMax + cameraMin)/2.0;
+    cameraMin = PADDING_SCALE * (cameraMin - center) + center;
+    cameraMax = PADDING_SCALE * (cameraMax - center) + center;
+    const Vector2 size = cameraMax - cameraMin;
+    const double ratioX = size.x() > 0 ? (view.LookAt().x() - cameraMin.x()) / size.x() : 0.5;
+    const double ratioY = size.y() > 0 ? (view.LookAt().y() - cameraMin.y()) / size.y() : 0.5;
 
     // compute the amount of wiggle room available for parallax
     const float diffX = static_cast<float>(m_background->getWidth() - Globals::windowWidth);
@@ -31,8 +34,7 @@ void Render::draw(const View& view) const {
     m_background->bind();
     glPushMatrix();
     glTranslated((ratioX-1.0)*diffX, (ratioY-1.0)*diffY, 0);
-    glScaled(1.1, 1.1, 1.1); // add some more padding to compensate for rubber banding
-    ci::gl::drawSolidRect(ci::Rectf(0.0f, 0.0f, m_background->getWidth(), m_background->getHeight()));
+    ci::gl::drawSolidRect(ci::Rectf(0.0f, 0.0f, static_cast<float>(m_background->getWidth()), static_cast<float>(m_background->getHeight())));
     glPopMatrix();
     m_background->unbind();
   }
