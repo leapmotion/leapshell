@@ -4,7 +4,7 @@
 #include "View.h"
 #include "Globals.h"
 
-const double View::CAM_DISTANCE_FROM_PLANE = 50.0; // mm
+const double View::CAM_DISTANCE_FROM_PLANE = 70.0; // mm
 const double View::TILE_PULL_THRESHOLD = 20.0; // mm
 const double View::PUSH_THRESHOLD = 1.1 * CAM_DISTANCE_FROM_PLANE; // mm
 const double View::MIN_TIME_BETWEEN_SWITCH = 1.5; // in seconds, how much time must elapse between changes in navigation
@@ -43,7 +43,7 @@ View::View(std::shared_ptr<NavigationState> const &ownerNavigationState)
 {
   resetView();
   m_up = Vector3::UnitY();
-  m_fov = 80.0f;
+  m_fov = 60.0f;
   m_near = 1.0f;
   m_far = 500.0f;
   m_transitionOpacity = 1.0f;
@@ -95,7 +95,7 @@ void View::PerFrameUpdate () {
     Tile& tile = *it;
     maxTileZ = std::max(maxTileZ, tile.Position().z());
     maxActivation = std::max(maxActivation, tile.Activation());
-    if (tile.Activation() > 0.95f && tile.Position().z() > TILE_PULL_THRESHOLD) {
+    if (tile.Activation() > 0.5f && tile.Position().z() > TILE_PULL_THRESHOLD) {
       selectedNode = tile.Node();
       break;
     }

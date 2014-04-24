@@ -20,6 +20,8 @@ public:
 
   double LastUpdateTime() const { return m_lastUpdateTime; }
 
+  Leap::Hand LeapHand() { return m_Hand; }
+
   static void SetMeshSources(const ci::DataSourceRef& leftSource, const ci::DataSourceRef& rightSource);
   static void SetAttributeIndices(int vertexIdx, int normalIdx, int colorIdx);
 

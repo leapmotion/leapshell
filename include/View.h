@@ -73,6 +73,8 @@ public:
   ForceVector& Forces() { return m_forces; }
   float TransitionOpacity() const { return m_transitionOpacity; }
   const std::string& SearchFilter() const { return m_searchFilter; }
+  const std::shared_ptr<SizeLayout>& GetSizeLayout() const { return m_sizeLayout; }
+  const std::shared_ptr<PositionLayout>& GetPositionLayout() const { return m_positionLayout; }
 
   // setters
   void SetSizeLayout(const std::shared_ptr<SizeLayout>& sizeLayout);

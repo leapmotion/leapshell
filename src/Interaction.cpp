@@ -29,7 +29,7 @@ void Interaction::Update(const Leap::Frame& frame) {
   }
 
   // scale the force by a constant in each direction to make sure we're not flying around the screen
-  static const Vector3 FORCE_POSITION_SCALE(-0.065, -0.065, -0.12);
+  static const Vector3 FORCE_POSITION_SCALE(-0.08, -0.08, -0.2);
   force = FORCE_POSITION_SCALE.cwiseProduct(force);
 
   // make speeding up have less lag than slowing down
@@ -76,10 +76,12 @@ void Interaction::applyInfluenceToTiles(const Leap::HandList& hands, View& view)
   static const Vector3 normal = Vector3::UnitZ();
   for (int i=0; i<hands.count(); i++) {
     const Vector3 position = hands[i].palmPosition().toVector3<Vector3>() + Globals::LEAP_OFFSET;
+    const Vector3 palmPoint = position + lookat;
     const Vector3 direction = (position - origin).normalized();
 
     // calculate grab/pinch strength
-    const float grabMultiplier = SmootherStep(std::max(hands[i].grabStrength(), hands[i].pinchStrength()));
+    const float grabStrength = std::max(hands[i].grabStrength(), hands[i].pinchStrength());
+    const float grabMultiplier = SmootherStep(grabStrength * grabStrength);
 
     // find the closest tile to the projection point
     float closestDistSq = MAX_INFLUENCE_DISTANCE_SQ;
@@ -103,15 +105,15 @@ void Interaction::applyInfluenceToTiles(const Leap::HandList& hands, View& view)
     // increase activation for closest tile to hand
     if (closestTile && Globals::haveSeenOpenHand) {
       // only allow activating the tile if it's already highlighted
-      const float newActivation = closestTile->Highlight() > 0.95f ? grabMultiplier : 0.0f;
+      const float newActivation = closestTile->Highlight() * grabMultiplier; // > 0.95f ? grabMultiplier : 0.0f;
       closestTile->UpdateActivation(newActivation, Tile::ACTIVATION_SMOOTH);
       closestTile->UpdateHighlight(std::min(1.0f, closestTile->Highlight() + INFLUENCE_CHANGE_SPEED), Tile::ACTIVATION_SMOOTH);
       
       // calculate pulling force from hand
-      Vector3 grabDelta = closestTile->Activation()*(hitPoint - closestTile->OrigPosition());
+      Vector3 grabDelta = closestTile->Activation()*(palmPoint - closestTile->OrigPosition());
       static const double PULL_SPEED = 0.5;
       grabDelta -= PULL_SPEED*closestTile->Activation()*hands[i].palmPosition().z*direction;
-      closestTile->UpdateGrabDelta(grabDelta, Tile::ACTIVATION_SMOOTH);
+      closestTile->UpdateGrabDelta(grabDelta, Tile::GRABDELTA_SMOOTH);
 
       // add repulsive force from this tile to others
       forces.push_back(Force(closestTile->Position(), closestTile->Activation() + closestTile->Highlight()));
@@ -124,7 +126,7 @@ void Interaction::applyInfluenceToTiles(const Leap::HandList& hands, View& view)
     if (tile.LastActivationUpdateTime() != Globals::curTimeSeconds) {
       tile.UpdateActivation(std::max(0.0f, tile.Activation() - INFLUENCE_CHANGE_SPEED), Tile::ACTIVATION_SMOOTH);
       tile.UpdateHighlight(std::max(0.0f, tile.Highlight() - INFLUENCE_CHANGE_SPEED), Tile::ACTIVATION_SMOOTH);
-      tile.UpdateGrabDelta(Vector3::Zero(), Tile::ACTIVATION_SMOOTH);
+      tile.UpdateGrabDelta(INFLUENCE_CHANGE_SPEED * tile.GrabDelta(), Tile::GRABDELTA_SMOOTH);
       if (tile.Highlight() > 0.01f) {
         forces.push_back(Force(tile.Position(), tile.Activation() + tile.Highlight()));
       }

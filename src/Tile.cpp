@@ -4,7 +4,8 @@
 
 const float Tile::POSITION_SMOOTH = 0.85f;
 const float Tile::SIZE_SMOOTH = 0.85f;
-const float Tile::ACTIVATION_SMOOTH = 0.95f;
+const float Tile::ACTIVATION_SMOOTH = 0.975f;
+const float Tile::GRABDELTA_SMOOTH = 0.75f;
 
 Tile::Tile() {
   m_positionSmoother.value = Vector3::Zero();
@@ -39,13 +40,16 @@ double Tile::LastActivationUpdateTime() const {
 }
 
 float Tile::SwitchWarmupFactor() {
-  static const float FADE_IN_TIME = 0.25f;
-  return SmootherStep(static_cast<float>(std::min(1.0, (Globals::curTimeSeconds - Globals::lastTileSwitchTime)/FADE_IN_TIME)));
+  return SmootherStep(static_cast<float>(std::min(1.0, (Globals::curTimeSeconds - Globals::lastTileSwitchTime)/Globals::SWITCH_TIME)));
 }
 
 float Tile::TransitionWarmupFactor() {
   static const float FADE_IN_TIME = 0.25f;
-  return SmootherStep(static_cast<float>(std::min(1.0, (Globals::curTimeSeconds - Globals::lastTileTransitionTime)/FADE_IN_TIME)));
+  return SmootherStep(static_cast<float>(std::min(1.0, (Globals::curTimeSeconds - Globals::lastTileTransitionTime)/Globals::TRANSITION_TIME)));
+}
+
+Vector3 Tile::GrabDelta() const {
+  return m_grabDeltaSmoother.value;
 }
 
 void Tile::UpdateSize(const Vector3& newSize, float smooth) {

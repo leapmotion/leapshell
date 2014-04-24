@@ -4,6 +4,8 @@
 double Globals::windowWidth = 0;
 double Globals::windowHeight = 0;
 double Globals::aspectRatio = 0;
+const float Globals::TRANSITION_TIME = 0.5f;
+const float Globals::SWITCH_TIME = 0.25f;
 double Globals::curTimeSeconds = 0;
 double Globals::lastTileSwitchTime = 0;
 double Globals::lastTileTransitionTime = 0;

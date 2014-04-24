@@ -9,6 +9,7 @@ public:
   static const float POSITION_SMOOTH;
   static const float SIZE_SMOOTH;
   static const float ACTIVATION_SMOOTH;
+  static const float GRABDELTA_SMOOTH;
   Tile();
 
   // getters
@@ -20,6 +21,7 @@ public:
   double LastActivationUpdateTime() const;
   static float SwitchWarmupFactor();
   static float TransitionWarmupFactor();
+  Vector3 GrabDelta() const;
 
   Vector3 m_phantomPosition;
 

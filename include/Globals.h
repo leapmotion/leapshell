@@ -9,6 +9,8 @@ public:
   static double aspectRatio;
 
   // timing info
+  static const float TRANSITION_TIME; // from layout changes
+  static const float SWITCH_TIME; // from sorting changes 
   static double curTimeSeconds;
   static double lastTileSwitchTime;
   static double lastTileTransitionTime;
@@ -26,8 +28,6 @@ public:
 
   // leap
   static const Vector3 LEAP_OFFSET;
-
-  // restricting interaction
   static bool haveSeenOpenHand;
 
 };

@@ -153,13 +153,21 @@ void Render::drawTile(const Tile& tile, const ForceVector& forces, float transit
 }
 
 void Render::drawHands(const View& view) const {
+  MeshHand& handL = view.LeftHand();
+  MeshHand& handR = view.RightHand();
+
+#if 0
+  const Vector3 lPos = handL.LeapHand().palmPosition().toVector3<Vector3>() + Globals::LEAP_OFFSET + view.LookAt();
+  ci::gl::drawSphere(ToVec3f(lPos), 5, 30);
+
+  const Vector3 rPos = handR.LeapHand().palmPosition().toVector3<Vector3>() + Globals::LEAP_OFFSET + view.LookAt();
+  ci::gl::drawSphere(ToVec3f(rPos), 5, 30);
+#endif
+
   const ci::Area origViewport = ci::gl::getViewport();
   ci::gl::setViewport(Globals::handsFbo.getBounds());
   Globals::handsFbo.bindFramebuffer();
   ci::gl::clear(ci::ColorA(0.0f, 0.0f, 0.0f, 0.0f));
-
-  MeshHand& handL = view.LeftHand();
-  MeshHand& handR = view.RightHand();
 
   ci::gl::GlslProg& shader = Globals::handsShader;
   shader.bind();
@@ -167,7 +175,8 @@ void Render::drawHands(const View& view) const {
   GLint normal = shader.getAttribLocation("normal");
   GLint color = shader.getAttribLocation("color");
   MeshHand::SetAttributeIndices(vertex, normal, color);
-  ci::Matrix44f transformMatrix = ci::Matrix44f::identity();
+  ci::Matrix44f transformMatrix = ci::gl::getModelView();
+  transformMatrix.translate(ToVec3f(view.LookAt()));
   ci::Matrix44f normalMatrix = transformMatrix.inverted().transposed();
   ci::Matrix44f projectionMatrix = ci::gl::getProjection();
 
@@ -186,8 +195,8 @@ void Render::drawHands(const View& view) const {
   shader.uniform("rimStart", 0.5f);
   shader.uniform("innerTransparency", 1.0f);
 
-  handL.SetScale(0.75f);
-  handR.SetScale(0.75f);
+  handL.SetScale(0.6f);
+  handR.SetScale(0.6f);
 
   static const float FADE_TIME = 1.0f;
 
