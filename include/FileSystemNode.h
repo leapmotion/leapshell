@@ -55,6 +55,7 @@ private:
   std::shared_ptr<FileSystemNode> m_parent;
   ci::Surface8u m_surface;
   bool m_isLeaf;
+  bool m_surfaceAttempted;
 };
 
 #endif

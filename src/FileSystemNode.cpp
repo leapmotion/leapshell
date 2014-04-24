@@ -33,6 +33,7 @@ FileSystemNode::FileSystemNode(boost::filesystem::path&& path, std::shared_ptr<F
 
 void FileSystemNode::init(std::shared_ptr<FileSystemNode> const& parent)
 {
+  m_surfaceAttempted = false;
   bool hasParent = (!parent && m_path.has_parent_path());
 #if defined(CINDER_MSW)
   auto path = m_path.wstring();
@@ -117,7 +118,8 @@ std::string FileSystemNode::path() const
 
 ci::Surface8u FileSystemNode::icon()
 {
-  if (!m_surface) {
+  if (!m_surfaceAttempted) {
+    m_surfaceAttempted = true;
 #if defined(CINDER_COCOA)
     @autoreleasepool {
       const CGFloat scale = [[NSScreen mainScreen] backingScaleFactor];
@@ -146,66 +148,46 @@ ci::Surface8u FileSystemNode::icon()
       }
     }
 #else
-    // Really, any folder will do--we use GetDesktopFolder because it's always available to serve requests.
-    CComPtr<IShellFolder> pshf;
-    HRESULT hr = SHGetDesktopFolder(&pshf);
-    if (!FAILED(hr)) {
-      // Need to construct a descriptor list which describes the path to the file we are trying to find:
-      PIDLIST_RELATIVE pidl;
-      wchar_t* filename = (wchar_t*)(m_path.wstring().c_str());
-      hr = pshf->ParseDisplayName(nullptr, nullptr, filename, nullptr, &pidl, nullptr);
+    CComPtr<IShellItem> shellItem;
+    std::wstring pathNative = m_path.wstring();
 
-      // Now we need to make an extractor for the file we're interested in.  The extractor allows us to generate
-      // an HICON from a given file, and does most of the work of format parsing for us.
-      CComPtr<IExtractIcon> iconExtract;
-      hr = pshf->GetUIObjectOf(nullptr, 1, (LPCITEMIDLIST*) &pidl, __uuidof(IExtractIcon), nullptr, (void**) &iconExtract);
-
-      // Figure out the location of the icon file and the index into that file where our icon is stored
-      wchar_t iconFile[MAX_PATH];
-      int index = 0;
-      UINT flags = 0;
-      hr = iconExtract->GetIconLocation(0, iconFile, MAX_PATH, &index, &flags);
-
-      // Pull the icon out of storage by its file name and index.
-      HICON hLarge;
-      hr = iconExtract->Extract(iconFile, index, &hLarge, nullptr, 0);
-
-      int dimension = 32;
-
-      // Create an HBITMAP which we can query from a backing DIB:
-      HANDLE hSection = CreateFileMapping(INVALID_HANDLE_VALUE, nullptr, PAGE_READWRITE, 0, 4*dimension*dimension, nullptr); void* pBits;
-
-      // We need to create a backing surface to render the HICON.  This surface will be backed by the section we
-      // just created, and have a maximum dimension of 256x256 pixels.
-      BITMAPINFO bmi = {};
-      bmi.bmiHeader.biSize = sizeof(bmi);
-      bmi.bmiHeader.biWidth = dimension;
-      bmi.bmiHeader.biHeight = -dimension;
-      bmi.bmiHeader.biPlanes = 1;
-      bmi.bmiHeader.biBitCount = 32;
-      bmi.bmiHeader.biCompression = BI_RGB;
-      HBITMAP hBmp = CreateDIBSection(nullptr, &bmi, 0, &pBits, hSection, 0);
-      CloseHandle(hSection);
-
-      // Create a DC that we will use to render the HICON.  We select the backing surface into the DC so that draw
-      // operations on the DC have a place to go.
-      HDC hCompatDC = CreateCompatibleDC(nullptr);
-      SelectObject(hCompatDC, hBmp);
-
-      // This is where our icon is actually drawn.  Up to this point, we've only been preparing for this render.
-      DrawIcon(hCompatDC, 0, 0, hLarge);
-
-      // At this point, pBits contains a pointer to the image starting at address zero, with a width of 256 pixels,
-      // and a pixel depth of 32 bits.
-
-      m_surface = ci::Surface8u(dimension, dimension, true, ci::SurfaceChannelOrder::ARGB);
-      m_surface.setPremultiplied(true);
-      ::memcpy(m_surface.getData(), pBits, dimension*dimension*4);
-
-      DestroyIcon(hLarge);
-      DeleteDC(hCompatDC);
-      DeleteObject(hBmp);
+    for (size_t i=0; i<pathNative.size(); i++) {
+      if (pathNative[i] == '/') {
+        pathNative[i] = '\\';
+      }
     }
+
+    SHCreateItemFromParsingName(pathNative.c_str(), nullptr, __uuidof(IShellItem), (void**)&shellItem);
+    if (!shellItem) {
+      return m_surface;
+    }
+
+    CComQIPtr<IShellItemImageFactory> imgFactory = shellItem;
+    if (!imgFactory) {
+      return m_surface;
+    }
+
+    size_t dimension = 256;
+    SIZE sz = { dimension, dimension };
+    HBITMAP thumbnail;
+    imgFactory->GetImage(
+      sz,
+      SIIGBF_BIGGERSIZEOK | SIIGBF_RESIZETOFIT,
+      &thumbnail
+    );
+
+    std::vector<char> memory(dimension * dimension * 4);
+    GetBitmapBits(thumbnail, memory.size(), memory.data());
+    DeleteObject(thumbnail);
+
+    const void* pBits = memory.data();
+
+    // At this point, pBits contains a pointer to the image starting at address zero, with a width of 256 pixels,
+    // and a pixel depth of 32 bits.
+
+    m_surface = ci::Surface8u(dimension, dimension, true, ci::SurfaceChannelOrder::BGRA);
+    m_surface.setPremultiplied(false);
+    ::memcpy(m_surface.getData(), pBits, dimension*dimension*4);
 #endif
   }
   return m_surface;

@@ -57,6 +57,7 @@
 #include <SoftPub.h>
 #include <CommDlg.h>
 #include <UserEnv.h>
+#include <Thumbcache.h>
 #elif __APPLE__
 #include <ApplicationServices/ApplicationServices.h>
 #endif
