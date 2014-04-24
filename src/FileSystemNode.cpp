@@ -33,8 +33,18 @@ FileSystemNode::FileSystemNode(boost::filesystem::path&& path, std::shared_ptr<F
 
 void FileSystemNode::init(std::shared_ptr<FileSystemNode> const& parent)
 {
-  m_parent = (!parent && m_path.has_parent_path()) ?
-             std::shared_ptr<FileSystemNode>(new FileSystemNode(m_path.parent_path())) : parent;
+  bool hasParent = (!parent && m_path.has_parent_path());
+#if defined(CINDER_MSW)
+  const auto path = m_path.wstring();
+  const auto pathLength = path.length();
+  if (pathLength <= 3) {
+    if (pathLength == 2 && path[1] == ':') {
+      m_path += '/';
+    }
+    hasParent = false;
+  }
+#endif
+  m_parent = hasParent ? std::shared_ptr<FileSystemNode>(new FileSystemNode(m_path.parent_path())) : parent;
   set_metadata_as("name", m_path.filename().string());
   std::string extension = m_path.extension().string();
   if (!extension.empty() && extension[0] == '.') {
