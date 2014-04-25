@@ -207,7 +207,7 @@ Vector3 View::clampCameraPosition(const Vector3& position) const {
   max.y() -= extraHeight;
 
   // make sure min and max are valid after adding height from camera bounds
-  for (int i=0; i<3; i++) {
+  for (int i=0; i<2; i++) {
     if (min[i] > max[i]) {
       double middle = 0.5 * (min[i] + max[i]);
       min[i] = middle;
