@@ -121,6 +121,7 @@ std::string FileSystemNode::path() const
 ci::Surface8u FileSystemNode::icon()
 {
   if (!m_surfaceAttempted) {
+    const size_t dimension = 256;
     m_surfaceAttempted = true;
 #if defined(CINDER_COCOA)
     @autoreleasepool {
@@ -128,7 +129,6 @@ ci::Surface8u FileSystemNode::icon()
       NSURL* filenameURL = [NSURL fileURLWithPath:filename];
       NSDictionary* options = [NSDictionary dictionaryWithObject:[NSNumber numberWithBool:NO] forKey:(NSString *)kQLThumbnailOptionIconModeKey];
       NSImage* nsImage = nil;
-      const size_t dimension = 256;
       CGFloat xoffset = 0, yoffset = 0, width = dimension, height = dimension;
 
       m_surface = ci::Surface8u(dimension, dimension, true, ci::SurfaceChannelOrder::RGBA);
@@ -180,7 +180,6 @@ ci::Surface8u FileSystemNode::icon()
       return m_surface;
     }
 
-    size_t dimension = 256;
     SIZE sz = { dimension, dimension };
     HBITMAP thumbnail;
     imgFactory->GetImage(
@@ -189,18 +188,10 @@ ci::Surface8u FileSystemNode::icon()
       &thumbnail
     );
 
-    std::vector<char> memory(dimension * dimension * 4);
-    GetBitmapBits(thumbnail, memory.size(), memory.data());
-    DeleteObject(thumbnail);
-
-    const void* pBits = memory.data();
-
-    // At this point, pBits contains a pointer to the image starting at address zero, with a width of 256 pixels,
-    // and a pixel depth of 32 bits.
-
     m_surface = ci::Surface8u(dimension, dimension, true, ci::SurfaceChannelOrder::BGRA);
-    m_surface.setPremultiplied(false);
-    ::memcpy(m_surface.getData(), pBits, dimension*dimension*4);
+    m_surface.setPremultiplied(true);
+    GetBitmapBits(thumbnail, 4*dimension*dimension, m_surface.getData());
+    DeleteObject(thumbnail);
 #endif
   }
   return m_surface;
