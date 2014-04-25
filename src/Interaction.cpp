@@ -9,27 +9,27 @@ Interaction::Interaction() {
 }
 
 void Interaction::Update(const Leap::Frame& frame) {
-  const Leap::HandList hands = frame.hands();
-  const double deltaTime = m_prevFrame.isValid() ? TIME_STAMP_TICKS_TO_SECS * (frame.timestamp() - m_prevFrame.timestamp()) : 0.0f;
   const double timeSeconds = TIME_STAMP_TICKS_TO_SECS * frame.timestamp();
+  m_frame = frame;
+
+  updateHandInfos();
+  cleanupHandInfos();
 
   // accumulate force from all hands
   Vector3 force(Vector3::Zero());
-  for (int i=0; i<hands.count(); i++) {
-    if (!hands[i].isValid()) {
-      continue;
-    }
+  for (HandInfoMap::iterator it = m_handInfos.begin(); it != m_handInfos.end(); ++it) {
+    const HandInfo& info = it->second;
     if (!Globals::haveSeenOpenHand) {
-      const float grabPinchStrength = SmootherStep(std::max(hands[i].grabStrength(), hands[i].pinchStrength()));
+      const float grabPinchStrength = info.GrabPinchStrength();
       if (grabPinchStrength < 0.1f) {
         Globals::haveSeenOpenHand = true;
       }
     }
-    force += forceFromHand(hands[i]);
+    force += forceFromHand(info);
   }
 
   // scale the force by a constant in each direction to make sure we're not flying around the screen
-  static const Vector3 FORCE_POSITION_SCALE(-0.08, -0.08, -0.2);
+  static const Vector3 FORCE_POSITION_SCALE(-0.1, -0.1, -0.25);
   force = FORCE_POSITION_SCALE.cwiseProduct(force);
 
   // make speeding up have less lag than slowing down
@@ -38,8 +38,6 @@ void Interaction::Update(const Leap::Frame& frame) {
   const Vector3 prevForce = m_panForce.value;
   const float curSmooth = force.squaredNorm() > prevForce.squaredNorm() ? SPEED_UP_SMOOTH : SLOW_DOWN_SMOOTH;
   m_panForce.Update(force, timeSeconds, curSmooth);
-
-  m_prevFrame = frame;
 }
 
 void Interaction::UpdateView(View &view) {
@@ -49,7 +47,7 @@ void Interaction::UpdateView(View &view) {
   // apply the force to the view camera
   view.ApplyVelocity(m_panForce.value, Globals::curTimeSeconds, deltaTime);
 
-  const Leap::HandList hands = m_prevFrame.hands();
+  const Leap::HandList hands = m_frame.hands();
   for (int i=0; i<hands.count(); i++) {
     if (hands[i].isLeft()) {
       view.LeftHand().Update(hands[i], Globals::curTimeSeconds);
@@ -57,12 +55,35 @@ void Interaction::UpdateView(View &view) {
       view.RightHand().Update(hands[i], Globals::curTimeSeconds);
     }
   }
-  applyInfluenceToTiles(hands, view);
+
+  applyInfluenceToTiles(view);
 
   m_lastViewUpdateTime = Globals::curTimeSeconds;
 }
 
-void Interaction::applyInfluenceToTiles(const Leap::HandList& hands, View& view) {
+void Interaction::updateHandInfos() {
+  const Leap::HandList hands = m_frame.hands();
+  for (int i=0; i<hands.count(); i++) {
+    const int id = hands[i].id();
+    m_handInfos[id].Update(hands[i]);
+  }
+}
+
+void Interaction::cleanupHandInfos() {
+  static const float MAX_HAND_INFO_AGE = 0.1f; // seconds since last update until hand info gets cleaned up
+  HandInfoMap::iterator it = m_handInfos.begin();
+  while (it != m_handInfos.end()) {
+    const HandInfo& cur = it->second;
+    const float curAge = fabs(static_cast<float>(Globals::curTimeSeconds - cur.LastUpdateTime()));
+    if (curAge > MAX_HAND_INFO_AGE) {
+      m_handInfos.erase(it++);
+    } else {
+      ++it;
+    }
+  }
+}
+
+void Interaction::applyInfluenceToTiles(View& view) {
   static const float MAX_INFLUENCE_DISTANCE_SQ = 30 * 30;
   static const float INFLUENCE_CHANGE_SPEED = 0.5f;
 
@@ -74,14 +95,16 @@ void Interaction::applyInfluenceToTiles(const Leap::HandList& hands, View& view)
 
   static const Vector3 origin = View::CAM_DISTANCE_FROM_PLANE * Vector3::UnitZ();
   static const Vector3 normal = Vector3::UnitZ();
-  for (int i=0; i<hands.count(); i++) {
-    const Vector3 position = hands[i].palmPosition().toVector3<Vector3>() + Globals::LEAP_OFFSET;
+  for (HandInfoMap::iterator it = m_handInfos.begin(); it != m_handInfos.end(); ++it) {
+    Leap::Hand hand = it->second.Hand();
+    const float handGrabPinch = it->second.GrabPinchStrength();
+    const Vector3 position = hand.palmPosition().toVector3<Vector3>() + Globals::LEAP_OFFSET;
     const Vector3 palmPoint = position + lookat;
     const Vector3 direction = (position - origin).normalized();
 
     // calculate grab/pinch strength
     static const float MIN_STRENGTH_TO_GRAB = 0.95f;
-    const float grabStrength = std::min(1.0f, (std::max(hands[i].grabStrength(), hands[i].pinchStrength()) - (1.0f-MIN_STRENGTH_TO_GRAB))/MIN_STRENGTH_TO_GRAB);
+    const float grabStrength = std::min(1.0f, (handGrabPinch - (1.0f-MIN_STRENGTH_TO_GRAB))/MIN_STRENGTH_TO_GRAB);
     const float grabMultiplier = SmootherStep(grabStrength * grabStrength * grabStrength * grabStrength);
 
     // find the closest tile to the projection point
@@ -113,7 +136,7 @@ void Interaction::applyInfluenceToTiles(const Leap::HandList& hands, View& view)
       // calculate pulling force from hand
       Vector3 grabDelta = closestTile->Activation()*(palmPoint - closestTile->OrigPosition());
       static const double PULL_SPEED = 0.5;
-      grabDelta -= PULL_SPEED*closestTile->Activation()*hands[i].palmPosition().z*direction;
+      grabDelta -= PULL_SPEED*closestTile->Activation()*hand.palmPosition().z*direction;
       closestTile->UpdateGrabDelta(grabDelta, Tile::GRABDELTA_SMOOTH);
 
       // add repulsive force from this tile to others
@@ -135,13 +158,15 @@ void Interaction::applyInfluenceToTiles(const Leap::HandList& hands, View& view)
   }
 }
 
-Vector3 Interaction::forceFromHand(const Leap::Hand& hand) {
+Vector3 Interaction::forceFromHand(const HandInfo& handInfo) {
   static float HAND_WARMUP_TIME = 2.0f;
+  const Leap::Hand& hand = handInfo.Hand();
   const float warmupMultiplier = SmootherStep(std::min(1.0f, hand.timeVisible() / HAND_WARMUP_TIME));
   Vector3 totalForce = Vector3::Zero();
   const Vector3 handDirection = hand.direction().toVector3<Vector3>();
   const Leap::FingerList fingers = hand.fingers();
   const float grabMultiplier = 1.0f - SmootherStep(std::max(hand.grabStrength(), hand.pinchStrength()));
+  const Vector3 modifiedVelocity = handInfo.ModifiedVelocity();
   for (int i=0; i<fingers.count(); i++) {
     if (!fingers[i].isExtended()) {
       continue;
@@ -149,10 +174,10 @@ Vector3 Interaction::forceFromHand(const Leap::Hand& hand) {
     const Vector3 direction = fingers[i].direction().toVector3<Vector3>();
     const Vector3 velocity = fingers[i].tipVelocity().toVector3<Vector3>();
     const Vector3 normVelocity = velocity.normalized();
-    const double ratio = normVelocity.x()*normVelocity.x() + normVelocity.y()*normVelocity.y();
+
     const double dot = std::abs(normVelocity.dot(hand.palmNormal().toVector3<Vector3>()));
     const double match = direction.dot(handDirection);
-    const Vector3 modifiedVelocity(ratio*velocity.x(), ratio*velocity.y(), (1.0-ratio)*velocity.z());
+
     totalForce += warmupMultiplier * warmupMultiplier * grabMultiplier * grabMultiplier * grabMultiplier * dot * dot * match * modifiedVelocity;
   }
   return totalForce;
