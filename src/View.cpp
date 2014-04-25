@@ -129,22 +129,26 @@ void View::PerFrameUpdate () {
       m_ownerNavigationState->navigateDown(selectedNode);
     }
   } else if ((m_position.z() > PUSH_THRESHOLD) && (Globals::curTimeSeconds - m_lastSwitchTime) > MIN_TIME_BETWEEN_SWITCH) {
-    resetView();
     Globals::lastTileSwitchTime = Globals::curTimeSeconds;
     Globals::lastTileTransitionTime = Globals::curTimeSeconds;
     m_additionalZ.Update(-CAM_DISTANCE_FROM_PLANE, Globals::curTimeSeconds, 0.1f);
     m_lastSwitchTime = Globals::curTimeSeconds;
     m_ownerNavigationState->navigateUp();
+    resetView();
   } else {
     m_additionalZ.Update(0.0, Globals::curTimeSeconds, 0.965f);
   }
 }
 
 Vector2 View::ViewSizeAtPlane() const {
-  const float aspect = static_cast<float>(Globals::windowHeight / Globals::windowWidth);
-  const float vFov = aspect * m_fov;
-  const double width = 2.0 * m_position.z() * std::tan(DEGREES_TO_RADIANS * 0.5 * m_fov);
-  const double height = 2.0 * m_position.z() * std::tan(DEGREES_TO_RADIANS * 0.5 * vFov);
+  /*
+  Note: Cinder has a bug in calculating Projection frustum (CameraPersp::calcProjection)
+  "horizFovDegrees" is actually vertical FOV, so the below math will need to change when using horizontal FOV
+  */
+  const float aspect = static_cast<float>(Globals::windowWidth / Globals::windowHeight);
+  const float hFov = aspect * m_fov;
+  const double width = 2.0 * m_position.z() * std::tan(DEGREES_TO_RADIANS * 0.5 * hFov);
+  const double height = 2.0 * m_position.z() * std::tan(DEGREES_TO_RADIANS * 0.5 * m_fov);
   return Vector2(width, height);
 }
 
@@ -195,11 +199,22 @@ void View::resetView() {
 
 Vector3 View::clampCameraPosition(const Vector3& position) const {
   Vector3 result(position);
-  const float extraHeight = static_cast<float>(ViewSizeAtPlane().y()/2.0);
+  static const float EXTRA_HEIGHT_SCALE = 0.95f; // scale factor to leave some room at the edge
+  const float extraHeight = EXTRA_HEIGHT_SCALE * static_cast<float>(ViewSizeAtPlane().y()/2.0);
   Vector2 min = m_positionLayout->GetCameraMinBounds();
   Vector2 max = m_positionLayout->GetCameraMaxBounds();
   min.y() += extraHeight;
   max.y() -= extraHeight;
+
+  // make sure min and max are valid after adding height from camera bounds
+  for (int i=0; i<3; i++) {
+    if (min[i] > max[i]) {
+      double middle = 0.5 * (min[i] + max[i]);
+      min[i] = middle;
+      max[i] = middle;
+    }
+  }
+
   result.head<2>() = result.head<2>().cwiseMax(min).cwiseMin(max);
   return result;
 }

@@ -4,7 +4,7 @@
 
 const float Tile::POSITION_SMOOTH = 0.85f;
 const float Tile::SIZE_SMOOTH = 0.85f;
-const float Tile::ACTIVATION_SMOOTH = 0.9f;
+const float Tile::ACTIVATION_SMOOTH = 0.925f;
 const float Tile::GRABDELTA_SMOOTH = 0.75f;
 
 Tile::Tile() {

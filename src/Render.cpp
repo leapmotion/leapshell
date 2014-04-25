@@ -281,7 +281,7 @@ float Render::getSearchFilterMult(const std::string& name, const std::string& se
 }
 
 bool Render::tileInView(const Vector2& viewSize, const Vector3& lookat, const Vector3& tilePosition) {
-  static const double VIEW_SCALE = 2.5;
+  static const double VIEW_SCALE = 1.25;
   const double maxX = VIEW_SCALE * viewSize.x() * 0.5;
   const double maxY = VIEW_SCALE * viewSize.y() * 0.5;
   const Vector3 pos = tilePosition - lookat;
