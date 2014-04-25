@@ -95,7 +95,7 @@ void Interaction::applyInfluenceToTiles(const Leap::HandList& hands, View& view)
       }
       hitPoint += lookat;
 
-      const float distSq = static_cast<float>((hitPoint - tile.Position()).squaredNorm());
+      const float distSq = (1.0f - tile.Activation()) * static_cast<float>((hitPoint - tile.Position()).squaredNorm());
       if (distSq < closestDistSq) {
         closestTile = &tile;
         closestDistSq = distSq;
