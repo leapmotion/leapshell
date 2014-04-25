@@ -34,7 +34,7 @@ void Interaction::Update(const Leap::Frame& frame) {
 
   // make speeding up have less lag than slowing down
   static const float SPEED_UP_SMOOTH = 0.8f;
-  static const float SLOW_DOWN_SMOOTH = 0.95f;
+  static const float SLOW_DOWN_SMOOTH = 0.975f;
   const Vector3 prevForce = m_panForce.value;
   const float curSmooth = force.squaredNorm() > prevForce.squaredNorm() ? SPEED_UP_SMOOTH : SLOW_DOWN_SMOOTH;
   m_panForce.Update(force, timeSeconds, curSmooth);
