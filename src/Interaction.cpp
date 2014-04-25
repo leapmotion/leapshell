@@ -105,7 +105,7 @@ void Interaction::applyInfluenceToTiles(const Leap::HandList& hands, View& view)
     // increase activation for closest tile to hand
     if (closestTile && Globals::haveSeenOpenHand) {
       // only allow activating the tile if it's already highlighted
-      const float newActivation = closestTile->Highlight() * grabMultiplier; // > 0.95f ? grabMultiplier : 0.0f;
+      const float newActivation = closestTile->Highlight() * grabMultiplier;
       closestTile->UpdateActivation(newActivation, Tile::ACTIVATION_SMOOTH);
       closestTile->UpdateHighlight(std::min(1.0f, closestTile->Highlight() + INFLUENCE_CHANGE_SPEED), Tile::ACTIVATION_SMOOTH);
       

@@ -6,6 +6,7 @@
 #include "GLBuffer.h"
 
 Render::Render() {
+  m_parallaxSmoother.Update(Vector2::Zero(), 0.0, 0.5f);
 }
 
 void Render::update_background(const ci::Surface8u& surface) {
@@ -16,6 +17,7 @@ void Render::draw(const View& view) const {
   if (m_background) {
     // compute ratios for where we are in the bounds
     static const double PADDING_SCALE = 1.5; // to compensate for rubber banding
+    static const float PARALLAX_SMOOTH = 0.85f;
     Vector2 cameraMin = view.GetPositionLayout()->GetCameraMinBounds();
     Vector2 cameraMax = view.GetPositionLayout()->GetCameraMaxBounds();
     const Vector2 center = (cameraMax + cameraMin)/2.0;
@@ -26,14 +28,14 @@ void Render::draw(const View& view) const {
     const double ratioY = size.y() > 0 ? (view.LookAt().y() - cameraMin.y()) / size.y() : 0.5;
 
     // compute the amount of wiggle room available for parallax
-    const float diffX = static_cast<float>(m_background->getWidth() - Globals::windowWidth);
-    const float diffY = static_cast<float>(m_background->getHeight() - Globals::windowHeight);
+    Vector2 parallax((ratioX-1.0)*(m_background->getWidth()-Globals::windowWidth), (ratioY-1.0)*(m_background->getHeight() - Globals::windowHeight));
+    m_parallaxSmoother.Update(parallax, Globals::curTimeSeconds, PARALLAX_SMOOTH);
 
     // draw a rectangle translated by the current ratios
     ci::gl::color(ci::ColorA::white());
     m_background->bind();
     glPushMatrix();
-    glTranslated((ratioX-1.0)*diffX, (ratioY-1.0)*diffY, 0);
+    glTranslated(m_parallaxSmoother.value.x(), m_parallaxSmoother.value.y(), 0);
     ci::gl::drawSolidRect(ci::Rectf(0.0f, 0.0f, static_cast<float>(m_background->getWidth()), static_cast<float>(m_background->getHeight())));
     glPopMatrix();
     m_background->unbind();
