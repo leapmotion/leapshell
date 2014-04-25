@@ -113,12 +113,10 @@ void View::PerFrameUpdate () {
   m_transitionOpacity = std::min(pullOpacity, pushOpacity);
 
   if (selectedNode) {
-    if (selectedNode->is_leaf()) {
-      if (selectedNode->open()) {
-        selectedTile->ResetActivation();
-        Globals::haveSeenOpenHand = false;
-      }
-    } else if ((Globals::curTimeSeconds - m_lastSwitchTime) > MIN_TIME_BETWEEN_SWITCH) {
+    if (selectedNode->open()) {
+      selectedTile->ResetActivation();
+      Globals::haveSeenOpenHand = false;
+    } else if (!selectedNode->is_leaf() && (Globals::curTimeSeconds - m_lastSwitchTime) > MIN_TIME_BETWEEN_SWITCH) {
       resetView();
       Globals::lastTileSwitchTime = Globals::curTimeSeconds;
       Globals::lastTileTransitionTime = Globals::curTimeSeconds;
