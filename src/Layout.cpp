@@ -59,7 +59,7 @@ void GridLayout::UpdateTilePositions(const Range<TilePointerVector::iterator> &t
   const double halfWidth = m_width/2.0;
   const double halfHeight = m_height/2.0;
   double curWidth = -halfWidth;
-  double curHeight = halfHeight - inc/2.0;
+  double curHeight = -inc/2.0;
   int idx = 0;
   for (auto t = tiles; t.is_not_at_end(); ++t, ++idx) {
     if (updatePhantomPosition) {
@@ -77,11 +77,11 @@ void GridLayout::UpdateTilePositions(const Range<TilePointerVector::iterator> &t
 }
 
 Vector2 GridLayout::GetCameraMinBounds() const {
-  return Vector2(0, -m_height/2.0);
+  return Vector2(0, -m_height);
 }
 
 Vector2 GridLayout::GetCameraMaxBounds() const {
-  return Vector2(0, m_height/2.0);
+  return Vector2(0, 0);
 }
 
 // RingLayout
