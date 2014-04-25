@@ -140,6 +140,14 @@ void View::PerFrameUpdate () {
   }
 }
 
+Vector2 View::ViewSizeAtPlane() const {
+  const float aspect = static_cast<float>(Globals::windowHeight / Globals::windowWidth);
+  const float vFov = aspect * m_fov;
+  const double width = 2.0 * m_position.z() * std::tan(DEGREES_TO_RADIANS * 0.5 * m_fov);
+  const double height = 2.0 * m_position.z() * std::tan(DEGREES_TO_RADIANS * 0.5 * vFov);
+  return Vector2(width, height);
+}
+
 void View::SetSizeLayout(const std::shared_ptr<SizeLayout>& sizeLayout) {
   m_sizeLayout = sizeLayout;
 }
@@ -187,19 +195,13 @@ void View::resetView() {
 
 Vector3 View::clampCameraPosition(const Vector3& position) const {
   Vector3 result(position);
-  const float extraHeight = calcExtraHeightAtPlane();
+  const float extraHeight = static_cast<float>(ViewSizeAtPlane().y()/2.0);
   Vector2 min = m_positionLayout->GetCameraMinBounds();
   Vector2 max = m_positionLayout->GetCameraMaxBounds();
   min.y() += extraHeight;
   max.y() -= extraHeight;
   result.head<2>() = result.head<2>().cwiseMax(min).cwiseMin(max);
   return result;
-}
-
-float View::calcExtraHeightAtPlane() const {
-  const float aspect = static_cast<float>(Globals::windowHeight / Globals::windowWidth);
-  const float vFov = aspect * m_fov;
-  return static_cast<float>(m_position.z() * std::tan(DEGREES_TO_RADIANS * 0.5 * vFov));
 }
 
 float View::calcPullOpacity(double maxTileZ, float maxActivation) const {

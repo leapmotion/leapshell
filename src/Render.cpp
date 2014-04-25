@@ -14,6 +14,46 @@ void Render::update_background(const ci::Surface8u& surface) {
 }
 
 void Render::draw(const View& view) const {
+  drawBackground(view);
+
+  m_camera.lookAt(ToVec3f(view.Position()), ToVec3f(view.LookAt()), ToVec3f(view.Up()));
+  m_camera.setPerspective(view.FOV(), static_cast<float>(Globals::aspectRatio), view.Near(), view.Far());
+  ci::gl::setMatrices(m_camera);
+
+  // draw tiles
+  ci::gl::enableAlphaBlending();
+  const TileVector& tiles = view.Tiles();
+  const float transitionOpacity = view.TransitionOpacity();
+  const Vector2 viewSize = view.ViewSizeAtPlane();
+
+  // draw backmost tiles before all others
+  for (TileVector::const_iterator it = tiles.begin(); it != tiles.end(); ++it) {
+    const Tile& tile = *it;
+    if (tile.Position().z() < 0 && tile.Activation() > 0.01f) {
+      drawTile(tile, view.Forces(), transitionOpacity, view.SearchFilter());
+    }
+  }
+
+  // draw most of the tiles
+  for (TileVector::const_iterator it = tiles.begin(); it != tiles.end(); ++it) {
+    const Tile& tile = *it;
+    if (tile.Activation() <= 0.01f && tileInView(viewSize, view.LookAt(), tile.Position())) {
+      drawTile(tile, view.Forces(), transitionOpacity, view.SearchFilter());
+    }
+  }
+
+  // draw frontmost tiles after all others
+  for (TileVector::const_iterator it = tiles.begin(); it != tiles.end(); ++it) {
+    const Tile& tile = *it;
+    if (tile.Position().z() >= 0 && tile.Activation() > 0.01f) {
+      drawTile(tile, view.Forces(), transitionOpacity, view.SearchFilter());
+    }
+  }
+
+  drawHands(view);
+}
+
+void Render::drawBackground(const View& view) const {
   if (m_background) {
     // compute ratios for where we are in the bounds
     static const double PADDING_SCALE = 1.5; // to compensate for rubber banding
@@ -44,40 +84,6 @@ void Render::draw(const View& view) const {
     glPopMatrix();
     m_background->unbind();
   }
-  m_camera.lookAt(ToVec3f(view.Position()), ToVec3f(view.LookAt()), ToVec3f(view.Up()));
-  m_camera.setPerspective(view.FOV(), static_cast<float>(Globals::aspectRatio), view.Near(), view.Far());
-  ci::gl::setMatrices(m_camera);
-
-  // draw tiles
-  ci::gl::enableAlphaBlending();
-  const TileVector& tiles = view.Tiles();
-  const float transitionOpacity = view.TransitionOpacity();
-
-  // draw backmost tiles before all others
-  for (TileVector::const_iterator it = tiles.begin(); it != tiles.end(); ++it) {
-    const Tile& tile = *it;
-    if (tile.Position().z() < 0 && tile.Activation() > 0.01f) {
-      drawTile(tile, view.Forces(), transitionOpacity, view.SearchFilter());
-    }
-  }
-
-  // draw most of the tiles
-  for (TileVector::const_iterator it = tiles.begin(); it != tiles.end(); ++it) {
-    const Tile& tile = *it;
-    if (tile.Activation() < 0.01f) {
-      drawTile(tile, view.Forces(), transitionOpacity, view.SearchFilter());
-    }
-  }
-
-  // draw frontmost tiles after all others
-  for (TileVector::const_iterator it = tiles.begin(); it != tiles.end(); ++it) {
-    const Tile& tile = *it;
-    if (tile.Position().z() >= 0 && tile.Activation() > 0.01f) {
-      drawTile(tile, view.Forces(), transitionOpacity, view.SearchFilter());
-    }
-  }
-
-  drawHands(view);
 }
 
 void Render::drawTile(const Tile& tile, const ForceVector& forces, float transitionOpacity, const std::string& searchFilter) const {
@@ -249,7 +255,7 @@ ci::ColorA Render::blendColors(const ci::ColorA& c1, const ci::ColorA& c2, float
   const float g = blend*c1.g + (1.0f-blend)*c2.g;
   const float b = blend*c1.b + (1.0f-blend)*c2.b;
   const float a = blend*c1.a + (1.0f-blend)*c2.a;
-  return ci::ColorA(r, g, b, a);  
+  return ci::ColorA(r, g, b, a);
 }
 
 float Render::getSearchFilterMult(const std::string& name, const std::string& searchFilter, bool anywhere) {
@@ -272,4 +278,12 @@ float Render::getSearchFilterMult(const std::string& name, const std::string& se
     }
   }
   return 1.0f;
+}
+
+bool Render::tileInView(const Vector2& viewSize, const Vector3& lookat, const Vector3& tilePosition) {
+  static const double VIEW_SCALE = 2.5;
+  const double maxX = VIEW_SCALE * viewSize.x() * 0.5;
+  const double maxY = VIEW_SCALE * viewSize.y() * 0.5;
+  const Vector3 pos = tilePosition - lookat;
+  return ((pos.x() > -maxX) && (pos.x() < maxX) && (pos.y() > -maxY) && (pos.y() < maxY));
 }

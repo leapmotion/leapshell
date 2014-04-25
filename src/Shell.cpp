@@ -496,3 +496,4 @@ void LeapShell::setText(const std::string& text) {
 }
 
 CINDER_APP_BASIC(LeapShell, ci::app::RendererGl)
+//CINDER_APP_BASIC(LeapShell, ci::app::RendererGl(ci::app::RendererGl::AA_NONE))

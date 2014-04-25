@@ -75,6 +75,7 @@ public:
   const std::string& SearchFilter() const { return m_searchFilter; }
   const std::shared_ptr<SizeLayout>& GetSizeLayout() const { return m_sizeLayout; }
   const std::shared_ptr<PositionLayout>& GetPositionLayout() const { return m_positionLayout; }
+  Vector2 ViewSizeAtPlane() const;
 
   // setters
   void SetSizeLayout(const std::shared_ptr<SizeLayout>& sizeLayout);
@@ -104,7 +105,6 @@ private:
 
   void resetView();
   Vector3 clampCameraPosition(const Vector3& position) const;
-  float calcExtraHeightAtPlane() const;
   float calcPullOpacity(double maxTileZ, float maxActivation) const;
   float calcPushOpacity() const;
   static void ExtractPrioritizedKeysFrom(const HierarchyNode &node, SortingCriteria &sortingCriteria);
