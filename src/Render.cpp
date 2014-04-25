@@ -112,7 +112,7 @@ void Render::drawTile(const Tile& tile, const ForceVector& forces, float transit
 
   // draw border
   const ci::ColorA activeColor = ci::ColorA(0.9f, 0.9f, 0.9f, 0.65f * activation * opacity);
-  const ci::ColorA highlightColor = ci::ColorA(0.7f, 0.7f, 0.7f, 0.4f * highlight * opacity);
+  const ci::ColorA highlightColor = ci::ColorA(0.7f, 0.7f, 0.7f, 0.05f * highlight * opacity);
   const ci::ColorA blended = blendColors(activeColor, highlightColor, activation);
   ci::gl::color(blended);
   ci::gl::drawSolidRoundedRect(rect, 2.0, 10);

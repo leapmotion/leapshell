@@ -80,8 +80,9 @@ void Interaction::applyInfluenceToTiles(const Leap::HandList& hands, View& view)
     const Vector3 direction = (position - origin).normalized();
 
     // calculate grab/pinch strength
-    const float grabStrength = std::max(hands[i].grabStrength(), hands[i].pinchStrength());
-    const float grabMultiplier = SmootherStep(grabStrength * grabStrength);
+    static const float MIN_STRENGTH_TO_GRAB = 0.85f;
+    const float grabStrength = std::min(1.0f, (std::max(hands[i].grabStrength(), hands[i].pinchStrength()) - (1.0f-MIN_STRENGTH_TO_GRAB))/MIN_STRENGTH_TO_GRAB);
+    const float grabMultiplier = SmootherStep(grabStrength * grabStrength * grabStrength * grabStrength);
 
     // find the closest tile to the projection point
     float closestDistSq = MAX_INFLUENCE_DISTANCE_SQ;
