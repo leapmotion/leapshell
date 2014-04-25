@@ -181,8 +181,19 @@ void View::resetView() {
 
 Vector3 View::clampCameraPosition(const Vector3& position) const {
   Vector3 result(position);
-  result.head<2>() = result.head<2>().cwiseMax(m_positionLayout->GetCameraMinBounds()).cwiseMin(m_positionLayout->GetCameraMaxBounds());
+  const float extraHeight = calcExtraHeightAtPlane();
+  Vector2 min = m_positionLayout->GetCameraMinBounds();
+  Vector2 max = m_positionLayout->GetCameraMaxBounds();
+  min.y() += extraHeight;
+  max.y() -= extraHeight;
+  result.head<2>() = result.head<2>().cwiseMax(min).cwiseMin(max);
   return result;
+}
+
+float View::calcExtraHeightAtPlane() const {
+  const float aspect = static_cast<float>(Globals::windowHeight / Globals::windowWidth);
+  const float vFov = aspect * m_fov;
+  return static_cast<float>(m_position.z() * std::tan(DEGREES_TO_RADIANS * 0.5 * vFov));
 }
 
 void View::ExtractPrioritizedKeysFrom (const HierarchyNode &node, SortingCriteria &sortingCriteria) {

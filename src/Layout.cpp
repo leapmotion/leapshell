@@ -74,8 +74,6 @@ void GridLayout::UpdateTilePositions(const Range<TilePointerVector::iterator> &t
       curHeight -= inc;
     }
   }
-
-  m_height = (halfHeight - curHeight);
 }
 
 Vector2 GridLayout::GetCameraMinBounds() const {
