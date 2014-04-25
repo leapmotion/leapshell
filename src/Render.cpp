@@ -17,7 +17,7 @@ void Render::draw(const View& view) const {
   if (m_background) {
     // compute ratios for where we are in the bounds
     static const double PADDING_SCALE = 1.5; // to compensate for rubber banding
-    static const float PARALLAX_SMOOTH = 0.85f;
+    static const float PARALLAX_SMOOTH = 0.75f;
     Vector2 cameraMin = view.GetPositionLayout()->GetCameraMinBounds();
     Vector2 cameraMax = view.GetPositionLayout()->GetCameraMaxBounds();
     const Vector2 center = (cameraMax + cameraMin)/2.0;
@@ -27,9 +27,13 @@ void Render::draw(const View& view) const {
     const double ratioX = size.x() > 0 ? (view.LookAt().x() - cameraMin.x()) / size.x() : 0.5;
     const double ratioY = size.y() > 0 ? (view.LookAt().y() - cameraMin.y()) / size.y() : 0.5;
 
-    // compute the amount of wiggle room available for parallax
+    // compute the amount of parallax
     Vector2 parallax((ratioX-1.0)*(m_background->getWidth()-Globals::windowWidth), (ratioY-1.0)*(m_background->getHeight() - Globals::windowHeight));
-    m_parallaxSmoother.Update(parallax, Globals::curTimeSeconds, PARALLAX_SMOOTH);
+
+    // apply smoothing to parallax based on transition/switch time to smooth harsh jumps
+    const float multSinceTransition = static_cast<float>(1.0 - std::min(1.0, (Globals::curTimeSeconds - std::max(Globals::lastTileTransitionTime, Globals::lastTileSwitchTime))));
+    const float smooth = PARALLAX_SMOOTH + (1.0f-PARALLAX_SMOOTH)*multSinceTransition;
+    m_parallaxSmoother.Update(parallax, Globals::curTimeSeconds, smooth);
 
     // draw a rectangle translated by the current ratios
     ci::gl::color(ci::ColorA::white());
