@@ -41,6 +41,10 @@ inline bool RayPlaneIntersection(const Vector3& origin, const Vector3& direction
   return true;
 }
 
+inline float Clamp(float value) {
+  return std::min(1.0f, std::max(0.0f, value));
+}
+
 static const int TIME_STAMP_TICKS_PER_SEC = 1000000;
 static const double TIME_STAMP_SECS_TO_TICKS  = static_cast<double>(TIME_STAMP_TICKS_PER_SEC);
 static const double TIME_STAMP_TICKS_TO_SECS  = 1.0/TIME_STAMP_SECS_TO_TICKS;

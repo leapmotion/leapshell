@@ -5,7 +5,7 @@
 #include "Globals.h"
 
 const double View::CAM_DISTANCE_FROM_PLANE = 70.0; // mm
-const double View::TILE_PULL_THRESHOLD = 20.0; // mm
+const double View::TILE_PULL_THRESHOLD = 0.4 * CAM_DISTANCE_FROM_PLANE; // mm
 const double View::PUSH_THRESHOLD = 1.1 * CAM_DISTANCE_FROM_PLANE; // mm
 const double View::MIN_TIME_BETWEEN_SWITCH = 1.5; // in seconds, how much time must elapse between changes in navigation
 
@@ -107,8 +107,8 @@ void View::PerFrameUpdate () {
   float pullOpacity = 1.0f;
   float pushOpacity = 1.0f;
   if ((Globals::curTimeSeconds - m_lastSwitchTime) > MIN_TIME_BETWEEN_SWITCH) {
-    pullOpacity = SmootherStep(std::max(1.0f - maxActivation, (maxTileZ > TILE_PULL_THRESHOLD ? 0.0f : std::max(0.0f, std::min(1.0f, static_cast<float>(TILE_PULL_THRESHOLD - maxTileZ)/5.0f)))));
-    pushOpacity = SmootherStep(m_position.z() > PUSH_THRESHOLD ? 0.0f : std::max(0.0f, std::min(1.0f, static_cast<float>(PUSH_THRESHOLD - m_position.z())/3.0f)));
+    pullOpacity = calcPullOpacity(maxTileZ, maxActivation);
+    pushOpacity = calcPushOpacity();
   }
   m_transitionOpacity = std::min(pullOpacity, pushOpacity);
 
@@ -200,6 +200,26 @@ float View::calcExtraHeightAtPlane() const {
   const float aspect = static_cast<float>(Globals::windowHeight / Globals::windowWidth);
   const float vFov = aspect * m_fov;
   return static_cast<float>(m_position.z() * std::tan(DEGREES_TO_RADIANS * 0.5 * vFov));
+}
+
+float View::calcPullOpacity(double maxTileZ, float maxActivation) const {
+  static const float FADE_DISTANCE = 0.25f * static_cast<float>(TILE_PULL_THRESHOLD);
+  const float distFromPull = static_cast<float>(TILE_PULL_THRESHOLD - maxTileZ);
+  float pullOpacity = 0.0f;
+  if (maxTileZ < TILE_PULL_THRESHOLD) {
+    pullOpacity = Clamp(distFromPull/FADE_DISTANCE);
+  }
+  const float activationOpacity = 1.0f - maxActivation;
+  return SmootherStep(std::max(activationOpacity, pullOpacity));
+}
+
+float View::calcPushOpacity() const {
+  if (m_position.z() >= PUSH_THRESHOLD) {
+    return 0.0f;
+  }
+  static const float FADE_DISTANCE = 0.25f * static_cast<float>(PUSH_THRESHOLD - CAM_DISTANCE_FROM_PLANE);
+  const float distFromPush = static_cast<float>(PUSH_THRESHOLD - m_position.z());
+  return SmootherStep(Clamp(distFromPush/FADE_DISTANCE));
 }
 
 void View::ExtractPrioritizedKeysFrom (const HierarchyNode &node, SortingCriteria &sortingCriteria) {

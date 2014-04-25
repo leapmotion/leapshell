@@ -105,6 +105,8 @@ private:
   void resetView();
   Vector3 clampCameraPosition(const Vector3& position) const;
   float calcExtraHeightAtPlane() const;
+  float calcPullOpacity(double maxTileZ, float maxActivation) const;
+  float calcPushOpacity() const;
   static void ExtractPrioritizedKeysFrom(const HierarchyNode &node, SortingCriteria &sortingCriteria);
   static void RegenerateTilesAndTilePointers(const HierarchyNodeVector &nodes, TileVector &tiles, TilePointerVector &tilePointers, bool fadeIn);
 
