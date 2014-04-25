@@ -89,6 +89,7 @@ void View::PerFrameUpdate () {
   m_positionLayout->UpdateTilePositions(range(m_sortedTiles.begin(), m_sortedTiles.end()));
 
   std::shared_ptr<HierarchyNode> selectedNode(nullptr);
+  Tile* selectedTile = nullptr;
   double maxTileZ = 0;
   float maxActivation = 0;
   for (TileVector::iterator it = m_tiles.begin(); it != m_tiles.end(); ++it) {
@@ -97,6 +98,7 @@ void View::PerFrameUpdate () {
     maxActivation = std::max(maxActivation, tile.Activation());
     if (tile.Activation() > 0.5f && tile.Position().z() > TILE_PULL_THRESHOLD) {
       selectedNode = tile.Node();
+      selectedTile = &tile;
       break;
     }
   }
@@ -110,18 +112,22 @@ void View::PerFrameUpdate () {
   }
   m_transitionOpacity = std::min(pullOpacity, pushOpacity);
 
-  if (selectedNode &&
-     !selectedNode->open() &&
-     !selectedNode->is_leaf() &&
-     (Globals::curTimeSeconds - m_lastSwitchTime) > MIN_TIME_BETWEEN_SWITCH) {
-    resetView();
-    Globals::lastTileSwitchTime = Globals::curTimeSeconds;
-    Globals::lastTileTransitionTime = Globals::curTimeSeconds;
-    m_tiles.clear();
-    m_additionalZ.Update(CAM_DISTANCE_FROM_PLANE, Globals::curTimeSeconds, 0.1f);
-    m_lastSwitchTime = Globals::curTimeSeconds;
-    Globals::haveSeenOpenHand = false;
-    m_ownerNavigationState->navigateDown(selectedNode);
+  if (selectedNode) {
+    if (selectedNode->is_leaf()) {
+      if (selectedNode->open()) {
+        selectedTile->ResetActivation();
+        Globals::haveSeenOpenHand = false;
+      }
+    } else if ((Globals::curTimeSeconds - m_lastSwitchTime) > MIN_TIME_BETWEEN_SWITCH) {
+      resetView();
+      Globals::lastTileSwitchTime = Globals::curTimeSeconds;
+      Globals::lastTileTransitionTime = Globals::curTimeSeconds;
+      m_tiles.clear();
+      m_additionalZ.Update(CAM_DISTANCE_FROM_PLANE, Globals::curTimeSeconds, 0.1f);
+      m_lastSwitchTime = Globals::curTimeSeconds;
+      Globals::haveSeenOpenHand = false;
+      m_ownerNavigationState->navigateDown(selectedNode);
+    }
   } else if ((m_position.z() > PUSH_THRESHOLD) && (Globals::curTimeSeconds - m_lastSwitchTime) > MIN_TIME_BETWEEN_SWITCH) {
     resetView();
     Globals::lastTileSwitchTime = Globals::curTimeSeconds;

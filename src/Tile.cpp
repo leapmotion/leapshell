@@ -73,6 +73,11 @@ void Tile::UpdateGrabDelta(const Vector3& newGrabDelta, float smooth) {
   m_grabDeltaSmoother.Update(newGrabDelta, Globals::curTimeSeconds, smooth);
 }
 
+void Tile::ResetActivation() {
+  UpdateHighlight(0.0f, 0.01f);
+  UpdateActivation(0.0f, 0.01f);
+}
+
 struct TileOrder {
   TileOrder (std::vector<std::string> const &prioritizedKeys) : m_prioritizedKeys(prioritizedKeys) { }
   bool operator () (Tile *&lhs, Tile *&rhs) {

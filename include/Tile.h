@@ -35,6 +35,7 @@ public:
   void UpdateHighlight(float newHighlight, float smooth);
   void UpdateActivation(float newActivation, float smooth);
   void UpdateGrabDelta(const Vector3& newGrabDelta, float smooth);
+  void ResetActivation();
 
   EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 
