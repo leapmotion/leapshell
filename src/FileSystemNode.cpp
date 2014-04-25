@@ -10,12 +10,18 @@
 FileSystemNode::FileSystemNode(std::string const& path, std::shared_ptr<FileSystemNode> const& parent) :
   m_path(boost::filesystem::canonical(path))
 {
+  if (path == "/") {
+    m_path = "/";
+  }
   init(parent);
 }
 
 FileSystemNode::FileSystemNode(char const* path, std::shared_ptr<FileSystemNode> const& parent) :
   m_path(boost::filesystem::canonical(std::string(path)))
 {
+  if (std::string(path) == "/") {
+    m_path = "/";
+  }
   init(parent);
 }
 
@@ -35,23 +41,61 @@ void FileSystemNode::init(std::shared_ptr<FileSystemNode> const& parent)
 {
   m_surfaceAttempted = false;
   bool hasParent = (!parent && m_path.has_parent_path());
+  std::string name = m_path.filename().string();
 #if defined(CINDER_MSW)
   auto path = m_path.wstring();
   const auto pathLength = path.length();
   if (pathLength <= 3) {
-    if (pathLength >= 2 && path[1] == ':') {
+    if (pathLength >= 2 && path[1] == L':') {
       if (pathLength == 2) {
-        m_path += '\\';
-      } else if (path[2] == '/') {
-        path[2] = '\\';
+        m_path += L'\\';
+      } else if (path[2] == L'/') {
+        path[2] = L'\\';
         m_path = path;
+      }
+      WCHAR volumeLabel[MAX_PATH + 1] = L"";
+      if (GetVolumeInformationW(m_path.wstring().c_str(), volumeLabel, ARRAYSIZE(volumeLabel),
+                                nullptr, nullptr, nullptr, nullptr, 0)) {
+        std::wstring volumeName(volumeLabel);
+        if (volumeName.empty()) {
+          // Generate a description of the device since it doesn't have a label
+          UINT type = GetDriveType(m_path.wstring().c_str());
+          switch (type) {
+            default:
+            case DRIVE_UNKNOWN:
+              volumeName = L"Unknown Disk"; // Needs to be localied -- FIXME
+              break;
+            case DRIVE_NO_ROOT_DIR:
+              volumeName = L"Invalid Disk"; // Needs to be localied -- FIXME
+              break;
+            case DRIVE_REMOVABLE:
+              volumeName = L"Removable Disk"; // Needs to be localied -- FIXME
+              break;
+            case DRIVE_FIXED:
+              volumeName = L"Local Disk"; // Needs to be localied -- FIXME
+              break;
+            case DRIVE_REMOTE:
+              volumeName = L"Network Disk"; // Needs to be localied -- FIXME
+              break;
+            case DRIVE_CDROM:
+              volumeName = L"CD-ROM Disk"; // Needs to be localied -- FIXME
+              break;
+            case DRIVE_RAMDISK:
+              volumeName = L"RAM Disk"; // Needs to be localied -- FIXME
+              break;
+          }
+        }
+        volumeName += L" (" + path.substr(0, 2) + L")";
+        name = cinder::toUtf8(volumeName);
+      } else {
+        name = m_path.string();
       }
     }
     hasParent = false;
   }
 #endif
   m_parent = hasParent ? std::shared_ptr<FileSystemNode>(new FileSystemNode(m_path.parent_path())) : parent;
-  set_metadata_as("name", m_path.filename().string());
+  set_metadata_as("name", name);
   std::string extension = m_path.extension().string();
   if (!extension.empty() && extension[0] == '.') {
     extension.erase(0, 1); // Remove leading '.' in extension (e.g., '.txt' => 'txt')
@@ -90,6 +134,46 @@ void FileSystemNode::child_nodes (std::function<bool(const std::shared_ptr<Hiera
   auto parent = std::static_pointer_cast<FileSystemNode>(shared_from_this());
   auto thread = boost::thread([callback, parent, path] {
     try {
+#if defined(CINDER_MSW)
+      // On Windows, our root (/) node's children are the mounted volumes
+      if (path == "/") {
+        WCHAR volumeName[MAX_PATH + 1] = L"";
+        HANDLE handle = FindFirstVolumeW(volumeName, ARRAYSIZE(volumeName));
+        if (handle != INVALID_HANDLE_VALUE) {
+          do {
+            DWORD charCount = MAX_PATH + 1;
+            PWCHAR names = nullptr;
+            BOOL success = false;
+
+            for (;;) {
+              names = new WCHAR[charCount];
+              if (!names) {
+                break;
+              }
+              success = GetVolumePathNamesForVolumeName(volumeName, names, charCount, &charCount);
+              if (success || GetLastError() != ERROR_MORE_DATA) {
+                break;
+              }
+              delete [] names;
+              names = nullptr;
+            }
+            if (success) {
+              for (PWCHAR name = names; name[0] != L'\0'; name += wcslen(name) + 1) {
+                try {
+                  auto node = std::shared_ptr<FileSystemNode>(new FileSystemNode(boost::filesystem::path(name), parent));
+                  node->icon();
+                  if (!callback(node)) {
+                    break;
+                  }
+                } catch (...) {}
+              }
+            }
+            delete [] names;
+          } while (FindNextVolumeW(handle, volumeName, ARRAYSIZE(volumeName)));
+          FindVolumeClose(handle);
+        }
+      } else
+#endif
       if (boost::filesystem::is_directory(path)) {
         boost::filesystem::directory_iterator endIter; // default construction yields past-the-end
         for (boost::filesystem::directory_iterator iter(path); iter != endIter; ++iter) {
@@ -115,7 +199,13 @@ void FileSystemNode::child_nodes (std::function<bool(const std::shared_ptr<Hiera
 
 std::string FileSystemNode::path() const
 {
-  return m_path.string();
+  const std::string path = m_path.string();
+#if defined(CINDER_MSW)
+  if (path == "/") {
+    return "This PC"; // FIXME
+  }
+#endif
+  return path;
 }
 
 ci::Surface8u FileSystemNode::icon()
