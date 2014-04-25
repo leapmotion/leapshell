@@ -236,7 +236,7 @@ bool FileSystemNode::open(std::vector<std::string> const& parameters) const
     bool isOtherBundle = false;
 
     @autoreleasepool {
-      NSString* filename = [NSString stringWithUTF8String:path.c_str()];
+      NSString* filename = [NSString stringWithUTF8String:boost::filesystem::canonical(m_path).c_str()];
       NSBundle* bundle = [NSBundle bundleWithPath:filename];
       NSString* execPath = [bundle executablePath];
       NSString* resourcePath = [bundle resourcePath];
