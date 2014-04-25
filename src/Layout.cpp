@@ -59,6 +59,9 @@ void GridLayout::UpdateTilePositions(const Range<TilePointerVector::iterator> &t
   const double halfWidth = m_width/2.0;
   const double halfHeight = m_height/2.0;
   double curWidth = -halfWidth;
+  if (NUM_ROWS == 1) {
+    curWidth = -(inc * tiles.length())/2.0 + inc/2.0;
+  }
   double curHeight = -inc/2.0;
   int idx = 0;
   for (auto t = tiles; t.is_not_at_end(); ++t, ++idx) {
