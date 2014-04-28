@@ -451,7 +451,7 @@ void LeapShell::resize()
       const CGFloat yoffset = (imageSize.height*scaleY - scaledImageSize.height)/2.0;
       const NSRect rect = NSMakeRect(xoffset, yoffset, scaledImageSize.width, scaledImageSize.height);
 
-      [nsImage drawInRect:rect];
+      [nsImage drawInRect:rect fromRect:NSZeroRect operation:NSCompositeSourceOver fraction:1.0];
       [NSGraphicsContext restoreGraphicsState];
       CGContextRelease(cgContextRef);
       CGColorSpaceRelease(rgb);

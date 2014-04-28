@@ -243,7 +243,7 @@ ci::Surface8u FileSystemNode::icon()
         NSGraphicsContext* gc = [NSGraphicsContext graphicsContextWithGraphicsPort:cgContextRef flipped:NO];
         [NSGraphicsContext saveGraphicsState];
         [NSGraphicsContext setCurrentContext:gc];
-        [nsImage drawInRect:NSMakeRect(xoffset, yoffset, width, height)];
+        [nsImage drawInRect:NSMakeRect(xoffset, yoffset, width, height) fromRect:NSZeroRect operation:NSCompositeSourceOver fraction:1.0];
         [NSGraphicsContext restoreGraphicsState];
         CGContextRelease(cgContextRef);
         CGColorSpaceRelease(rgb);
