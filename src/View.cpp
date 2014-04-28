@@ -103,12 +103,14 @@ void View::PerFrameUpdate () {
     }
   }
 
+  const bool haveParent = !!(m_ownerNavigationState->currentLocation()->parent());
+
   // calculate a fade when about to change navigation state
   float pullOpacity = 1.0f;
   float pushOpacity = 1.0f;
   if ((Globals::curTimeSeconds - m_lastSwitchTime) > MIN_TIME_BETWEEN_SWITCH) {
     pullOpacity = calcPullOpacity(maxTileZ, maxActivation);
-    pushOpacity = calcPushOpacity();
+    pushOpacity = haveParent ? calcPushOpacity() : 1.0f;
   }
   m_transitionOpacity = std::min(pullOpacity, pushOpacity);
 
@@ -126,7 +128,7 @@ void View::PerFrameUpdate () {
       Globals::haveSeenOpenHand = false;
       m_ownerNavigationState->navigateDown(selectedNode);
     }
-  } else if ((m_position.z() > PUSH_THRESHOLD) && (Globals::curTimeSeconds - m_lastSwitchTime) > MIN_TIME_BETWEEN_SWITCH) {
+  } else if (haveParent && (m_position.z() > PUSH_THRESHOLD) && (Globals::curTimeSeconds - m_lastSwitchTime) > MIN_TIME_BETWEEN_SWITCH) {
     Globals::lastTileSwitchTime = Globals::curTimeSeconds;
     Globals::lastTileTransitionTime = Globals::curTimeSeconds;
     m_additionalZ.Update(-CAM_DISTANCE_FROM_PLANE, Globals::curTimeSeconds, 0.1f);
