@@ -847,7 +847,7 @@ FbxVector4 MeshHand::getColorForNode(const std::string& name) const {
 #else
   for (int i=0; i<5; i++) {
     if (name.compare(0, m_fingerStrings[i].length(), m_fingerStrings[i]) == 0) {
-      return FbxVector4(0.1, 0.2, 0.3, 1.0);
+      return FbxVector4(0.3, 0.3, 0.3, 1.0);
     }
   }
 

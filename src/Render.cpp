@@ -201,13 +201,13 @@ void Render::drawHands(const View& view) const {
   shader.uniform("lightPosition1", ci::Vec3f(1000, 500, 0));
   shader.uniform("lightPosition2", ci::Vec3f(-1000, 500, 0));
   shader.uniform("cameraPosition", ci::Vec3f(0, 0, 0));
-  shader.uniform("ambientFactor", 0.0f);
-  shader.uniform("specularPower", 1.0f);
-  shader.uniform("specularFactor", 0.0f);
+  shader.uniform("ambientFactor", 1.0f);
+  shader.uniform("specularPower", 10.0f);
+  shader.uniform("specularFactor", 1.0f);
   shader.uniform("diffuseFactor", 0.0f);
   shader.uniform("rimColor", ci::Color::white());
   shader.uniform("rimStart", 0.5f);
-  shader.uniform("innerTransparency", 1.0f);
+  shader.uniform("innerTransparency", 0.9f);
 
   handL.SetScale(0.6f);
   handR.SetScale(0.6f);
