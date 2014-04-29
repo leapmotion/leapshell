@@ -21,7 +21,7 @@ void Interaction::Update(const Leap::Frame& frame) {
     const HandInfo& info = it->second;
     if (!Globals::haveSeenOpenHand) {
       const float grabPinchStrength = info.GrabPinchStrength();
-      if (grabPinchStrength < 0.1f) {
+      if (grabPinchStrength < 0.25f) {
         Globals::haveSeenOpenHand = true;
       }
     }
@@ -29,15 +29,16 @@ void Interaction::Update(const Leap::Frame& frame) {
   }
 
   // scale the force by a constant in each direction to make sure we're not flying around the screen
-  static const Vector3 FORCE_POSITION_SCALE(-0.1, -0.1, -0.25);
+  static const Vector3 FORCE_POSITION_SCALE(-0.15, -0.15, -0.25);
   force = FORCE_POSITION_SCALE.cwiseProduct(force);
 
   // make speeding up have less lag than slowing down
-  static const float SPEED_UP_SMOOTH = 0.8f;
-  static const float SLOW_DOWN_SMOOTH = 0.975f;
+  static const float SPEED_UP_SMOOTH = 0.75f;
+  static const float SLOW_DOWN_SMOOTH = 0.95f;
+  static const float DECAY_MULTIPLIER = 0.6f;
   const Vector3 prevForce = m_panForce.value;
   const float curSmooth = force.squaredNorm() > prevForce.squaredNorm() ? SPEED_UP_SMOOTH : SLOW_DOWN_SMOOTH;
-  m_panForce.Update(force, timeSeconds, curSmooth);
+  m_panForce.Update(force + DECAY_MULTIPLIER*prevForce, timeSeconds, curSmooth);
 }
 
 void Interaction::UpdateView(View &view) {
@@ -120,12 +121,17 @@ void Interaction::applyInfluenceToTiles(View& view) {
       }
       hitPoint += lookat;
 
-      const float distSq = (1.0f - tile.Activation()) * static_cast<float>((hitPoint - tile.Position()).squaredNorm());
+      float distMult = 1.0f;
+      if (&tile == it->second.ClosestTile()) {
+        distMult = (1.0f - tile.Activation());
+      }
+      const float distSq = distMult * static_cast<float>((hitPoint - tile.Position()).squaredNorm());
       if (distSq < closestDistSq) {
         closestTile = &tile;
         closestDistSq = distSq;
       }
     }
+    it->second.SetClosestTile(closestTile);
 
     // increase activation for closest tile to hand
     if (closestTile && Globals::haveSeenOpenHand) {

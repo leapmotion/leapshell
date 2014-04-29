@@ -6,7 +6,7 @@
 #include "GLBuffer.h"
 
 Render::Render() {
-  m_parallaxSmoother.Update(Vector2::Zero(), 0.0, 0.5f);
+  m_parallaxSmoother.value = Vector2::Zero();
 }
 
 void Render::update_background(const ci::Surface8u& surface) {

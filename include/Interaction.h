@@ -36,7 +36,7 @@ class HandInfo {
 
 public:
 
-  HandInfo() : m_lastUpdateTime(0.0), m_velocity(Vector3::Zero()), m_palmPosition(Vector3::Zero()) {
+  HandInfo() : m_lastUpdateTime(0.0), m_velocity(Vector3::Zero()), m_palmPosition(Vector3::Zero()), m_closestTile(nullptr) {
     m_ratioSmoother.Update(1.0f, Globals::curTimeSeconds, 0.5f);
     m_grabSmoother.Update(0.0f, Globals::curTimeSeconds, 0.5f);
   }
@@ -44,6 +44,7 @@ public:
   float GrabPinchStrength() const { return m_grabSmoother.value; }
   const Leap::Hand& Hand() const { return m_hand; }
   double LastUpdateTime() const { return m_lastUpdateTime; }
+  Tile* ClosestTile() const { return m_closestTile; }
 
   const Vector3 ModifiedVelocity() const {
     const Vector3 velocity = m_hand.palmVelocity().toVector3<Vector3>();
@@ -81,6 +82,10 @@ public:
     return m_velocity * (targetDepth / depth);
   }
 
+  void SetClosestTile(Tile* tile) {
+    m_closestTile = tile;
+  }
+
 private:
 
   Leap::Hand m_hand;
@@ -89,6 +94,7 @@ private:
   Vector3 m_velocity;
   Vector3 m_palmPosition;
   double m_lastUpdateTime;
+  Tile* m_closestTile;
 
 };
 
