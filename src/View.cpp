@@ -5,9 +5,9 @@
 #include "Globals.h"
 
 const double View::CAM_DISTANCE_FROM_PLANE = 70.0; // mm
-const double View::TILE_PULL_THRESHOLD = 0.4 * CAM_DISTANCE_FROM_PLANE; // mm
+const double View::TILE_PULL_THRESHOLD = 0.5 * CAM_DISTANCE_FROM_PLANE; // mm
 const double View::PUSH_THRESHOLD = 1.1 * CAM_DISTANCE_FROM_PLANE; // mm
-const double View::MIN_TIME_BETWEEN_SWITCH = 1.5; // in seconds, how much time must elapse between changes in navigation
+const double View::MIN_TIME_BETWEEN_SWITCH = 1.0; // in seconds, how much time must elapse between changes in navigation
 
 // TEMP for the 2014.04.21 demo
 void SortingCriteria::PrioritizeKey (const std::string &key) {

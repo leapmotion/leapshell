@@ -5,7 +5,7 @@
 const float Tile::POSITION_SMOOTH = 0.85f;
 const float Tile::SIZE_SMOOTH = 0.85f;
 const float Tile::ACTIVATION_SMOOTH = 0.925f;
-const float Tile::GRABDELTA_SMOOTH = 0.75f;
+const float Tile::GRABDELTA_SMOOTH = 0.5f;
 
 Tile::Tile() {
   m_positionSmoother.value = Vector3::Zero();
@@ -13,6 +13,7 @@ Tile::Tile() {
   m_highlightSmoother.value = 0.0f;
   m_activationSmoother.value = 0.0f;
   m_grabDeltaSmoother.value = Vector3::Zero();
+  m_targetGrabDelta = Vector3::Zero();
 }
 
 Vector3 Tile::OrigPosition() const {
@@ -52,6 +53,10 @@ Vector3 Tile::GrabDelta() const {
   return m_grabDeltaSmoother.value;
 }
 
+const Vector3& Tile::TargetGrabDelta() const {
+  return m_targetGrabDelta;
+}
+
 void Tile::UpdateSize(const Vector3& newSize, float smooth) {
   m_sizeSmoother.Update(newSize, Globals::curTimeSeconds, smooth);
 }
@@ -69,8 +74,12 @@ void Tile::UpdateActivation(float newActivation, float smooth) {
   m_activationSmoother.Update(newActivation, Globals::curTimeSeconds, smooth);
 }
 
-void Tile::UpdateGrabDelta(const Vector3& newGrabDelta, float smooth) {
-  m_grabDeltaSmoother.Update(newGrabDelta, Globals::curTimeSeconds, smooth);
+void Tile::UpdateTargetGrabDelta(const Vector3& newGrabDelta) {
+  m_targetGrabDelta = newGrabDelta;
+}
+
+void Tile::UpdateGrabDelta(float smooth) {
+  m_grabDeltaSmoother.Update(m_targetGrabDelta, Globals::curTimeSeconds, smooth);
 }
 
 void Tile::ResetActivation() {

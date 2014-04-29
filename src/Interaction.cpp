@@ -84,9 +84,10 @@ void Interaction::cleanupHandInfos() {
 }
 
 void Interaction::applyInfluenceToTiles(View& view) {
-  static const float MAX_INFLUENCE_DISTANCE_SQ = 30 * 30;
+  static const float MAX_INFLUENCE_DISTANCE_SQ = 10.0f * 10.0f;
   static const float INFLUENCE_CHANGE_SPEED = 0.5f;
 
+  const double deltaTime = Globals::curTimeSeconds - m_lastViewUpdateTime;
   TileVector& tiles = view.Tiles();
   ForceVector& forces = view.Forces();
   forces.clear();
@@ -110,8 +111,8 @@ void Interaction::applyInfluenceToTiles(View& view) {
     // find the closest tile to the projection point
     float closestDistSq = MAX_INFLUENCE_DISTANCE_SQ;
     Tile* closestTile = nullptr;
-    for (TileVector::iterator it = tiles.begin(); it != tiles.end(); ++it) {
-      Tile& tile = *it;
+    for (TileVector::iterator it2 = tiles.begin(); it2 != tiles.end(); ++it2) {
+      Tile& tile = *it2;
 
       // calculate projection point from camera to tile
       if (!RayPlaneIntersection(origin, direction, tile.Position(), normal, hitPoint)) {
@@ -132,12 +133,15 @@ void Interaction::applyInfluenceToTiles(View& view) {
       const float newActivation = closestTile->Highlight() * grabMultiplier;
       closestTile->UpdateActivation(newActivation, Tile::ACTIVATION_SMOOTH);
       closestTile->UpdateHighlight(std::min(1.0f, closestTile->Highlight() + INFLUENCE_CHANGE_SPEED), Tile::ACTIVATION_SMOOTH);
-      
+
       // calculate pulling force from hand
-      Vector3 grabDelta = closestTile->Activation()*(palmPoint - closestTile->OrigPosition());
-      static const double PULL_SPEED = 0.5;
-      grabDelta -= PULL_SPEED*closestTile->Activation()*hand.palmPosition().z*direction;
-      closestTile->UpdateGrabDelta(grabDelta, Tile::GRABDELTA_SMOOTH);
+#if 1
+      const Vector3 grabDelta = grabMultiplier*(closestTile->TargetGrabDelta() + deltaTime*it->second.VelocityAt(origin, closestTile->Position() - lookat));
+#else
+      const Vector3 grabDelta = closestTile->TargetGrabDelta() + grabMultiplier*(deltaTime*it->second.VelocityAt(origin, closestTile->Position() - lookat));
+#endif
+      closestTile->UpdateTargetGrabDelta(grabDelta);
+      closestTile->UpdateGrabDelta(Tile::GRABDELTA_SMOOTH);
 
       // add repulsive force from this tile to others
       forces.push_back(Force(closestTile->Position(), closestTile->Activation() + closestTile->Highlight()));
@@ -150,7 +154,8 @@ void Interaction::applyInfluenceToTiles(View& view) {
     if (tile.LastActivationUpdateTime() != Globals::curTimeSeconds) {
       tile.UpdateActivation(std::max(0.0f, tile.Activation() - INFLUENCE_CHANGE_SPEED), Tile::ACTIVATION_SMOOTH);
       tile.UpdateHighlight(std::max(0.0f, tile.Highlight() - INFLUENCE_CHANGE_SPEED), Tile::ACTIVATION_SMOOTH);
-      tile.UpdateGrabDelta(INFLUENCE_CHANGE_SPEED * tile.GrabDelta(), Tile::GRABDELTA_SMOOTH);
+      tile.UpdateTargetGrabDelta(INFLUENCE_CHANGE_SPEED * tile.TargetGrabDelta());
+      tile.UpdateGrabDelta(Tile::GRABDELTA_SMOOTH);
       if (tile.Highlight() > 0.01f) {
         forces.push_back(Force(tile.Position(), tile.Activation() + tile.Highlight()));
       }

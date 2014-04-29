@@ -23,7 +23,7 @@ private:
 
   static Vector3 forceFromHand(const HandInfo& handInfo);
 
-  typedef std::map<int, HandInfo> HandInfoMap;
+  typedef std::map<int, HandInfo, std::less<int>, Eigen::aligned_allocator<std::pair<int, HandInfo> > > HandInfoMap;
 
   Leap::Frame m_frame;
   ExponentialFilter<Vector3> m_panForce;
@@ -36,7 +36,7 @@ class HandInfo {
 
 public:
 
-  HandInfo() : m_lastUpdateTime(0.0) {
+  HandInfo() : m_lastUpdateTime(0.0), m_velocity(Vector3::Zero()), m_palmPosition(Vector3::Zero()) {
     m_ratioSmoother.Update(1.0f, Globals::curTimeSeconds, 0.5f);
     m_grabSmoother.Update(0.0f, Globals::curTimeSeconds, 0.5f);
   }
@@ -56,15 +56,29 @@ public:
     static const float GRAB_SMOOTH_STRENGTH = 0.8f;
 
     // calculate velocity and ratio of X-Y movement to Z movement
-    const Vector3 normVelocity = hand.palmVelocity().toVector3<Vector3>().normalized();
+    m_velocity = hand.palmVelocity().toVector3<Vector3>();
+    const Vector3 normVelocity = m_velocity.normalized();
     const double ratio = normVelocity.x()*normVelocity.x() + normVelocity.y()*normVelocity.y();
     m_ratioSmoother.Update(static_cast<float>(ratio), Globals::curTimeSeconds, TRANSLATION_RATIO_SMOOTH_STRENGTH);
 
     // calculate grab/pinch strength
     m_grabSmoother.Update(std::max(hand.grabStrength(), hand.pinchStrength()), Globals::curTimeSeconds, GRAB_SMOOTH_STRENGTH);
 
+    // update palm position
+    m_palmPosition = hand.palmPosition().toVector3<Vector3>() + Globals::LEAP_OFFSET;
+
     m_lastUpdateTime = Globals::curTimeSeconds;
     m_hand = hand;
+  }
+
+  const Vector3& Velocity() const {
+    return m_velocity;
+  }
+
+  const Vector3 VelocityAt(const Vector3& origin, const Vector3& target) {
+    double depth = (m_palmPosition - origin).norm();
+    double targetDepth = (target - origin).norm();
+    return m_velocity * (targetDepth / depth);
   }
 
 private:
@@ -72,6 +86,8 @@ private:
   Leap::Hand m_hand;
   ExponentialFilter<float> m_ratioSmoother;
   ExponentialFilter<float> m_grabSmoother;
+  Vector3 m_velocity;
+  Vector3 m_palmPosition;
   double m_lastUpdateTime;
 
 };

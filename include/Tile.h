@@ -22,6 +22,7 @@ public:
   static float SwitchWarmupFactor();
   static float TransitionWarmupFactor();
   Vector3 GrabDelta() const;
+  const Vector3& TargetGrabDelta() const;
 
   Vector3 m_phantomPosition;
 
@@ -34,7 +35,8 @@ public:
   void UpdatePosition(const Vector3& newPosition, float smooth);
   void UpdateHighlight(float newHighlight, float smooth);
   void UpdateActivation(float newActivation, float smooth);
-  void UpdateGrabDelta(const Vector3& newGrabDelta, float smooth);
+  void UpdateTargetGrabDelta(const Vector3& newGrabDelta);
+  void UpdateGrabDelta(float smooth);
   void ResetActivation();
 
   EIGEN_MAKE_ALIGNED_OPERATOR_NEW
@@ -45,6 +47,7 @@ private:
   ExponentialFilter<float> m_highlightSmoother;
   ExponentialFilter<float> m_activationSmoother;
   ExponentialFilter<Vector3> m_grabDeltaSmoother;
+  Vector3 m_targetGrabDelta;
 
   mutable ci::gl::TextureRef m_icon;
   std::shared_ptr<HierarchyNode> m_node;
