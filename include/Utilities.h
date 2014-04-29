@@ -45,6 +45,27 @@ inline float Clamp(float value) {
   return std::min(1.0f, std::max(0.0f, value));
 }
 
+static bool StringContains(const std::string& name, const std::string& searchFilter, bool anywhere) {
+  if (searchFilter.empty()) {
+    return true;
+  }
+  std::string lowerSearch = searchFilter, lowerName = name;
+  std::transform(lowerSearch.begin(), lowerSearch.end(), lowerSearch.begin(), ::tolower);
+  std::transform(lowerName.begin(), lowerName.end(), lowerName.begin(), ::tolower);
+  if (anywhere) {
+    // search filter can be anywhere in the name
+    if (lowerName.find(lowerSearch) == std::string::npos) {
+      return false;
+    }
+  } else {
+    // search filter must be at the beginning of the name
+    if (lowerName.compare(0, lowerSearch.length(), lowerSearch) != 0) {
+      return false;
+    }
+  }
+  return true;
+}
+
 static const int TIME_STAMP_TICKS_PER_SEC = 1000000;
 static const double TIME_STAMP_SECS_TO_TICKS  = static_cast<double>(TIME_STAMP_TICKS_PER_SEC);
 static const double TIME_STAMP_TICKS_TO_SECS  = 1.0/TIME_STAMP_SECS_TO_TICKS;

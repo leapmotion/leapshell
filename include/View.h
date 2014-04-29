@@ -119,6 +119,7 @@ private:
   TilePointerVector m_sortedTiles;
   ForceVector m_forces;
   std::string m_searchFilter;
+  int m_prevSearchVisibleTiles;
 
   // render parameters
   ExponentialFilter<Vector3> m_lookatSmoother;

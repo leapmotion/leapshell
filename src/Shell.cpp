@@ -335,7 +335,10 @@ void LeapShell::update()
     m_view->PerFrameUpdate();
   }
 
-  m_view->SetSearchFilter(m_searchString);
+  if (m_searchString != m_prevSearchString) {
+    m_view->SetSearchFilter(m_searchString);
+    m_prevSearchString = m_searchString;
+  }
 }
 
 void LeapShell::draw()

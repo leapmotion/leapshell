@@ -16,10 +16,9 @@ public:
 private:
 
   void drawBackground(const View& view) const;
-  void drawTile(const Tile& tile, const ForceVector& forces, float transitionOpacity, const std::string& searchFilter) const;
+  void drawTile(const Tile& tile, const ForceVector& forces, float transitionOpacity) const;
   void drawHands(const View& view) const;
   static ci::ColorA blendColors(const ci::ColorA& c1, const ci::ColorA& c2, float blend);
-  static float getSearchFilterMult(const std::string& name, const std::string& searchFilter, bool anywhere);
   static bool tileInView(const Vector2& viewSize, const Vector3& lookat, const Vector3& tilePosition);
 
   mutable ExponentialFilter<Vector2> m_parallaxSmoother;

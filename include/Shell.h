@@ -86,6 +86,7 @@ private:
 
   // for search highlight
   std::string m_searchString;
+  std::string m_prevSearchString;
 
   // for text drawing
   std::string m_textString;

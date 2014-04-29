@@ -29,24 +29,24 @@ void Render::draw(const View& view) const {
   // draw backmost tiles before all others
   for (TileVector::const_iterator it = tiles.begin(); it != tiles.end(); ++it) {
     const Tile& tile = *it;
-    if (tile.Position().z() < 0 && tile.Activation() > 0.01f) {
-      drawTile(tile, view.Forces(), transitionOpacity, view.SearchFilter());
+    if (tile.IsVisible() && tile.Position().z() < 0 && tile.Activation() > 0.01f) {
+      drawTile(tile, view.Forces(), transitionOpacity);
     }
   }
 
   // draw most of the tiles
   for (TileVector::const_iterator it = tiles.begin(); it != tiles.end(); ++it) {
     const Tile& tile = *it;
-    if (tile.Activation() <= 0.01f && tileInView(viewSize, view.LookAt(), tile.Position())) {
-      drawTile(tile, view.Forces(), transitionOpacity, view.SearchFilter());
+    if (tile.IsVisible() && tile.Activation() <= 0.01f && tileInView(viewSize, view.LookAt(), tile.Position())) {
+      drawTile(tile, view.Forces(), transitionOpacity);
     }
   }
 
   // draw frontmost tiles after all others
   for (TileVector::const_iterator it = tiles.begin(); it != tiles.end(); ++it) {
     const Tile& tile = *it;
-    if (tile.Position().z() >= 0 && tile.Activation() > 0.01f) {
-      drawTile(tile, view.Forces(), transitionOpacity, view.SearchFilter());
+    if (tile.IsVisible() && tile.Position().z() >= 0 && tile.Activation() > 0.01f) {
+      drawTile(tile, view.Forces(), transitionOpacity);
     }
   }
 
@@ -86,17 +86,16 @@ void Render::drawBackground(const View& view) const {
   }
 }
 
-void Render::drawTile(const Tile& tile, const ForceVector& forces, float transitionOpacity, const std::string& searchFilter) const {
+void Render::drawTile(const Tile& tile, const ForceVector& forces, float transitionOpacity) const {
   if (!tile.Node()) {
     return;
   }
   glPushMatrix();
 
   const std::string name = tile.Node()->get_metadata_as<std::string>("name");
-  const float searchMult = getSearchFilterMult(name, searchFilter, true);
 
   // compute tile opacity
-  const float opacity = searchMult * Tile::TransitionWarmupFactor() * transitionOpacity;
+  const float opacity = tile.TransitionWarmupFactor() * transitionOpacity;
 
   const Vector3 tileSize = tile.Size();
   float highlight = tile.Highlight();
@@ -256,28 +255,6 @@ ci::ColorA Render::blendColors(const ci::ColorA& c1, const ci::ColorA& c2, float
   const float b = blend*c1.b + (1.0f-blend)*c2.b;
   const float a = blend*c1.a + (1.0f-blend)*c2.a;
   return ci::ColorA(r, g, b, a);
-}
-
-float Render::getSearchFilterMult(const std::string& name, const std::string& searchFilter, bool anywhere) {
-  static const float NOT_FOUND_MULTIPLIER = 0.33f;
-  if (searchFilter.empty()) {
-    return 1.0f;
-  }
-  std::string lowerSearch = searchFilter, lowerName = name;
-  std::transform(lowerSearch.begin(), lowerSearch.end(), lowerSearch.begin(), ::tolower);
-  std::transform(lowerName.begin(), lowerName.end(), lowerName.begin(), ::tolower);
-  if (anywhere) {
-    // search filter can be anywhere in the name
-    if (lowerName.find(lowerSearch) == std::string::npos) {
-      return NOT_FOUND_MULTIPLIER;
-    }
-  } else {
-    // search filter must be at the beginning of the name
-    if (lowerName.compare(0, lowerSearch.length(), lowerSearch) != 0) {
-      return NOT_FOUND_MULTIPLIER;
-    }
-  }
-  return 1.0f;
 }
 
 bool Render::tileInView(const Vector2& viewSize, const Vector3& lookat, const Vector3& tilePosition) {

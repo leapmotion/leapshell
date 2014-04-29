@@ -76,6 +76,7 @@ void View::UpdateFromChangedNavigationState(bool fadeIn) {
     RegenerateTilesAndTilePointers(m_ownerNavigationState->currentChildNodes(), m_tiles, m_sortedTiles, false);
     // NOTE: now the elements of m_sortedTiles point to elements of m_tiles, so m_sortedTiles
     // should be cleared and regenerated if m_tiles is changed.
+    SetSearchFilter(m_searchFilter);
   }
   SortTiles(m_sortedTiles, m_sortingCriteria.PrioritizedKeys());
 
@@ -190,6 +191,22 @@ void View::SetLookAt(const Vector3& lookat) {
 
 void View::SetSearchFilter(const std::string& searchFilter) {
   m_searchFilter = searchFilter;
+  int numVisibleTiles = 0;
+  for (TileVector::iterator it = m_tiles.begin(); it != m_tiles.end(); ++it) {
+    Tile& tile = *it;
+    if (tile.Node()) {
+      const std::string name = tile.Node()->get_metadata_as<std::string>("name");
+      const bool visible = StringContains(name, searchFilter, true);
+      tile.SetVisible(visible);
+      if (visible) {
+        numVisibleTiles++;
+      }
+    }
+  }
+  if (m_prevSearchVisibleTiles != numVisibleTiles) {
+    Globals::lastTileSwitchTime = Globals::curTimeSeconds;
+    m_prevSearchVisibleTiles = numVisibleTiles;
+  }
 }
 
 void View::resetView() {

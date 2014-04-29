@@ -14,6 +14,7 @@ Tile::Tile() {
   m_activationSmoother.value = 0.0f;
   m_grabDeltaSmoother.value = Vector3::Zero();
   m_targetGrabDelta = Vector3::Zero();
+  m_visible = true;
 }
 
 Vector3 Tile::OrigPosition() const {
@@ -40,13 +41,12 @@ double Tile::LastActivationUpdateTime() const {
   return m_activationSmoother.lastTimeSeconds;
 }
 
-float Tile::SwitchWarmupFactor() {
+float Tile::SwitchWarmupFactor() const {
   return SmootherStep(static_cast<float>(std::min(1.0, (Globals::curTimeSeconds - Globals::lastTileSwitchTime)/Globals::SWITCH_TIME)));
 }
 
-float Tile::TransitionWarmupFactor() {
-  static const float FADE_IN_TIME = 0.25f;
-  return SmootherStep(static_cast<float>(std::min(1.0, (Globals::curTimeSeconds - Globals::lastTileTransitionTime)/Globals::TRANSITION_TIME)));
+float Tile::TransitionWarmupFactor() const {
+  return SmootherStep(static_cast<float>(std::min(1.0, (Globals::curTimeSeconds - std::max(m_visibleTime, Globals::lastTileTransitionTime))/Globals::TRANSITION_TIME)));
 }
 
 Vector3 Tile::GrabDelta() const {
@@ -55,6 +55,10 @@ Vector3 Tile::GrabDelta() const {
 
 const Vector3& Tile::TargetGrabDelta() const {
   return m_targetGrabDelta;
+}
+
+bool Tile::IsVisible() const {
+  return m_visible;
 }
 
 void Tile::UpdateSize(const Vector3& newSize, float smooth) {
@@ -85,6 +89,13 @@ void Tile::UpdateGrabDelta(float smooth) {
 void Tile::ResetActivation() {
   UpdateHighlight(0.0f, 0.01f);
   UpdateActivation(0.0f, 0.01f);
+}
+
+void Tile::SetVisible(bool visible) {
+  if (visible && !m_visible) {
+    m_visibleTime = Globals::curTimeSeconds;
+  }
+  m_visible = visible;
 }
 
 struct TileOrder {

@@ -19,10 +19,11 @@ public:
   float Highlight() const;
   float Activation() const;
   double LastActivationUpdateTime() const;
-  static float SwitchWarmupFactor();
-  static float TransitionWarmupFactor();
+  float SwitchWarmupFactor() const;
+  float TransitionWarmupFactor() const;
   Vector3 GrabDelta() const;
   const Vector3& TargetGrabDelta() const;
+  bool IsVisible() const;
 
   Vector3 m_phantomPosition;
 
@@ -38,6 +39,7 @@ public:
   void UpdateTargetGrabDelta(const Vector3& newGrabDelta);
   void UpdateGrabDelta(float smooth);
   void ResetActivation();
+  void SetVisible(bool visible);
 
   EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 
@@ -51,6 +53,8 @@ private:
 
   mutable ci::gl::TextureRef m_icon;
   std::shared_ptr<HierarchyNode> m_node;
+  bool m_visible;
+  double m_visibleTime;
 };
 
 typedef std::vector<Tile, Eigen::aligned_allocator<Tile>> TileVector;

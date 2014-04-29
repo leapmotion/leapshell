@@ -115,7 +115,7 @@ void Interaction::applyInfluenceToTiles(View& view) {
       Tile& tile = *it2;
 
       // calculate projection point from camera to tile
-      if (!RayPlaneIntersection(origin, direction, tile.Position(), normal, hitPoint)) {
+      if (!tile.IsVisible() || !RayPlaneIntersection(origin, direction, tile.Position(), normal, hitPoint)) {
         continue;
       }
       hitPoint += lookat;
