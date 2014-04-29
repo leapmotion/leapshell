@@ -12,8 +12,8 @@ void Interaction::Update(const Leap::Frame& frame) {
   const double timeSeconds = TIME_STAMP_TICKS_TO_SECS * frame.timestamp();
   m_frame = frame;
 
-  updateHandInfos();
-  cleanupHandInfos();
+  updateHandInfos(timeSeconds);
+  cleanupHandInfos(timeSeconds);
 
   // accumulate force from all hands
   Vector3 force(Vector3::Zero());
@@ -61,20 +61,20 @@ void Interaction::UpdateView(View &view) {
   m_lastViewUpdateTime = Globals::curTimeSeconds;
 }
 
-void Interaction::updateHandInfos() {
+void Interaction::updateHandInfos(double frameTime) {
   const Leap::HandList hands = m_frame.hands();
   for (int i=0; i<hands.count(); i++) {
     const int id = hands[i].id();
-    m_handInfos[id].Update(hands[i]);
+    m_handInfos[id].Update(hands[i], frameTime);
   }
 }
 
-void Interaction::cleanupHandInfos() {
+void Interaction::cleanupHandInfos(double frameTime) {
   static const float MAX_HAND_INFO_AGE = 0.1f; // seconds since last update until hand info gets cleaned up
   HandInfoMap::iterator it = m_handInfos.begin();
   while (it != m_handInfos.end()) {
     const HandInfo& cur = it->second;
-    const float curAge = fabs(static_cast<float>(Globals::curTimeSeconds - cur.LastUpdateTime()));
+    const float curAge = fabs(static_cast<float>(frameTime - cur.LastUpdateTime()));
     if (curAge > MAX_HAND_INFO_AGE) {
       m_handInfos.erase(it++);
     } else {

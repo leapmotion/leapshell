@@ -17,8 +17,8 @@ public:
 
 private:
 
-  void updateHandInfos();
-  void cleanupHandInfos();
+  void updateHandInfos(double frameTime);
+  void cleanupHandInfos(double frameTime);
   void applyInfluenceToTiles(View& view);
 
   static Vector3 forceFromHand(const HandInfo& handInfo);
@@ -51,7 +51,7 @@ public:
     return Vector3(ratio*velocity.x(), ratio*velocity.y(), (1.0-ratio)*velocity.z());
   }
 
-  void Update(const Leap::Hand& hand) {
+  void Update(const Leap::Hand& hand, double frameTime) {
     static const float TRANSLATION_RATIO_SMOOTH_STRENGTH = 0.95f;
     static const float GRAB_SMOOTH_STRENGTH = 0.8f;
 
@@ -59,15 +59,15 @@ public:
     m_velocity = hand.palmVelocity().toVector3<Vector3>();
     const Vector3 normVelocity = m_velocity.normalized();
     const double ratio = normVelocity.x()*normVelocity.x() + normVelocity.y()*normVelocity.y();
-    m_ratioSmoother.Update(static_cast<float>(ratio), Globals::curTimeSeconds, TRANSLATION_RATIO_SMOOTH_STRENGTH);
+    m_ratioSmoother.Update(static_cast<float>(ratio), frameTime, TRANSLATION_RATIO_SMOOTH_STRENGTH);
 
     // calculate grab/pinch strength
-    m_grabSmoother.Update(std::max(hand.grabStrength(), hand.pinchStrength()), Globals::curTimeSeconds, GRAB_SMOOTH_STRENGTH);
+    m_grabSmoother.Update(std::max(hand.grabStrength(), hand.pinchStrength()), frameTime, GRAB_SMOOTH_STRENGTH);
 
     // update palm position
     m_palmPosition = hand.palmPosition().toVector3<Vector3>() + Globals::LEAP_OFFSET;
 
-    m_lastUpdateTime = Globals::curTimeSeconds;
+    m_lastUpdateTime = frameTime;
     m_hand = hand;
   }
 
