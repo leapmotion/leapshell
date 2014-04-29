@@ -251,7 +251,6 @@ ci::Surface8u FileSystemNode::icon()
       }
     }
 #else
-    CComPtr<IShellItem> shellItem;
     std::wstring pathNative = m_path.wstring();
 
     for (size_t i=0; i<pathNative.size(); i++) {
@@ -260,28 +259,19 @@ ci::Surface8u FileSystemNode::icon()
       }
     }
 
-    SHCreateItemFromParsingName(pathNative.c_str(), nullptr, __uuidof(IShellItem), (void**)&shellItem);
-    if (!shellItem) {
-      return m_surface;
+    IShellItemImageFactory *pImageFactory = nullptr;
+    if (SUCCEEDED(SHCreateItemFromParsingName(pathNative.c_str(), nullptr, IID_PPV_ARGS(&pImageFactory)))) {
+      SIZE sz = { dimension, dimension };
+      HBITMAP thumbnail;
+
+      if (SUCCEEDED(pImageFactory->GetImage(sz, SIIGBF_BIGGERSIZEOK | SIIGBF_RESIZETOFIT, &thumbnail))) {
+        m_surface = ci::Surface8u(dimension, dimension, true, ci::SurfaceChannelOrder::BGRA);
+        GetBitmapBits(thumbnail, 4*dimension*dimension, m_surface.getData());
+        DeleteObject(thumbnail);
+        m_surface.setPremultiplied(true);
+      }
+      pImageFactory->Release();
     }
-
-    CComQIPtr<IShellItemImageFactory> imgFactory = shellItem;
-    if (!imgFactory) {
-      return m_surface;
-    }
-
-    SIZE sz = { dimension, dimension };
-    HBITMAP thumbnail;
-    imgFactory->GetImage(
-      sz,
-      SIIGBF_BIGGERSIZEOK | SIIGBF_RESIZETOFIT,
-      &thumbnail
-    );
-
-    m_surface = ci::Surface8u(dimension, dimension, true, ci::SurfaceChannelOrder::BGRA);
-    m_surface.setPremultiplied(true);
-    GetBitmapBits(thumbnail, 4*dimension*dimension, m_surface.getData());
-    DeleteObject(thumbnail);
 #endif
   }
   return m_surface;
