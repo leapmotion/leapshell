@@ -462,9 +462,26 @@ void LeapShell::resize()
     m_render->update_background(surface);
   }
 #else
-  ci::Surface8u surface = loadImage(loadResource(RES_WINTER_JPG));
+  ci::Surface8u surface;
 
-  //ci::Vec2i size = surface.getSize();
+  bool haveDesktopWallpaper = false;
+  try {
+    WCHAR pvParam[1024];
+    if (SystemParametersInfo(SPI_GETDESKWALLPAPER, 1024, pvParam, 0)) {
+      std::wstring pathString(pvParam);
+      if (!pathString.empty()) {
+        surface = ci::loadImage(boost::filesystem::path(pathString));
+        haveDesktopWallpaper = true;
+      }
+    }
+  } catch (...) {
+    haveDesktopWallpaper = false;
+  }
+
+  if (!haveDesktopWallpaper) {
+    surface = ci::loadImage(loadResource(RES_WINTER_JPG));
+  }
+
   const ci::Vec2f windowSize(static_cast<float>(Globals::windowWidth), static_cast<float>(Globals::windowHeight));
   const ci::Vec2f imageSize(static_cast<float>(surface.getWidth()), static_cast<float>(surface.getHeight()));
   const ci::Vec2f scaledSize = getScaledSizeWithAspect(windowSize, imageSize, SCALE_FACTOR);
