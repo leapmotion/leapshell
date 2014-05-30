@@ -17,10 +17,16 @@ public:
 
 private:
 
+  static const float MAX_INFLUENCE_DISTANCE_SQ;
+  static const float INFLUENCE_CHANGE_SPEED;
+
   void updateHandInfos(double frameTime);
   void cleanupHandInfos(double frameTime);
   void applyInfluenceToTiles(View& view);
-
+ 
+  static void updateInactiveTiles(TileVector& tiles);
+  static void computeForcesFromTiles(const TileVector& tiles, ForceVector& forces);
+  static Tile* findClosestTile(const Leap::Hand& hand, const Vector3& lookat, Tile* prevClosest, TileVector& tiles);
   static Vector3 forceFromHand(const HandInfo& handInfo);
 
   typedef std::map<int, HandInfo, std::less<int>, Eigen::aligned_allocator<std::pair<int, HandInfo> > > HandInfoMap;
@@ -55,6 +61,7 @@ public:
   void Update(const Leap::Hand& hand, double frameTime) {
     static const float TRANSLATION_RATIO_SMOOTH_STRENGTH = 0.95f;
     static const float GRAB_SMOOTH_STRENGTH = 0.8f;
+    static const float MIN_STRENGTH_TO_GRAB = 0.95f;
 
     // calculate velocity and ratio of X-Y movement to Z movement
     m_velocity = hand.palmVelocity().toVector3<Vector3>();
@@ -63,7 +70,10 @@ public:
     m_ratioSmoother.Update(static_cast<float>(ratio), frameTime, TRANSLATION_RATIO_SMOOTH_STRENGTH);
 
     // calculate grab/pinch strength
-    m_grabSmoother.Update(std::max(hand.grabStrength(), hand.pinchStrength()), frameTime, GRAB_SMOOTH_STRENGTH);
+    const float maxGrabPinch = std::max(hand.grabStrength(), hand.pinchStrength());
+    const float clampedScaledStrength = std::min(1.0f, (maxGrabPinch - (1.0f-MIN_STRENGTH_TO_GRAB))/MIN_STRENGTH_TO_GRAB);
+    const float grabPinchStrength = SmootherStep(clampedScaledStrength * clampedScaledStrength * clampedScaledStrength);
+    m_grabSmoother.Update(grabPinchStrength, frameTime, GRAB_SMOOTH_STRENGTH);
 
     // update palm position
     m_palmPosition = hand.palmPosition().toVector3<Vector3>() + Globals::LEAP_OFFSET;
