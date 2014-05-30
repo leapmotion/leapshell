@@ -334,6 +334,12 @@ void LeapShell::update()
   if (!m_state->updateChildren()) {
     m_view->PerFrameUpdate();
   }
+
+  const std::string pathString = m_state->currentLocation()->path();
+  if (pathString != m_pathString) {
+    m_pathString = pathString;
+    m_lastPathChangeTime = Globals::curTimeSeconds;
+  }
 }
 
 void LeapShell::draw()
@@ -342,7 +348,9 @@ void LeapShell::draw()
   ci::gl::color(ci::ColorA::white());
 
   m_interaction->UpdateView(*m_view);
-  m_render->draw(*m_view);
+  m_render->drawViewBackground(*m_view);
+  m_render->drawViewTiles(*m_view);
+  m_render->drawViewHands(*m_view);
 
   ci::gl::setMatricesWindow(getWindowSize());
 #if 0
@@ -350,56 +358,34 @@ void LeapShell::draw()
   ci::gl::drawString("FPS: " + ci::toString(getAverageFps()), ci::Vec2f(10.0f, 10.0f), ci::ColorA::white(), ci::Font("Arial", 18));
 #endif
 
-  // draw search text
-  const std::string& searchString = m_view->SearchFilter();
-  if (!searchString.empty()) {
-    const ci::Vec2f searchSize = Globals::fontRegular->measureString(searchString);
-    const ci::Rectf searchRect(0.0f, 0.0f, searchSize.x, 100.0f);
-    ci::gl::color(ci::ColorA::white());
-    glPushMatrix();
-    glTranslated(0.05*Globals::windowWidth, 0.025 * Globals::windowHeight, 0.0);
-    Globals::fontRegular->drawString(searchString, searchRect);
-    glPopMatrix();
-  }
+  // draw UI text strings
+  drawString(m_view->SearchFilter(), 0.05*Globals::windowWidth, 0.025*Globals::windowHeight, Globals::curTimeSeconds, 1.0f, false);
+  drawString(m_textString, Globals::windowWidth/2.0, 0.875*Globals::windowHeight, m_lastTextChangeTime, 2.0f, true);
+  drawString(m_pathString, Globals::windowWidth/2.0, 0.025*Globals::windowHeight, m_lastPathChangeTime, 3.0f, true);
+}
 
-  // draw indicator text
-  static const float TEXT_FADE_TIME = 2.0f;
-  const float timeSinceTextChange = static_cast<float>(Globals::curTimeSeconds - m_lastTextChangeTime);
-  const float textOpacity = SmootherStep(1.0f - std::min(1.0f, timeSinceTextChange/TEXT_FADE_TIME));
+void LeapShell::drawString(const std::string& str, double x, double y, double lastChangeTime, float fadeTime, bool center)
+{
+  if (str.empty()) {
+    return;
+  }
+  const float timeSinceTextChange = static_cast<float>(Globals::curTimeSeconds - lastChangeTime);
+  const float textOpacity = SmootherStep(1.0f - std::min(1.0f, timeSinceTextChange/fadeTime));
   if (textOpacity > 0.01f) {
     const ci::ColorA textColor = ci::ColorA(1.0f, 1.0f, 1.0f, textOpacity);
-    const ci::Vec2f textSize = Globals::fontBold->measureString(m_textString);
-    const ci::Rectf textRect(-textSize.x/2.0f, 0.0f, textSize.x/2.0f, 100.0f);
+    const ci::Vec2f textSize = Globals::fontBold->measureString(str);
+    const float start = center ? -textSize.x/2.0f : 0.0f;
+    const ci::Rectf textRect(start, 0.0f, start + textSize.x, 100.0f);
     ci::gl::color(textColor);
     glPushMatrix();
-    glTranslated(Globals::windowWidth/2.0, 0.875 * Globals::windowHeight, 0.0);
-    Globals::fontBold->drawString(m_textString, textRect);
-    glPopMatrix();
-  }
-
-  const std::string pathString = m_state->currentLocation()->path();
-  if (pathString != m_pathString) {
-    m_pathString = pathString;
-    m_lastPathChangeTime = Globals::curTimeSeconds;
-  }
-
-  // draw path text
-  static const float PATH_FADE_TIME = 3.0f;
-  const float timeSincePathChange = static_cast<float>(Globals::curTimeSeconds - m_lastPathChangeTime);
-  const float pathOpacity = SmootherStep(1.0f - std::min(1.0f, timeSincePathChange/PATH_FADE_TIME));
-  if (pathOpacity > 0.01f) {
-    const ci::ColorA pathColor = ci::ColorA(1.0f, 1.0f, 1.0f, pathOpacity);
-    const ci::Vec2f pathSize = Globals::fontBold->measureString(m_pathString);
-    const ci::Rectf pathRect(-pathSize.x/2.0f, 0.0f, pathSize.x/2.0f, 100.0f);
-    ci::gl::color(pathColor);
-    glPushMatrix();
-    glTranslated(Globals::windowWidth/2.0, 0.025 * Globals::windowHeight, 0.0);
-    Globals::fontBold->drawString(m_pathString, pathRect);
+    glTranslated(x, y, 0.0);
+    Globals::fontBold->drawString(str, textRect);
     glPopMatrix();
   }
 }
 
-ci::Vec2f getScaledSizeWithAspect(const ci::Vec2f& windowSize, const ci::Vec2f& imageSize, float scale) {
+ci::Vec2f getScaledSizeWithAspect(const ci::Vec2f& windowSize, const ci::Vec2f& imageSize, float scale)
+{
   const float windowAspect = windowSize.y / windowSize.x;
   const float imageAspect = imageSize.y / imageSize.x;
   float width, height;

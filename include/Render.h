@@ -7,7 +7,9 @@
 class Render {
 public:
   Render();
-  void draw(const View& view) const;
+  void drawViewTiles(const View& view) const;
+  void drawViewBackground(const View& view) const;
+  void drawViewHands(const View& view) const;
 
   void update_background(const ci::Surface8u& surface);
 
@@ -15,9 +17,7 @@ public:
 
 private:
 
-  void drawBackground(const View& view) const;
   void drawTile(const Tile& tile, const ForceVector& forces, float transitionOpacity) const;
-  void drawHands(const View& view) const;
   static ci::ColorA blendColors(const ci::ColorA& c1, const ci::ColorA& c2, float blend);
   static bool tileInView(const Vector2& viewSize, const Vector3& lookat, const Vector3& tilePosition);
 

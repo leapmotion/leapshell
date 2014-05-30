@@ -40,6 +40,8 @@ private:
   void updateGlobals();
   void setText(const std::string& text);
 
+  static void drawString(const std::string& str, double x, double y, double lastChangeTime, float fadeTime, bool center);
+
 #if defined(CINDER_COCOA)
   ci::DataSourceRef loadResource(const std::string& macPath) {
     try {
