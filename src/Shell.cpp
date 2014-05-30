@@ -302,14 +302,14 @@ void LeapShell::keyDown(ci::app::KeyEvent event)
     break;
   case ci::app::KeyEvent::KEY_BACKSPACE:
   case ci::app::KeyEvent::KEY_DELETE:
-    if (!m_searchString.empty()) {
-      m_searchString.pop_back();
+    if (!m_view->SearchFilter().empty()) {
+      m_view->SetSearchFilter(m_view->SearchFilter().substr(0, m_view->SearchFilter().size()-1));
     }
     break;
   case ci::app::KeyEvent::KEY_UNKNOWN:
     break;
   default:
-    m_searchString += event.getChar();
+    m_view->SetSearchFilter(m_view->SearchFilter() + event.getChar());
     break;
   }
 }
@@ -334,11 +334,6 @@ void LeapShell::update()
   if (!m_state->updateChildren()) {
     m_view->PerFrameUpdate();
   }
-
-  if (m_searchString != m_prevSearchString) {
-    m_view->SetSearchFilter(m_searchString);
-    m_prevSearchString = m_searchString;
-  }
 }
 
 void LeapShell::draw()
@@ -356,13 +351,14 @@ void LeapShell::draw()
 #endif
 
   // draw search text
-  if (!m_searchString.empty()) {
-    const ci::Vec2f searchSize = Globals::fontRegular->measureString(m_searchString);
+  const std::string& searchString = m_view->SearchFilter();
+  if (!searchString.empty()) {
+    const ci::Vec2f searchSize = Globals::fontRegular->measureString(searchString);
     const ci::Rectf searchRect(0.0f, 0.0f, searchSize.x, 100.0f);
     ci::gl::color(ci::ColorA::white());
     glPushMatrix();
     glTranslated(0.05*Globals::windowWidth, 0.025 * Globals::windowHeight, 0.0);
-    Globals::fontRegular->drawString(m_searchString, searchRect);
+    Globals::fontRegular->drawString(searchString, searchRect);
     glPopMatrix();
   }
 

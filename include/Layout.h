@@ -42,10 +42,12 @@ public:
   virtual void UpdateTilePositions(const Range<TilePointerVector::iterator> &tiles, bool updatePhantomPosition = false) = 0;
   virtual Vector2 GetCameraMinBounds() const = 0;
   virtual Vector2 GetCameraMaxBounds() const = 0;
+  void SetNumVisibleTiles(int numVisibleTiles) { m_numVisibleTiles = numVisibleTiles; }
   EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 protected:
   void animateTilePosition(Tile& tile, int idx, const Vector3& newPosition) const;
   double m_creationTime;
+  int m_numVisibleTiles;
 };
 
 /// @brief Lays tiles out in a fixed-width grid, row-major, in the given order.

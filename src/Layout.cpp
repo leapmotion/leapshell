@@ -30,7 +30,7 @@ void UniformSizeLayout::UpdateTileSizes(const Range<TilePointerVector::iterator>
 
 // PositionLayout
 
-PositionLayout::PositionLayout() : m_creationTime(Globals::curTimeSeconds) {
+PositionLayout::PositionLayout() : m_creationTime(Globals::curTimeSeconds), m_numVisibleTiles(0) {
 
 }
 
@@ -49,19 +49,10 @@ GridLayout::GridLayout() : m_width(100), m_height(m_width) {
 }
 
 void GridLayout::UpdateTilePositions(const Range<TilePointerVector::iterator> &tiles, bool updatePhantomPosition) {
-  // compute number of visible tiles
-  int numTiles = 0;
-  for (auto t = tiles; t.is_not_at_end(); ++t) {
-    Tile& tile = **t;
-    if (tile.IsVisible()) {
-      numTiles++;
-    }
-  }
-
   // compute number of rows and height of the layout
   static const int TILES_PER_ROW = 6;
   const double inc = m_width / (TILES_PER_ROW-1);
-  const int NUM_ROWS = static_cast<int>(std::ceil(static_cast<double>(numTiles) / TILES_PER_ROW));
+  const int NUM_ROWS = static_cast<int>(std::ceil(static_cast<double>(m_numVisibleTiles) / TILES_PER_ROW));
   m_height = inc * NUM_ROWS;
 
   // start placing tiles
@@ -69,7 +60,7 @@ void GridLayout::UpdateTilePositions(const Range<TilePointerVector::iterator> &t
   const double halfHeight = m_height/2.0;
   double curWidth = -halfWidth;
   if (NUM_ROWS == 1) {
-    curWidth = -(inc * numTiles)/2.0 + inc/2.0;
+    curWidth = -(inc * m_numVisibleTiles)/2.0 + inc/2.0;
   }
   double curHeight = -inc/2.0;
   int idx = 0;

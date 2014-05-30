@@ -87,6 +87,7 @@ void View::PerFrameUpdate () {
   // update the sizes first (a PositionLayout implementation often depends on the sizes)
   m_sizeLayout->UpdateTileSizes(range(m_sortedTiles.begin(), m_sortedTiles.end()));
   // then update the positions
+  m_positionLayout->SetNumVisibleTiles(m_prevSearchVisibleTiles);
   m_positionLayout->UpdateTilePositions(range(m_sortedTiles.begin(), m_sortedTiles.end()));
 
   std::shared_ptr<HierarchyNode> selectedNode(nullptr);
