@@ -168,7 +168,7 @@ void Render::drawViewBounds(const View& view, const ci::ColorA& color) const {
   const Vector2 min = view.GetPositionLayout()->GetContentsMinBounds() - view.LookAt().head<2>();
   const Vector2 max = view.GetPositionLayout()->GetContentsMaxBounds() - view.LookAt().head<2>();
 
-  ci::Rectf rect(min.x(), min.y(), max.x(), max.y());
+  ci::Rectf rect(static_cast<float>(min.x()), static_cast<float>(min.y()), static_cast<float>(max.x()), static_cast<float>(max.y()));
   ci::gl::color(color);
   ci::gl::drawStrokedRect(rect);
 }
