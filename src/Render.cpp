@@ -82,10 +82,7 @@ void Render::drawViewBackground(const View& view) const {
   }
 }
 
-void Render::drawViewHands(const View& view) const {
-  MeshHand& handL = view.LeftHand();
-  MeshHand& handR = view.RightHand();
-
+void Render::drawHands(const View& view, MeshHand& handL, MeshHand& handR) const {
 #if 0
   const Vector3 lPos = handL.LeapHand().palmPosition().toVector3<Vector3>() + Globals::LEAP_OFFSET + view.LookAt();
   ci::gl::drawSphere(ToVec3f(lPos), 5, 30);

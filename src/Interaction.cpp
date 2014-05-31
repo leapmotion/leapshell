@@ -8,7 +8,6 @@ const float Interaction::INFLUENCE_CHANGE_SPEED = 0.5f;
 
 Interaction::Interaction() {
   m_panForce.Update(Vector3::Zero(), 0.0, 0.5f);
-  m_lastViewUpdateTime = 0.0;
 }
 
 void Interaction::Update(const Leap::Frame& frame) {
@@ -45,24 +44,23 @@ void Interaction::Update(const Leap::Frame& frame) {
 }
 
 void Interaction::UpdateView(View &view) {
-  const double deltaTime = Globals::curTimeSeconds - m_lastViewUpdateTime;
-  assert(deltaTime > 0);
+  const double deltaTime = Globals::curTimeSeconds - view.LastUpdateTime();
 
   // apply the force to the view camera
-  view.ApplyVelocity(m_panForce.value, Globals::curTimeSeconds, deltaTime);
+  view.ApplyVelocity(m_panForce.value);
 
+  applyInfluenceToTiles(view, deltaTime);
+}
+
+void Interaction::UpdateMeshHands(MeshHand& handL, MeshHand& handR) {
   const Leap::HandList hands = m_frame.hands();
   for (int i=0; i<hands.count(); i++) {
     if (hands[i].isLeft()) {
-      view.LeftHand().Update(hands[i], Globals::curTimeSeconds);
+      handL.Update(hands[i], Globals::curTimeSeconds);
     } else if (hands[i].isRight()) {
-      view.RightHand().Update(hands[i], Globals::curTimeSeconds);
+      handR.Update(hands[i], Globals::curTimeSeconds);
     }
   }
-
-  applyInfluenceToTiles(view);
-
-  m_lastViewUpdateTime = Globals::curTimeSeconds;
 }
 
 void Interaction::updateHandInfos(double frameTime) {
@@ -87,9 +85,7 @@ void Interaction::cleanupHandInfos(double frameTime) {
   }
 }
 
-void Interaction::applyInfluenceToTiles(View& view) {
-  const double deltaTime = Globals::curTimeSeconds - m_lastViewUpdateTime;
-
+void Interaction::applyInfluenceToTiles(View& view, double deltaTime) {
   for (HandInfoMap::iterator it = m_handInfos.begin(); it != m_handInfos.end(); ++it) {
     Leap::Hand hand = it->second.Hand();
 

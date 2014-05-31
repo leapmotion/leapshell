@@ -4,6 +4,7 @@
 #include "View.h"
 #include "Utilities.h"
 #include "Globals.h"
+#include "MeshHand.h"
 
 class HandInfo;
 
@@ -14,6 +15,7 @@ public:
   Interaction();
   void Update(const Leap::Frame& frame);
   void UpdateView(View &view);
+  void UpdateMeshHands(MeshHand& handL, MeshHand& handR);
 
 private:
 
@@ -22,7 +24,7 @@ private:
 
   void updateHandInfos(double frameTime);
   void cleanupHandInfos(double frameTime);
-  void applyInfluenceToTiles(View& view);
+  void applyInfluenceToTiles(View& view, double deltaTime);
  
   static void updateInactiveTiles(TileVector& tiles);
   static void computeForcesFromTiles(const TileVector& tiles, ForceVector& forces);
@@ -33,7 +35,6 @@ private:
 
   Leap::Frame m_frame;
   ExponentialFilter<Vector3> m_panForce;
-  double m_lastViewUpdateTime;
   HandInfoMap m_handInfos;
 
 };

@@ -51,17 +51,7 @@ View::View(std::shared_ptr<NavigationState> const &ownerNavigationState)
   m_positionLayout = std::shared_ptr<PositionLayout>(new GridLayout());
   m_lookatSmoother.Update(m_lookat, 0.0, 0.5f);
   m_lastSwitchTime = 0.0;
-
-  m_handL = new MeshHand("Left Hand", MeshHand::LEFT);
-  m_handR = new MeshHand("Right Hand", MeshHand::RIGHT);
-
-  m_handL->SetScale(0.75f);
-  m_handR->SetScale(0.75f);
-}
-
-View::~View () {
-  delete m_handL;
-  delete m_handR;
+  m_lastUpdateTime = 0.0;
 }
 
 void View::UpdateFromChangedNavigationState(bool fadeIn) {
@@ -162,7 +152,10 @@ void View::SetPositionLayout(const std::shared_ptr<PositionLayout>& positionLayo
   m_positionLayout = positionLayout;
 }
 
-void View::ApplyVelocity(const Vector3& velocity, double timeSeconds, double deltaTime) {
+void View::ApplyVelocity(const Vector3& velocity) {
+  const double deltaTime = Globals::curTimeSeconds - m_lastUpdateTime;
+  m_lastUpdateTime = Globals::curTimeSeconds;
+
   const Vector3 deltaPosition = velocity * deltaTime;
 
   m_position += deltaPosition;
@@ -175,11 +168,11 @@ void View::ApplyVelocity(const Vector3& velocity, double timeSeconds, double del
   Vector3 clampedLookat = clampCameraPosition(m_lookat);
   clampedLookat.z() = 0.0;
   const Vector3 lookatRubberBandForce = RUBBER_BAND_SPEED * (clampedLookat - m_lookat);
- 
+
   m_position += positionRubberBandForce;
   m_lookat += lookatRubberBandForce;
 
-  m_lookatSmoother.Update(m_lookat, timeSeconds, 0.5f);
+  m_lookatSmoother.Update(m_lookat, Globals::curTimeSeconds, 0.5f);
 }
 
 void View::SetPosition(const Vector3& position) {

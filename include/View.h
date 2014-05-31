@@ -4,7 +4,6 @@
 #include "Layout.h"
 #include "Tile.h"
 #include "Utilities.h"
-#include "MeshHand.h"
 
 class HierarchyNode;
 class PositionLayout;
@@ -51,7 +50,6 @@ class View {
 public:
 
   View (std::shared_ptr<NavigationState> const &ownerNavigationState);
-  ~View ();
 
   // this is a "heavy" update that happens only when the NavigationState changes
   void UpdateFromChangedNavigationState(bool fadeIn = true);
@@ -67,8 +65,6 @@ public:
   float FOV() const { return m_fov; }
   float Near() const { return m_near; }
   float Far() const { return m_far; }
-  MeshHand& LeftHand() const { return *m_handL; }
-  MeshHand& RightHand() const { return *m_handR; }
   const ForceVector& Forces() const { return m_forces; }
   ForceVector& Forces() { return m_forces; }
   float TransitionOpacity() const { return m_transitionOpacity; }
@@ -76,11 +72,12 @@ public:
   const std::shared_ptr<SizeLayout>& GetSizeLayout() const { return m_sizeLayout; }
   const std::shared_ptr<PositionLayout>& GetPositionLayout() const { return m_positionLayout; }
   Vector2 ViewSizeAtPlane() const;
+  double LastUpdateTime() const { return m_lastUpdateTime; }
 
   // setters
   void SetSizeLayout(const std::shared_ptr<SizeLayout>& sizeLayout);
   void SetPositionLayout(const std::shared_ptr<PositionLayout>& positionLayout);
-  void ApplyVelocity(const Vector3& velocity, double timeSeconds, double deltaTime);
+  void ApplyVelocity(const Vector3& velocity);
   void SetPosition(const Vector3& position);
   void SetLookAt(const Vector3& lookat);
   void SetSearchFilter(const std::string& searchFilter);
@@ -120,6 +117,7 @@ private:
   ForceVector m_forces;
   std::string m_searchFilter;
   int m_prevSearchVisibleTiles;
+  double m_lastUpdateTime;
 
   // render parameters
   ExponentialFilter<Vector3> m_lookatSmoother;
@@ -132,10 +130,6 @@ private:
   ExponentialFilter<double> m_additionalZ;
   double m_lastSwitchTime;
   float m_transitionOpacity;
-
-  // hands
-  mutable MeshHand* m_handL;
-  mutable MeshHand* m_handR;
 
 };
 

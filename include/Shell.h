@@ -91,6 +91,11 @@ private:
   double m_lastTextChangeTime;
   std::string m_pathString;
   double m_lastPathChangeTime;
+
+  // hands
+  MeshHand* m_handL;
+  MeshHand* m_handR;
+
 };
 
 #endif

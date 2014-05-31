@@ -3,13 +3,14 @@
 
 #include "View.h"
 #include "Tile.h"
+#include "MeshHand.h"
 
 class Render {
 public:
   Render();
   void drawViewTiles(const View& view) const;
   void drawViewBackground(const View& view) const;
-  void drawViewHands(const View& view) const;
+  void drawHands(const View& view, MeshHand& handL, MeshHand& handR) const;
 
   void update_background(const ci::Surface8u& surface);
 

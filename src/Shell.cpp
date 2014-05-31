@@ -157,6 +157,8 @@ LeapShell::~LeapShell()
 #if defined(CINDER_MSW)
   CoUninitialize();
 #endif
+  delete m_handL;
+  delete m_handR;
 }
 
 void LeapShell::prepareSettings(Settings* settings)
@@ -202,6 +204,12 @@ void LeapShell::setup()
 
   m_root = std::shared_ptr<FileSystemNode>(new FileSystemNode("/"));
   m_state->setCurrentLocation(m_root);
+
+  m_handL = new MeshHand("Left Hand", MeshHand::LEFT);
+  m_handR = new MeshHand("Right Hand", MeshHand::RIGHT);
+
+  m_handL->SetScale(0.75f);
+  m_handR->SetScale(0.75f);
 
   // this is done after m_state->setCurrentLocation so the metadata keys are accessible to View.
   // also, view must be created after meshes.
@@ -348,9 +356,10 @@ void LeapShell::draw()
   ci::gl::color(ci::ColorA::white());
 
   m_interaction->UpdateView(*m_view);
+  m_interaction->UpdateMeshHands(*m_handL, *m_handR);
   m_render->drawViewBackground(*m_view);
   m_render->drawViewTiles(*m_view);
-  m_render->drawViewHands(*m_view);
+  m_render->drawHands(*m_view, *m_handL, *m_handR);
 
   ci::gl::setMatricesWindow(getWindowSize());
 #if 0
