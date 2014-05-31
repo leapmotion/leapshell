@@ -44,7 +44,7 @@ void Interaction::Update(const Leap::Frame& frame) {
 }
 
 void Interaction::UpdateActiveView(View& primary, View& secondary) {
-  static const float VIEW_ACTIVATION_SMOOTH = 0.95f;
+  static const float VIEW_ACTIVATION_SMOOTH = 0.925f;
   static const float PADDING_MULT = 2.0f;
   static const float VELOCITY_SQ_THRESH = 200 * 200; // to prevent accidentally triggering view when scrolling
 
@@ -92,7 +92,7 @@ void Interaction::UpdateView(View &view) {
   // apply the force to the view camera
   view.ApplyVelocity(view.Activation() * m_panForce.value);
   
-  if (view.Activation() > 0.9f) {
+  if (view.Activation() > 0.8f) {
     updateActiveTile(view, deltaTime);
   }
   updateInactiveTiles(view.Tiles());

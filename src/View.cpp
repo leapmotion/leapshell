@@ -55,6 +55,7 @@ View::View(std::shared_ptr<NavigationState> const &ownerNavigationState)
   m_isNavView = false;
   m_activationSmoother.Update(1.0f, 0.0, 0.5f);
   m_inactiveOpacity = 0.1f;
+  m_additionalZ.Update(0.0, 0.0, 0.5f);
 }
 
 void View::UpdateFromChangedNavigationState(bool fadeIn) {

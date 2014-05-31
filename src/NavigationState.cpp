@@ -41,7 +41,7 @@ bool NavigationState::navigateUp () {
 }
 
 bool NavigationState::navigateDown (std::shared_ptr<HierarchyNode> const &targetNode) {
-  assert(targetNode->parent() == m_currentLocation && "targetNode is not a child of current location");
+  //assert(targetNode->parent() == m_currentLocation && "targetNode is not a child of current location");
   m_currentLocation = targetNode;
   update();
   return true; // can't fail except by programmer error
