@@ -43,6 +43,42 @@ void Interaction::Update(const Leap::Frame& frame) {
   m_panForce.Update(force + DECAY_MULTIPLIER*prevForce, timeSeconds, curSmooth);
 }
 
+void Interaction::UpdateActiveView(View& primary, View& secondary) {
+  static const float VIEW_ACTIVATION_SMOOTH = 0.95f;
+
+  const Vector2 secondaryMin = secondary.GetPositionLayout()->GetContentsMinBounds();
+  const Vector2 secondaryMax = secondary.GetPositionLayout()->GetContentsMaxBounds();
+
+  bool closerToSecondary = false;
+
+  double closestTileZ = 0;
+  const TileVector& tiles = secondary.Tiles();
+  for (TileVector::const_iterator it = tiles.begin(); it != tiles.end(); ++it) {
+    const Tile& tile = *it;
+    closestTileZ = std::max(closestTileZ, tile.Position().z());
+  }
+  
+  for (HandInfoMap::iterator it = m_handInfos.begin(); it != m_handInfos.end(); ++it) {
+    Leap::Hand hand = it->second.Hand();
+    
+    const Vector3 origin = secondary.Position();
+    const Vector3 direction = (leapToView(hand.palmPosition(), secondary.LookAt()) - origin).normalized();
+    Vector3 hitPoint;
+    if (RayPlaneIntersection(origin, direction, closestTileZ*Vector3::UnitZ(), Vector3::UnitZ(), hitPoint)) {
+      closerToSecondary = hitPoint.x() >= secondaryMin.x() && hitPoint.x() <= secondaryMax.x() && hitPoint.y() >= secondaryMin.y() && hitPoint.y() <= secondaryMax.y();
+    }
+  }
+
+  float newPrimaryActivation = 1.0f;
+  float newSecondaryActivation = 0.0f;
+  if (closerToSecondary) {
+    std::swap(newPrimaryActivation, newSecondaryActivation);
+  }
+
+  primary.UpdateActivation(newPrimaryActivation, VIEW_ACTIVATION_SMOOTH);
+  secondary.UpdateActivation(newSecondaryActivation, VIEW_ACTIVATION_SMOOTH);
+}
+
 void Interaction::UpdateView(View &view) {
   const double deltaTime = Globals::curTimeSeconds - view.LastUpdateTime();
 

@@ -142,6 +142,7 @@ LeapShell::LeapShell()
   m_view(nullptr),
   m_state(new NavigationState()),
   m_render(nullptr),
+  m_navView(nullptr),
   m_lastTextChangeTime(0.0)
 {
 #if defined(CINDER_MSW)
@@ -214,7 +215,16 @@ void LeapShell::setup()
   // this is done after m_state->setCurrentLocation so the metadata keys are accessible to View.
   // also, view must be created after meshes.
   m_view = std::shared_ptr<View>(new View(m_state));
+  m_view->SetWorldView(m_view);
+  m_view->SetIsNavView(false);
   m_state->registerView(m_view);
+
+  m_navView = std::shared_ptr<View>(new View(m_state));
+  m_navView->SetWorldView(m_view);
+  m_navView->SetIsNavView(true);
+  m_state->registerView(m_navView);
+  m_navView->SetSizeLayout(std::shared_ptr<SizeLayout>(new UniformSizeLayout(10.0)));
+  m_navView->SetPositionLayout(std::shared_ptr<PositionLayout>(new ListLayout(Vector2(0, 33))));
 
   // initial sorting criteria keys TEMP HACK for 2014.04.21 demo
   std::vector<std::string> prioritizedKeys;
@@ -341,12 +351,7 @@ void LeapShell::update()
 
   if (!m_state->updateChildren()) {
     m_view->PerFrameUpdate();
-  }
-
-  const std::string pathString = m_state->currentLocation()->path();
-  if (pathString != m_pathString) {
-    m_pathString = pathString;
-    m_lastPathChangeTime = Globals::curTimeSeconds;
+    m_navView->PerFrameUpdate();
   }
 }
 
@@ -355,11 +360,16 @@ void LeapShell::draw()
   ci::gl::clear(ci::ColorA::gray(0.4f, 1.0f));
   ci::gl::color(ci::ColorA::white());
 
+  m_interaction->UpdateActiveView(*m_view, *m_navView);
   m_interaction->UpdateView(*m_view);
+  m_interaction->UpdateView(*m_navView);
   m_interaction->UpdateMeshHands(*m_handL, *m_handR);
   m_render->drawViewBackground(*m_view);
   m_render->drawViewTiles(*m_view);
   m_render->drawHands(*m_view, *m_handL, *m_handR);
+  m_render->drawViewTiles(*m_navView);
+  //m_render->drawViewBounds(*m_view, ci::ColorA(1.0f, 0.0f, 0.0f));
+  //m_render->drawViewBounds(*m_navView, ci::ColorA(0.0f, 1.0f, 0.0f));
 
   ci::gl::setMatricesWindow(getWindowSize());
 #if 0
@@ -370,7 +380,6 @@ void LeapShell::draw()
   // draw UI text strings
   drawString(m_view->SearchFilter(), 0.05*Globals::windowWidth, 0.025*Globals::windowHeight, Globals::curTimeSeconds, 1.0f, false);
   drawString(m_textString, Globals::windowWidth/2.0, 0.875*Globals::windowHeight, m_lastTextChangeTime, 2.0f, true);
-  drawString(m_pathString, Globals::windowWidth/2.0, 0.025*Globals::windowHeight, m_lastPathChangeTime, 3.0f, true);
 }
 
 void LeapShell::drawString(const std::string& str, double x, double y, double lastChangeTime, float fadeTime, bool center)

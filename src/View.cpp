@@ -52,26 +52,46 @@ View::View(std::shared_ptr<NavigationState> const &ownerNavigationState)
   m_lookatSmoother.Update(m_lookat, 0.0, 0.5f);
   m_lastSwitchTime = 0.0;
   m_lastUpdateTime = 0.0;
+  m_isNavView = false;
   m_activationSmoother.Update(1.0f, 0.0, 0.5f);
 }
 
 void View::UpdateFromChangedNavigationState(bool fadeIn) {
   m_sortedTiles.clear();
-  if (m_ownerNavigationState) {
-    if (m_sortingCriteria.PrioritizedKeys().empty()) {
-      std::shared_ptr<HierarchyNode> node = m_ownerNavigationState->currentLocation();
-      // if (node) {
-      //   ExtractPrioritizedKeysFrom(*node, m_sortingCriteria);
-      // }
-    }
-    RegenerateTilesAndTilePointers(m_ownerNavigationState->currentChildNodes(), m_tiles, m_sortedTiles, false);
-    // NOTE: now the elements of m_sortedTiles point to elements of m_tiles, so m_sortedTiles
-    // should be cleared and regenerated if m_tiles is changed.
-    SetSearchFilter(m_searchFilter);
-  }
-  SortTiles(m_sortedTiles, m_sortingCriteria.PrioritizedKeys());
 
-  PerFrameUpdate();
+  if (m_isNavView) {
+    if (m_ownerNavigationState) {
+      if (m_sortingCriteria.PrioritizedKeys().empty()) {
+        std::shared_ptr<HierarchyNode> node = m_ownerNavigationState->currentLocation();
+        // if (node) {
+        //   ExtractPrioritizedKeysFrom(*node, m_sortingCriteria);
+        // }
+      }
+      RegenerateTilesAndTilePointers(m_ownerNavigationState->currentOrderedPathNodes(), m_tiles, m_sortedTiles, false);
+      // NOTE: now the elements of m_sortedTiles point to elements of m_tiles, so m_sortedTiles
+      // should be cleared and regenerated if m_tiles is changed.
+      //SetSearchFilter(m_searchFilter);
+    }
+    SortTiles(m_sortedTiles, m_sortingCriteria.PrioritizedKeys());
+
+    PerFrameUpdate();
+  } else {
+    if (m_ownerNavigationState) {
+      if (m_sortingCriteria.PrioritizedKeys().empty()) {
+        std::shared_ptr<HierarchyNode> node = m_ownerNavigationState->currentLocation();
+        // if (node) {
+        //   ExtractPrioritizedKeysFrom(*node, m_sortingCriteria);
+        // }
+      }
+      RegenerateTilesAndTilePointers(m_ownerNavigationState->currentChildNodes(), m_tiles, m_sortedTiles, false);
+      // NOTE: now the elements of m_sortedTiles point to elements of m_tiles, so m_sortedTiles
+      // should be cleared and regenerated if m_tiles is changed.
+      SetSearchFilter(m_searchFilter);
+    }
+    SortTiles(m_sortedTiles, m_sortingCriteria.PrioritizedKeys());
+
+    PerFrameUpdate();
+  }
 }
 
 void View::PerFrameUpdate () {
@@ -112,11 +132,11 @@ void View::PerFrameUpdate () {
       selectedTile->ResetActivation();
       Globals::haveSeenOpenHand = false;
     } else if (!selectedNode->is_leaf() && (Globals::curTimeSeconds - m_lastSwitchTime) > MIN_TIME_BETWEEN_SWITCH) {
-      resetView();
+      m_worldView->resetView();
       Globals::lastTileSwitchTime = Globals::curTimeSeconds;
       Globals::lastTileTransitionTime = Globals::curTimeSeconds;
       m_tiles.clear();
-      m_additionalZ.Update(CAM_DISTANCE_FROM_PLANE, Globals::curTimeSeconds, 0.1f);
+      m_worldView->m_additionalZ.value = CAM_DISTANCE_FROM_PLANE;
       m_lastSwitchTime = Globals::curTimeSeconds;
       Globals::haveSeenOpenHand = false;
       m_ownerNavigationState->navigateDown(selectedNode);
@@ -124,12 +144,12 @@ void View::PerFrameUpdate () {
   } else if (haveParent && (m_position.z() > PUSH_THRESHOLD) && (Globals::curTimeSeconds - m_lastSwitchTime) > MIN_TIME_BETWEEN_SWITCH) {
     Globals::lastTileSwitchTime = Globals::curTimeSeconds;
     Globals::lastTileTransitionTime = Globals::curTimeSeconds;
-    m_additionalZ.Update(-CAM_DISTANCE_FROM_PLANE, Globals::curTimeSeconds, 0.1f);
+    m_worldView->m_additionalZ.value = -CAM_DISTANCE_FROM_PLANE;
     m_lastSwitchTime = Globals::curTimeSeconds;
     m_ownerNavigationState->navigateUp();
-    resetView();
+    m_worldView->resetView();
   } else {
-    m_additionalZ.Update(0.0, Globals::curTimeSeconds, 0.965f);
+    m_worldView->m_additionalZ.Update(0.0, Globals::curTimeSeconds, 0.965f);
   }
 }
 
@@ -157,21 +177,23 @@ void View::ApplyVelocity(const Vector3& velocity) {
   const double deltaTime = Globals::curTimeSeconds - m_lastUpdateTime;
   m_lastUpdateTime = Globals::curTimeSeconds;
 
-  const Vector3 deltaPosition = velocity * deltaTime;
+  if (!m_isNavView) {
+    const Vector3 deltaPosition = velocity * deltaTime;
 
-  m_position += deltaPosition;
-  m_lookat += deltaPosition;
+    m_position += deltaPosition;
+    m_lookat += deltaPosition;
 
-  static const double RUBBER_BAND_SPEED = 0.3333;
-  Vector3 clampedPosition = clampCameraPosition(m_position);
-  clampedPosition.z() = CAM_DISTANCE_FROM_PLANE;
-  const Vector3 positionRubberBandForce = RUBBER_BAND_SPEED * (clampedPosition - m_position);
-  Vector3 clampedLookat = clampCameraPosition(m_lookat);
-  clampedLookat.z() = 0.0;
-  const Vector3 lookatRubberBandForce = RUBBER_BAND_SPEED * (clampedLookat - m_lookat);
+    static const double RUBBER_BAND_SPEED = 0.3333;
+    Vector3 clampedPosition = clampCameraPosition(m_position);
+    clampedPosition.z() = CAM_DISTANCE_FROM_PLANE;
+    const Vector3 positionRubberBandForce = RUBBER_BAND_SPEED * (clampedPosition - m_position);
+    Vector3 clampedLookat = clampCameraPosition(m_lookat);
+    clampedLookat.z() = 0.0;
+    const Vector3 lookatRubberBandForce = RUBBER_BAND_SPEED * (clampedLookat - m_lookat);
 
-  m_position += positionRubberBandForce;
-  m_lookat += lookatRubberBandForce;
+    m_position += positionRubberBandForce;
+    m_lookat += lookatRubberBandForce;
+  }
 
   m_lookatSmoother.Update(m_lookat, Globals::curTimeSeconds, 0.5f);
 }

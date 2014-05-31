@@ -81,6 +81,7 @@ private:
 
   std::shared_ptr<NavigationState> m_state;
   std::shared_ptr<View> m_view;
+  std::shared_ptr<View> m_navView;
   Render* m_render;
   Interaction* m_interaction;
 
@@ -89,8 +90,6 @@ private:
   // for text drawing
   std::string m_textString;
   double m_lastTextChangeTime;
-  std::string m_pathString;
-  double m_lastPathChangeTime;
 
   // hands
   MeshHand* m_handL;

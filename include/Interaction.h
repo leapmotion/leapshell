@@ -15,6 +15,7 @@ public:
   Interaction();
   void Update(const Leap::Frame& frame);
   void UpdateView(View &view);
+  void UpdateActiveView(View& primary, View& secondary);
   void UpdateMeshHands(MeshHand& handL, MeshHand& handR);
 
 private:

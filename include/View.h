@@ -83,6 +83,8 @@ public:
   void SetLookAt(const Vector3& lookat);
   void SetSearchFilter(const std::string& searchFilter);
   void UpdateActivation(float activation, float smooth);
+  void SetWorldView(const std::shared_ptr<View>& worldViewPtr) { m_worldView = worldViewPtr; }
+  void SetIsNavView(bool isNav) { m_isNavView = isNav; }
 
   // TEMPORARY HACK for 2014.04.21 demo
   void SetPrioritizedKeys (const std::vector<std::string> &prioritizedKeys) {
@@ -132,6 +134,9 @@ private:
   ExponentialFilter<double> m_additionalZ;
   double m_lastSwitchTime;
   float m_transitionOpacity;
+
+  std::shared_ptr<View> m_worldView;
+  bool m_isNavView;
 
   ExponentialFilter<float> m_activationSmoother;
 
