@@ -45,9 +45,14 @@ void Interaction::Update(const Leap::Frame& frame) {
 
 void Interaction::UpdateActiveView(View& primary, View& secondary) {
   static const float VIEW_ACTIVATION_SMOOTH = 0.95f;
+  static const float PADDING_MULT = 2.0f;
+  static const float VELOCITY_SQ_THRESH = 200 * 200; // to prevent accidentally triggering view when scrolling
 
-  const Vector2 secondaryMin = secondary.GetPositionLayout()->GetContentsMinBounds();
-  const Vector2 secondaryMax = secondary.GetPositionLayout()->GetContentsMaxBounds();
+  Vector2 secondaryMin = secondary.GetPositionLayout()->GetContentsMinBounds();
+  Vector2 secondaryMax = secondary.GetPositionLayout()->GetContentsMaxBounds();
+  const Vector2 secondaryCenter = 0.5*(secondaryMax + secondaryMin);
+  secondaryMin = PADDING_MULT*(secondaryMin - secondaryCenter) + secondaryCenter;
+  secondaryMax = PADDING_MULT*(secondaryMax - secondaryCenter) + secondaryCenter;
 
   bool closerToSecondary = false;
 
@@ -61,10 +66,12 @@ void Interaction::UpdateActiveView(View& primary, View& secondary) {
   for (HandInfoMap::iterator it = m_handInfos.begin(); it != m_handInfos.end(); ++it) {
     Leap::Hand hand = it->second.Hand();
     
+    const Vector3 velocity = it->second.Velocity();
+
     const Vector3 origin = secondary.Position();
     const Vector3 direction = (leapToView(hand.palmPosition(), secondary.LookAt()) - origin).normalized();
     Vector3 hitPoint;
-    if (RayPlaneIntersection(origin, direction, closestTileZ*Vector3::UnitZ(), Vector3::UnitZ(), hitPoint)) {
+    if (velocity.squaredNorm() < VELOCITY_SQ_THRESH && RayPlaneIntersection(origin, direction, closestTileZ*Vector3::UnitZ(), Vector3::UnitZ(), hitPoint)) {
       closerToSecondary = hitPoint.x() >= secondaryMin.x() && hitPoint.x() <= secondaryMax.x() && hitPoint.y() >= secondaryMin.y() && hitPoint.y() <= secondaryMax.y();
     }
   }
