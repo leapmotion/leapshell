@@ -14,6 +14,7 @@ void Render::update_background(const ci::Surface8u& surface) {
 }
 
 void Render::drawViewTiles(const View& view) const {
+  static const float INACTIVE_VIEW_OPACITY = 0.2f;
   m_camera.lookAt(ToVec3f(view.Position()), ToVec3f(view.LookAt()), ToVec3f(view.Up()));
   m_camera.setPerspective(view.FOV(), static_cast<float>(Globals::aspectRatio), view.Near(), view.Far());
   ci::gl::setMatrices(m_camera);
@@ -21,14 +22,14 @@ void Render::drawViewTiles(const View& view) const {
   // draw tiles
   ci::gl::enableAlphaBlending();
   const TileVector& tiles = view.Tiles();
-  const float transitionOpacity = view.TransitionOpacity();
+  const float opacity = (INACTIVE_VIEW_OPACITY + (1.0f-INACTIVE_VIEW_OPACITY)*view.Activation()) * view.TransitionOpacity();
   const Vector2 viewSize = view.ViewSizeAtPlane();
 
   // draw backmost tiles before all others
   for (TileVector::const_iterator it = tiles.begin(); it != tiles.end(); ++it) {
     const Tile& tile = *it;
     if (tile.IsVisible() && tile.Position().z() < 0 && tile.Activation() > 0.01f) {
-      drawTile(tile, view.Forces(), transitionOpacity);
+      drawTile(tile, view.Forces(), opacity);
     }
   }
 
@@ -36,7 +37,7 @@ void Render::drawViewTiles(const View& view) const {
   for (TileVector::const_iterator it = tiles.begin(); it != tiles.end(); ++it) {
     const Tile& tile = *it;
     if (tile.IsVisible() && tile.Activation() <= 0.01f && tileInView(viewSize, view.LookAt(), tile.Position())) {
-      drawTile(tile, view.Forces(), transitionOpacity);
+      drawTile(tile, view.Forces(), opacity);
     }
   }
 
@@ -44,7 +45,7 @@ void Render::drawViewTiles(const View& view) const {
   for (TileVector::const_iterator it = tiles.begin(); it != tiles.end(); ++it) {
     const Tile& tile = *it;
     if (tile.IsVisible() && tile.Position().z() >= 0 && tile.Activation() > 0.01f) {
-      drawTile(tile, view.Forces(), transitionOpacity);
+      drawTile(tile, view.Forces(), opacity);
     }
   }
 }
@@ -163,7 +164,16 @@ void Render::drawHands(const View& view, MeshHand& handL, MeshHand& handR) const
   ci::gl::enableAlphaBlending();
 }
 
-void Render::drawTile(const Tile& tile, const ForceVector& forces, float transitionOpacity) const {
+void Render::drawViewBounds(const View& view, const ci::ColorA& color) const {
+  const Vector2 min = view.GetPositionLayout()->GetContentsMinBounds() - view.LookAt().head<2>();
+  const Vector2 max = view.GetPositionLayout()->GetContentsMaxBounds() - view.LookAt().head<2>();
+
+  ci::Rectf rect(min.x(), min.y(), max.x(), max.y());
+  ci::gl::color(color);
+  ci::gl::drawStrokedRect(rect);
+}
+
+void Render::drawTile(const Tile& tile, const ForceVector& forces, float tileOpacity) const {
   if (!tile.Node()) {
     return;
   }
@@ -172,7 +182,7 @@ void Render::drawTile(const Tile& tile, const ForceVector& forces, float transit
   const std::string name = tile.Node()->get_metadata_as<std::string>("name");
 
   // compute tile opacity
-  const float opacity = tile.TransitionWarmupFactor() * transitionOpacity;
+  const float opacity = tile.TransitionWarmupFactor() * tileOpacity;
 
   const Vector3 tileSize = tile.Size();
   float highlight = tile.Highlight();

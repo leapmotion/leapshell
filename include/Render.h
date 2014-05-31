@@ -11,6 +11,7 @@ public:
   void drawViewTiles(const View& view) const;
   void drawViewBackground(const View& view) const;
   void drawHands(const View& view, MeshHand& handL, MeshHand& handR) const;
+  void drawViewBounds(const View& view, const ci::ColorA& color) const;
 
   void update_background(const ci::Surface8u& surface);
 
@@ -18,7 +19,7 @@ public:
 
 private:
 
-  void drawTile(const Tile& tile, const ForceVector& forces, float transitionOpacity) const;
+  void drawTile(const Tile& tile, const ForceVector& forces, float tileOpacity) const;
   static ci::ColorA blendColors(const ci::ColorA& c1, const ci::ColorA& c2, float blend);
   static bool tileInView(const Vector2& viewSize, const Vector3& lookat, const Vector3& tilePosition);
 

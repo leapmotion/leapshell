@@ -47,9 +47,13 @@ void Interaction::UpdateView(View &view) {
   const double deltaTime = Globals::curTimeSeconds - view.LastUpdateTime();
 
   // apply the force to the view camera
-  view.ApplyVelocity(m_panForce.value);
-
-  applyInfluenceToTiles(view, deltaTime);
+  view.ApplyVelocity(view.Activation() * m_panForce.value);
+  
+  if (view.Activation() > 0.9f) {
+    updateActiveTile(view, deltaTime);
+  }
+  updateInactiveTiles(view.Tiles());
+  computeForcesFromTiles(view.Tiles(), view.Forces());
 }
 
 void Interaction::UpdateMeshHands(MeshHand& handL, MeshHand& handR) {
@@ -85,20 +89,21 @@ void Interaction::cleanupHandInfos(double frameTime) {
   }
 }
 
-void Interaction::applyInfluenceToTiles(View& view, double deltaTime) {
+void Interaction::updateActiveTile(View& view, double deltaTime) {
+  const float viewActivation = view.Activation();
   for (HandInfoMap::iterator it = m_handInfos.begin(); it != m_handInfos.end(); ++it) {
     Leap::Hand hand = it->second.Hand();
 
     // find the closest tile to the hand based on a ray cast
-    Tile* closestTile = findClosestTile(hand, view.LookAt(), it->second.ClosestTile(), view.Tiles());
+    Tile* closestTile = findClosestTile(hand, view.Position(), view.LookAt(), it->second.ClosestTile(), view.Tiles());
     it->second.SetClosestTile(closestTile);
 
     // increase activation for closest tile to hand
     if (closestTile && Globals::haveSeenOpenHand) {
       // only allow activating the tile if it's already highlighted
-      const float newActivation = closestTile->Highlight() * it->second.GrabPinchStrength();
+      const float newActivation = viewActivation * closestTile->Highlight() * it->second.GrabPinchStrength();
       closestTile->UpdateActivation(newActivation, Tile::ACTIVATION_SMOOTH);
-      closestTile->UpdateHighlight(std::min(1.0f, closestTile->Highlight() + INFLUENCE_CHANGE_SPEED), Tile::ACTIVATION_SMOOTH);
+      closestTile->UpdateHighlight(std::min(viewActivation, closestTile->Highlight() + INFLUENCE_CHANGE_SPEED), Tile::ACTIVATION_SMOOTH);
 
       // calculate pulling force from hand
       const Vector3 grabDelta = it->second.GrabPinchStrength() * (closestTile->TargetGrabDelta() + deltaTime*it->second.VelocityAt((view.Position() - view.LookAt()), closestTile->Position() - view.LookAt()));
@@ -106,18 +111,11 @@ void Interaction::applyInfluenceToTiles(View& view, double deltaTime) {
       closestTile->UpdateGrabDelta(Tile::GRABDELTA_SMOOTH);
     }
   }
-
-  updateInactiveTiles(view.Tiles());
-  computeForcesFromTiles(view.Tiles(), view.Forces());
 }
 
-Tile* Interaction::findClosestTile(const Leap::Hand& hand, const Vector3& lookat, Tile* prevClosest, TileVector& tiles) {
-  static const Vector3 origin = View::CAM_DISTANCE_FROM_PLANE * Vector3::UnitZ();
-  static const Vector3 normal = Vector3::UnitZ();
-
-  const Vector3 position = hand.palmPosition().toVector3<Vector3>() + Globals::LEAP_OFFSET;
-  const Vector3 palmPoint = position + lookat;
-  const Vector3 direction = (position - origin).normalized();
+Tile* Interaction::findClosestTile(const Leap::Hand& hand, const Vector3& position, const Vector3& lookat, Tile* prevClosest, TileVector& tiles) {
+  const Vector3 palmPoint = leapToView(hand.palmPosition(), lookat);
+  const Vector3 direction = (palmPoint - position).normalized();
 
   Vector3 hitPoint;
   float closestDistSq = MAX_INFLUENCE_DISTANCE_SQ;
@@ -126,10 +124,9 @@ Tile* Interaction::findClosestTile(const Leap::Hand& hand, const Vector3& lookat
     Tile& tile = *it;
 
     // calculate projection point from camera to tile
-    if (!tile.IsVisible() || !RayPlaneIntersection(origin, direction, tile.Position(), normal, hitPoint)) {
+    if (!tile.IsVisible() || !RayPlaneIntersection(position, direction, tile.Position(), Vector3::UnitZ(), hitPoint)) {
       continue;
     }
-    hitPoint += lookat;
 
     // make it easier for this hand to hit its previous closest tile
     float distMult = 1.0f;
@@ -193,4 +190,8 @@ Vector3 Interaction::forceFromHand(const HandInfo& handInfo) {
     totalForce += warmupMultiplier * warmupMultiplier * grabMultiplier * grabMultiplier * grabMultiplier * dot * dot * match * modifiedVelocity;
   }
   return totalForce;
+}
+
+Vector3 Interaction::leapToView(const Leap::Vector& position, const Vector3& lookat) {
+  return position.toVector3<Vector3>() + Globals::LEAP_OFFSET + lookat;
 }

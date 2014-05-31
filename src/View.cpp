@@ -52,6 +52,7 @@ View::View(std::shared_ptr<NavigationState> const &ownerNavigationState)
   m_lookatSmoother.Update(m_lookat, 0.0, 0.5f);
   m_lastSwitchTime = 0.0;
   m_lastUpdateTime = 0.0;
+  m_activationSmoother.Update(1.0f, 0.0, 0.5f);
 }
 
 void View::UpdateFromChangedNavigationState(bool fadeIn) {
@@ -201,6 +202,10 @@ void View::SetSearchFilter(const std::string& searchFilter) {
     Globals::lastTileSwitchTime = Globals::curTimeSeconds;
     m_prevSearchVisibleTiles = numVisibleTiles;
   }
+}
+
+void View::UpdateActivation(float activation, float smooth) {
+  m_activationSmoother.Update(activation, Globals::curTimeSeconds, smooth);
 }
 
 void View::resetView() {

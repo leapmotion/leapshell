@@ -73,6 +73,7 @@ public:
   const std::shared_ptr<PositionLayout>& GetPositionLayout() const { return m_positionLayout; }
   Vector2 ViewSizeAtPlane() const;
   double LastUpdateTime() const { return m_lastUpdateTime; }
+  float Activation() const { return m_activationSmoother.value; }
 
   // setters
   void SetSizeLayout(const std::shared_ptr<SizeLayout>& sizeLayout);
@@ -81,6 +82,7 @@ public:
   void SetPosition(const Vector3& position);
   void SetLookAt(const Vector3& lookat);
   void SetSearchFilter(const std::string& searchFilter);
+  void UpdateActivation(float activation, float smooth);
 
   // TEMPORARY HACK for 2014.04.21 demo
   void SetPrioritizedKeys (const std::vector<std::string> &prioritizedKeys) {
@@ -130,6 +132,8 @@ private:
   ExponentialFilter<double> m_additionalZ;
   double m_lastSwitchTime;
   float m_transitionOpacity;
+
+  ExponentialFilter<float> m_activationSmoother;
 
 };
 

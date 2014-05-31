@@ -24,12 +24,13 @@ private:
 
   void updateHandInfos(double frameTime);
   void cleanupHandInfos(double frameTime);
-  void applyInfluenceToTiles(View& view, double deltaTime);
- 
+  void updateActiveTile(View& view, double deltaTime);
+
   static void updateInactiveTiles(TileVector& tiles);
   static void computeForcesFromTiles(const TileVector& tiles, ForceVector& forces);
-  static Tile* findClosestTile(const Leap::Hand& hand, const Vector3& lookat, Tile* prevClosest, TileVector& tiles);
+  static Tile* findClosestTile(const Leap::Hand& hand, const Vector3& position, const Vector3& lookat, Tile* prevClosest, TileVector& tiles);
   static Vector3 forceFromHand(const HandInfo& handInfo);
+  static Vector3 leapToView(const Leap::Vector& position, const Vector3& lookat);
 
   typedef std::map<int, HandInfo, std::less<int>, Eigen::aligned_allocator<std::pair<int, HandInfo> > > HandInfoMap;
 
