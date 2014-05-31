@@ -19,7 +19,7 @@ void SizeLayout::animateTileSize(Tile& tile, int idx, const Vector3& newSize) co
 
 // UniformSizeLayout
 
-UniformSizeLayout::UniformSizeLayout() : m_size(Vector3::Constant(15.0)) { }
+UniformSizeLayout::UniformSizeLayout(double size) : m_size(Vector3::Constant(size)) { }
 
 void UniformSizeLayout::UpdateTileSizes(const Range<TilePointerVector::iterator> &tiles) {
   int idx = 0;
@@ -30,8 +30,12 @@ void UniformSizeLayout::UpdateTileSizes(const Range<TilePointerVector::iterator>
 
 // PositionLayout
 
-PositionLayout::PositionLayout() : m_creationTime(Globals::curTimeSeconds), m_numVisibleTiles(0) {
-
+PositionLayout::PositionLayout() :
+  m_creationTime(Globals::curTimeSeconds),
+  m_numVisibleTiles(0),
+  m_contentsMin(Vector2::Zero()),
+  m_contentsMax(Vector2::Zero())
+{
 }
 
 void PositionLayout::animateTilePosition(Tile& tile, int idx, const Vector3& newPosition) const {
@@ -56,6 +60,8 @@ void GridLayout::UpdateTilePositions(const Range<TilePointerVector::iterator> &t
   m_height = inc * NUM_ROWS;
 
   // start placing tiles
+  m_contentsMin.setConstant(DBL_MAX);
+  m_contentsMax.setConstant(-DBL_MAX);
   const double halfWidth = m_width/2.0;
   const double halfHeight = m_height/2.0;
   double curWidth = -halfWidth;
@@ -80,6 +86,11 @@ void GridLayout::UpdateTilePositions(const Range<TilePointerVector::iterator> &t
       curWidth = -halfWidth;
       curHeight -= inc;
     }
+
+    const Vector3 curPos = tile.Position();
+    const Vector3 curSize = tile.Size();
+    m_contentsMin = m_contentsMin.cwiseMin(curPos.head<2>() - 0.5*curSize.head<2>());
+    m_contentsMax = m_contentsMax.cwiseMax(curPos.head<2>() + 0.5*curSize.head<2>());
   }
 }
 
@@ -325,5 +336,59 @@ Vector2 BlobClusterLayout::GetCameraMaxBounds() const {
   return m_cameraMaxBounds;
 }
 
+// ListLayout
 
+ListLayout::ListLayout(const Vector2& offset) : m_offset(offset), m_orientation(HORIZONTAL)
+{
+}
 
+void ListLayout::UpdateTilePositions(const Range<TilePointerVector::iterator> &tiles, bool updatePhantomPosition) {
+  static const double SIZE_PADDING_MULT = 1.25;
+
+  double totalSize = 0;
+  double firstSize = 0;
+  for (auto t = tiles; t.is_not_at_end(); ++t) {
+    Tile& tile = **t;
+    if (tile.IsVisible()) {
+      const double curSize = (m_orientation == HORIZONTAL) ? tile.Size().x() : tile.Size().y();
+      totalSize += SIZE_PADDING_MULT * curSize;
+      if (firstSize == 0) {
+        firstSize = curSize;
+      }
+    }
+  }
+
+  Vector3 desiredPos = Vector3::Zero();
+  desiredPos.head<2>() += m_offset;
+  desiredPos.x() = -0.5*totalSize + 0.5*firstSize;
+  int idx = 0;
+  m_contentsMin.setConstant(DBL_MAX);
+  m_contentsMax.setConstant(-DBL_MAX);
+  for (auto t = tiles; t.is_not_at_end(); ++t, ++idx) {
+    Tile& tile = **t;
+    if (!tile.IsVisible()) {
+      continue;
+    }
+    if (updatePhantomPosition) {
+      tile.m_phantomPosition = desiredPos;
+    } else {
+      animateTilePosition(tile, idx, desiredPos);
+    }
+
+    const Vector3 spacing = (m_orientation == HORIZONTAL) ? tile.Size().x()*Vector3::UnitX() : tile.Size().y()*Vector3::UnitY();
+    desiredPos += SIZE_PADDING_MULT * spacing;
+
+    const Vector3 curPos = tile.Position();
+    const Vector3 curSize = tile.Size();
+    m_contentsMin = m_contentsMin.cwiseMin(curPos.head<2>() - 0.5*curSize.head<2>());
+    m_contentsMax = m_contentsMax.cwiseMax(curPos.head<2>() + 0.5*curSize.head<2>());
+  }
+}
+
+Vector2 ListLayout::GetCameraMinBounds() const {
+  return Vector2::Zero();
+}
+
+Vector2 ListLayout::GetCameraMaxBounds() const {
+  return Vector2::Zero();
+}

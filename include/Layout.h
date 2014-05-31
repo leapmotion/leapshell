@@ -23,7 +23,7 @@ protected:
 /// @brief Sets all tile sizes to the same, pre-specified size.  The default is Vector3::Constant(15).
 class UniformSizeLayout : public SizeLayout {
 public:
-  UniformSizeLayout();
+  UniformSizeLayout(double size = 15.0);
   virtual void UpdateTileSizes(const Range<TilePointerVector::iterator> &tiles) override;
   void SetSize(const Vector3 &size) { m_size = size; }
   EIGEN_MAKE_ALIGNED_OPERATOR_NEW
@@ -42,12 +42,16 @@ public:
   virtual void UpdateTilePositions(const Range<TilePointerVector::iterator> &tiles, bool updatePhantomPosition = false) = 0;
   virtual Vector2 GetCameraMinBounds() const = 0;
   virtual Vector2 GetCameraMaxBounds() const = 0;
+  const Vector2& GetContentsMinBounds() const { return m_contentsMin; }
+  const Vector2& GetContentsMaxBounds() const { return m_contentsMax; }
   void SetNumVisibleTiles(int numVisibleTiles) { m_numVisibleTiles = numVisibleTiles; }
   EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 protected:
   void animateTilePosition(Tile& tile, int idx, const Vector3& newPosition) const;
   double m_creationTime;
   int m_numVisibleTiles;
+  Vector2 m_contentsMin;
+  Vector2 m_contentsMax;
 };
 
 /// @brief Lays tiles out in a fixed-width grid, row-major, in the given order.
@@ -146,6 +150,21 @@ private:
   double m_boundingRadius;
   Vector2 m_cameraMinBounds;
   Vector2 m_cameraMaxBounds;
+};
+
+class ListLayout : public PositionLayout {
+public:
+  enum Orientation { HORIZONTAL, VERTICAL };
+  ListLayout(const Vector2& offset = Vector2::Zero());
+  virtual void UpdateTilePositions(const Range<TilePointerVector::iterator> &tiles, bool updatePhantomPosition = false) override;
+  virtual Vector2 GetCameraMinBounds() const override;
+  virtual Vector2 GetCameraMaxBounds() const override;
+  void SetOrientation(Orientation orient) { m_orientation = orient; }
+  void SetOffset(const Vector2& offset) { m_offset = offset; }
+  EIGEN_MAKE_ALIGNED_OPERATOR_NEW
+private:
+  Vector2 m_offset;
+  Orientation m_orientation;
 };
 
 #endif
