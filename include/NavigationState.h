@@ -56,11 +56,17 @@ public:
   void update();
   bool updateChildren();
 
+  HierarchyNodeVector const &currentOrderedPathNodes() {
+    boost::lock_guard<boost::mutex> lock(m_ancestorMutex);
+    return m_currentOrderedPathNodes;
+  }
+
 private:
   void updateThread();
 
   std::shared_ptr<HierarchyNode> m_currentLocation;
   HierarchyNodeVector m_currentChildNodes;
+  HierarchyNodeVector m_currentOrderedPathNodes;
 
   bool m_running;
   bool m_dirty;
@@ -70,6 +76,7 @@ private:
   boost::thread m_childThread;
   boost::condition_variable m_cond;
   boost::mutex m_mutex;
+  boost::mutex m_ancestorMutex;
 
   typedef std::set<std::weak_ptr<View>, std::owner_less<std::weak_ptr<View>>> ViewSet;
   ViewSet m_views;

@@ -79,6 +79,7 @@ void NavigationState::updateThread() {
       m_dirty = true;
       m_first = true;
       m_currentChildNodes.clear();
+      m_currentOrderedPathNodes.clear();
 
       // if the current location is valid, query its child nodes
       if (m_currentLocation) {
@@ -90,6 +91,11 @@ void NavigationState::updateThread() {
           m_currentChildNodes.push_back(child);
           m_dirty = true;
           return true;
+        });
+
+        m_currentLocation->all_ancestors([this] (const std::shared_ptr<HierarchyNode>& child) {
+          boost::lock_guard<boost::mutex> lock(m_ancestorMutex);
+          m_currentOrderedPathNodes.push_back(child);
         });
       }
     }

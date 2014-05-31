@@ -50,6 +50,8 @@ public:
   /// @brief Returns true if and only if this is a leaf node.
   virtual bool is_leaf () const = 0;
 
+  virtual void all_ancestors(std::function<void(const std::shared_ptr<HierarchyNode>&)> callback);
+
   /// @brief Uniquely identifies this item in the hierearchy.
   /// @details This item's ancestry should be derivable from the path (e.g. the directory portion of a file path).
   virtual std::string path () const = 0;
