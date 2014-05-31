@@ -14,7 +14,7 @@ void Render::update_background(const ci::Surface8u& surface) {
 }
 
 void Render::drawViewTiles(const View& view) const {
-  static const float INACTIVE_VIEW_OPACITY = 0.2f;
+  const float inactiveOpacity = view.InactiveOpacity();
   m_camera.lookAt(ToVec3f(view.Position()), ToVec3f(view.LookAt()), ToVec3f(view.Up()));
   m_camera.setPerspective(view.FOV(), static_cast<float>(Globals::aspectRatio), view.Near(), view.Far());
   ci::gl::setMatrices(m_camera);
@@ -22,7 +22,7 @@ void Render::drawViewTiles(const View& view) const {
   // draw tiles
   ci::gl::enableAlphaBlending();
   const TileVector& tiles = view.Tiles();
-  const float opacity = (INACTIVE_VIEW_OPACITY + (1.0f-INACTIVE_VIEW_OPACITY)*view.Activation()) * view.TransitionOpacity();
+  const float opacity = (inactiveOpacity + (1.0f-inactiveOpacity)*view.Activation()) * view.TransitionOpacity();
   const Vector2 viewSize = view.ViewSizeAtPlane();
 
   // draw backmost tiles before all others

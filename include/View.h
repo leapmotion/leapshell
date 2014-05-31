@@ -31,7 +31,7 @@ private:
 struct Force {
   Force(const Vector3& position, float strength) : m_position(position), m_strength(strength) { }
   Vector3 ForceAt(const Vector3& position) const {
-    static const float FORCE_DISTANCE = 75.0f;
+    static const float FORCE_DISTANCE = 50.0f;
     const Vector3 diff = position - m_position;
     const double normSq = diff.squaredNorm();
     if (normSq > 0.001) {
@@ -74,6 +74,7 @@ public:
   Vector2 ViewSizeAtPlane() const;
   double LastUpdateTime() const { return m_lastUpdateTime; }
   float Activation() const { return m_activationSmoother.value; }
+  float InactiveOpacity() const { return m_inactiveOpacity; }
 
   // setters
   void SetSizeLayout(const std::shared_ptr<SizeLayout>& sizeLayout);
@@ -85,6 +86,7 @@ public:
   void UpdateActivation(float activation, float smooth);
   void SetWorldView(const std::shared_ptr<View>& worldViewPtr) { m_worldView = worldViewPtr; }
   void SetIsNavView(bool isNav) { m_isNavView = isNav; }
+  void SetInactiveOpacity(float opacity) { m_inactiveOpacity = opacity; }
 
   // TEMPORARY HACK for 2014.04.21 demo
   void SetPrioritizedKeys (const std::vector<std::string> &prioritizedKeys) {
@@ -137,6 +139,7 @@ private:
 
   std::shared_ptr<View> m_worldView;
   bool m_isNavView;
+  float m_inactiveOpacity;
 
   ExponentialFilter<float> m_activationSmoother;
 

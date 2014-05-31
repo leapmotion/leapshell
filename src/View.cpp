@@ -54,6 +54,7 @@ View::View(std::shared_ptr<NavigationState> const &ownerNavigationState)
   m_lastUpdateTime = 0.0;
   m_isNavView = false;
   m_activationSmoother.Update(1.0f, 0.0, 0.5f);
+  m_inactiveOpacity = 0.1f;
 }
 
 void View::UpdateFromChangedNavigationState(bool fadeIn) {
@@ -237,7 +238,7 @@ void View::resetView() {
 
 Vector3 View::clampCameraPosition(const Vector3& position) const {
   Vector3 result(position);
-  static const float EXTRA_HEIGHT_SCALE = 0.95f; // scale factor to leave some room at the edge
+  static const float EXTRA_HEIGHT_SCALE = 0.75f; // scale factor to leave some room at the edge
   const float extraHeight = EXTRA_HEIGHT_SCALE * static_cast<float>(ViewSizeAtPlane().y()/2.0);
   Vector2 min = m_positionLayout->GetCameraMinBounds();
   Vector2 max = m_positionLayout->GetCameraMaxBounds();

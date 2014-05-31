@@ -343,7 +343,7 @@ ListLayout::ListLayout(const Vector2& offset) : m_offset(offset), m_orientation(
 }
 
 void ListLayout::UpdateTilePositions(const Range<TilePointerVector::iterator> &tiles, bool updatePhantomPosition) {
-  static const double SIZE_PADDING_MULT = 1.25;
+  static const double SIZE_PADDING_MULT = 1.35;
 
   double totalSize = 0;
   double firstSize = 0;

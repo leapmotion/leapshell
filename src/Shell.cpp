@@ -217,6 +217,7 @@ void LeapShell::setup()
   m_view = std::shared_ptr<View>(new View(m_state));
   m_view->SetWorldView(m_view);
   m_view->SetIsNavView(false);
+  m_view->SetInactiveOpacity(0.1f);
   m_state->registerView(m_view);
 
   m_navView = std::shared_ptr<View>(new View(m_state));
@@ -225,6 +226,7 @@ void LeapShell::setup()
   m_state->registerView(m_navView);
   m_navView->SetSizeLayout(std::shared_ptr<SizeLayout>(new UniformSizeLayout(10.0)));
   m_navView->SetPositionLayout(std::shared_ptr<PositionLayout>(new ListLayout(Vector2(0, 33))));
+  m_navView->SetInactiveOpacity(0.0f);
 
   // initial sorting criteria keys TEMP HACK for 2014.04.21 demo
   std::vector<std::string> prioritizedKeys;
