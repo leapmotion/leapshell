@@ -3,16 +3,18 @@
 #include <cinder/CinderResources.h>
 
 // fonts
-#define RES_FONT_FREIGHTSANS_TTF              CINDER_RESOURCE( ../resources/, freigsanpromed-webfont.ttf, 100, TTF )
-#define RES_FONT_FREIGHTSANSBOLD_TTF          CINDER_RESOURCE( ../resources/, freigsanprobold-webfont.ttf, 101, TTF )
+#define RES_FONT_PROXIMA_NOVA_OTF             CINDER_RESOURCE( ../resources/, proxima-nova.otf, 100, OTF )
 
 // hand meshes
 #define RES_LEFT_HAND_FBX                     CINDER_RESOURCE( ../resources/, models/left_hand.fbx, 120, FBX )
 #define RES_RIGHT_HAND_FBX                    CINDER_RESOURCE( ../resources/, models/right_hand.fbx, 121, FBX )
 
 // shaders
-#define RES_HANDS_FRAG_GLSL                   CINDER_RESOURCE( ../resources/, shaders/hands-frag.glsl, 130, GLSL )
-#define RES_HANDS_VERT_GLSL                   CINDER_RESOURCE( ../resources/, shaders/hands-vert.glsl, 131, GLSL )
+#define RES_HANDS_FRAG_GLSL                   CINDER_RESOURCE( ../resources/, shaders/hands-frag.glsl, 140, GLSL )
+#define RES_HANDS_VERT_GLSL                   CINDER_RESOURCE( ../resources/, shaders/hands-vert.glsl, 141, GLSL )
+#define RES_PASSTHROUGH_VERT_GLSL             CINDER_RESOURCE( ../resources/, shaders/passthrough-vert.glsl, 142, GLSL )
+#define RES_BLUR_FRAG_GLSL                    CINDER_RESOURCE( ../resources/, shaders/blur-frag.glsl, 143, GLSL )
+#define RES_BLUR_VERT_GLSL                    CINDER_RESOURCE( ../resources/, shaders/blur-vert.glsl, 144, GLSL )
 
 // images
-#define RES_WINTER_JPG                        CINDER_RESOURCE( ../resources/, images/winter.jpg, 140, JPG )
+#define RES_WINTER_JPG                        CINDER_RESOURCE( ../resources/, images/winter.jpg, 160, JPG )

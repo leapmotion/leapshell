@@ -73,7 +73,7 @@ public:
   const std::shared_ptr<PositionLayout>& GetPositionLayout() const { return m_positionLayout; }
   Vector2 ViewSizeAtPlane() const;
   double LastUpdateTime() const { return m_lastUpdateTime; }
-  float Activation() const { return m_activationSmoother.value; }
+  float Activation() const { return m_activationSmoother.value(); }
   float InactiveOpacity() const { return m_inactiveOpacity; }
 
   // setters
@@ -141,7 +141,7 @@ private:
   bool m_isNavView;
   float m_inactiveOpacity;
 
-  ExponentialFilter<float> m_activationSmoother;
+  MultiExponentialFilter<float, 5> m_activationSmoother;
 
 };
 

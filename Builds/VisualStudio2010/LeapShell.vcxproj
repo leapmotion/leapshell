@@ -165,8 +165,14 @@
     <ClCompile Include="..\..\src\View.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="..\..\resources\shaders\blur-frag.glsl" />
+    <None Include="..\..\resources\shaders\blur-vert.glsl" />
     <None Include="..\..\resources\shaders\hands-frag.glsl" />
     <None Include="..\..\resources\shaders\hands-vert.glsl" />
+    <None Include="..\..\resources\shaders\motion-frag.glsl" />
+    <None Include="..\..\resources\shaders\passthrough-vert.glsl" />
+    <None Include="..\..\resources\shaders\postprocess-frag.glsl" />
+    <None Include="..\..\resources\shaders\texture-frag.glsl" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets" />

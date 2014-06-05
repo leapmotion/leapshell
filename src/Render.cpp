@@ -13,16 +13,22 @@ void Render::update_background(const ci::Surface8u& surface) {
   m_background = ci::gl::Texture::create(surface);
 }
 
-void Render::drawViewTiles(const View& view) const {
-  const float inactiveOpacity = view.InactiveOpacity();
+void Render::setViewMatrices(const View& view) const {
   m_camera.lookAt(ToVec3f(view.Position()), ToVec3f(view.LookAt()), ToVec3f(view.Up()));
   m_camera.setPerspective(view.FOV(), static_cast<float>(Globals::aspectRatio), view.Near(), view.Far());
   ci::gl::setMatrices(m_camera);
+}
+
+void Render::drawViewTiles(const View& view, bool ignoreActivationOpacity) const {
+  setViewMatrices(view);
+  const float inactiveOpacity = view.InactiveOpacity();
 
   // draw tiles
-  ci::gl::enableAlphaBlending();
+  //ci::gl::enableAlphaBlending();
+  //glBlendFunc(GL_ONE, GL_ONE_MINUS_SRC_ALPHA);
   const TileVector& tiles = view.Tiles();
-  const float opacity = (inactiveOpacity + (1.0f-inactiveOpacity)*view.Activation()) * view.TransitionOpacity();
+  const float activationOpacity = ignoreActivationOpacity ? 1.0f : view.Activation();
+  const float opacity = (inactiveOpacity + (1.0f-inactiveOpacity)*activationOpacity) * view.TransitionOpacity();
   const Vector2 viewSize = view.ViewSizeAtPlane();
 
   // draw backmost tiles before all others
@@ -73,7 +79,6 @@ void Render::drawViewBackground(const View& view) const {
     m_parallaxSmoother.Update(parallax, Globals::curTimeSeconds, smooth);
 
     // draw a rectangle translated by the current ratios
-    ci::gl::color(ci::ColorA::white());
     m_background->bind();
     glPushMatrix();
     glTranslated(m_parallaxSmoother.value.x(), m_parallaxSmoother.value.y(), 0);
@@ -83,7 +88,8 @@ void Render::drawViewBackground(const View& view) const {
   }
 }
 
-void Render::drawHands(const View& view, MeshHand& handL, MeshHand& handR) const {
+void Render::drawHandsToFBO(const View& view, MeshHand& handL, MeshHand& handR) const {
+  setViewMatrices(view);
 #if 0
   const Vector3 lPos = handL.LeapHand().palmPosition().toVector3<Vector3>() + Globals::LEAP_OFFSET + view.LookAt();
   ci::gl::drawSphere(ToVec3f(lPos), 5, 30);
@@ -152,16 +158,6 @@ void Render::drawHands(const View& view, MeshHand& handL, MeshHand& handR) const
   Globals::handsFbo.unbindFramebuffer();
 
   shader.unbind();
-
-  // draw hands FBO to screen
-  ci::gl::setMatricesWindow(static_cast<int>(Globals::windowWidth), static_cast<int>(Globals::windowHeight));
-  ci::gl::enableAdditiveBlending();
-  ci::gl::setViewport(origViewport);
-  Globals::handsFbo.bindTexture();
-  const ci::Rectf rect(0.0f, static_cast<float>(Globals::windowHeight), static_cast<float>(Globals::windowWidth), 0.0f);
-  ci::gl::drawSolidRect(rect);
-  Globals::handsFbo.unbindTexture();
-  ci::gl::enableAlphaBlending();
 }
 
 void Render::drawViewBounds(const View& view, const ci::ColorA& color) const {
@@ -171,6 +167,17 @@ void Render::drawViewBounds(const View& view, const ci::ColorA& color) const {
   ci::Rectf rect(static_cast<float>(min.x()), static_cast<float>(min.y()), static_cast<float>(max.x()), static_cast<float>(max.y()));
   ci::gl::color(color);
   ci::gl::drawStrokedRect(rect);
+}
+
+void Render::drawHandsTexture() const {
+  // draw hands FBO to screen
+  ci::gl::setMatricesWindow(static_cast<int>(Globals::windowWidth), static_cast<int>(Globals::windowHeight));
+  ci::gl::enableAdditiveBlending();
+  Globals::handsFbo.bindTexture();
+  const ci::Rectf rect(0.0f, static_cast<float>(Globals::windowHeight), static_cast<float>(Globals::windowWidth), 0.0f);
+  ci::gl::drawSolidRect(rect);
+  Globals::handsFbo.unbindTexture();
+  ci::gl::enableAlphaBlending();
 }
 
 void Render::drawTile(const Tile& tile, const ForceVector& forces, float tileOpacity) const {
@@ -226,6 +233,7 @@ void Render::drawTile(const Tile& tile, const ForceVector& forces, float tileOpa
     glPushMatrix();
     glScaled(1, -1, 1);
     ci::gl::color(ci::ColorA(1.0f, 1.0f, 1.0f, opacity));
+    const ci::Vec2i iconSize = tile.Icon()->getSize();
     ci::gl::draw(tile.Icon(), rect);
     glPopMatrix();
   }
@@ -233,7 +241,7 @@ void Render::drawTile(const Tile& tile, const ForceVector& forces, float tileOpa
   // draw text
   const ci::ColorA nameColor = ci::ColorA(1.0f, 1.0f, 1.0f, opacity);
   const ci::ColorA shadowColor = ci::ColorA(0.1f, 0.1f, 0.1f, opacity);
-  static const ci::Vec2f shadowOffset = ci::Vec2f(5.0, 7.0f);
+  static const ci::Vec2f shadowOffset = ci::Vec2f(3.0, 5.0f);
   glPushMatrix();
   const ci::Vec2f nameSize = Globals::fontRegular->measureString(name);
   const ci::Rectf nameRect(-nameSize.x/2.0f, 0.0f, nameSize.x/2.0f + shadowOffset.x, 100.0f);

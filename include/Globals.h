@@ -12,13 +12,14 @@ public:
   static const float TRANSITION_TIME; // from layout changes
   static const float SWITCH_TIME; // from sorting changes 
   static double curTimeSeconds;
+  static double prevTimeSeconds;
   static double lastTileSwitchTime;
   static double lastTileTransitionTime;
 
   // fonts
   static const float FONT_SIZE;
   static ci::gl::TextureFontRef fontRegular;
-  static ci::gl::TextureFontRef fontBold;
+  //static ci::gl::TextureFontRef fontBold;
 
   // shaders
   static ci::gl::GlslProg handsShader;

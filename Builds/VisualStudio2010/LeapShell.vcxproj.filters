@@ -138,5 +138,23 @@
     <None Include="..\..\resources\shaders\hands-frag.glsl">
       <Filter>Shaders</Filter>
     </None>
+    <None Include="..\..\resources\shaders\blur-vert.glsl">
+      <Filter>Shaders</Filter>
+    </None>
+    <None Include="..\..\resources\shaders\motion-frag.glsl">
+      <Filter>Shaders</Filter>
+    </None>
+    <None Include="..\..\resources\shaders\passthrough-vert.glsl">
+      <Filter>Shaders</Filter>
+    </None>
+    <None Include="..\..\resources\shaders\texture-frag.glsl">
+      <Filter>Shaders</Filter>
+    </None>
+    <None Include="..\..\resources\shaders\blur-frag.glsl">
+      <Filter>Shaders</Filter>
+    </None>
+    <None Include="..\..\resources\shaders\postprocess-frag.glsl">
+      <Filter>Shaders</Filter>
+    </None>
   </ItemGroup>
 </Project>

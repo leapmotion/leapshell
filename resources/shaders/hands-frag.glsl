@@ -36,7 +36,7 @@ void main() {
   float d2 = diffuseFactor * max(0.0, dot(lightdir2, normal));
 
   // fade out fragments near the camera
-  float distMult = 1.0 - clamp((worldPosition.z + 100)/50, 0.0, 1.0);
+  float distMult = 1.0 - clamp((worldPosition.z + 125)/50, 0.0, 1.0);
 
   // fade out fragments near the center of the geometry
   float edgeMult = 1.0 - innerTransparency*abs(dot(normal, eyedir));

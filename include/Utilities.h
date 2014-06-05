@@ -28,6 +28,22 @@ struct ExponentialFilter {
   float targetFramerate;
 };
 
+template <class T, int NUM_ITERATIONS>
+struct MultiExponentialFilter {
+  void Update(const T& data, double timeSeconds, float smoothStrength) {
+    T prev = data;
+    for (int i=0; i<NUM_ITERATIONS; i++) {
+      filters[i].Update(prev, timeSeconds, smoothStrength);
+      prev = filters[i].value;
+    }
+  }
+  T& value() { return filters[NUM_ITERATIONS-1].value; }
+  const T& value() const { return filters[NUM_ITERATIONS-1].value; }
+  double lastTimeSeconds() const { return filters[NUM_ITERATIONS-1].lastTimeSeconds; }
+private:
+  ExponentialFilter<T> filters[NUM_ITERATIONS];
+};
+
 inline ci::Vec3f ToVec3f(const Vector3& vec) {
   return ci::Vec3f(static_cast<float>(vec.x()), static_cast<float>(vec.y()), static_cast<float>(vec.z()));
 }
