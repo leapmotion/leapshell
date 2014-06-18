@@ -28,6 +28,22 @@ struct ExponentialFilter {
   float targetFramerate;
 };
 
+template <class T, int NUM_ITERATIONS>
+struct MultiExponentialFilter {
+  void Update(const T& data, double timeSeconds, float smoothStrength) {
+    T prev = data;
+    for (int i=0; i<NUM_ITERATIONS; i++) {
+      filters[i].Update(prev, timeSeconds, smoothStrength);
+      prev = filters[i].value;
+    }
+  }
+  T& value() { return filters[NUM_ITERATIONS-1].value; }
+  const T& value() const { return filters[NUM_ITERATIONS-1].value; }
+  double lastTimeSeconds() const { return filters[NUM_ITERATIONS-1].lastTimeSeconds; }
+private:
+  ExponentialFilter<T> filters[NUM_ITERATIONS];
+};
+
 inline ci::Vec3f ToVec3f(const Vector3& vec) {
   return ci::Vec3f(static_cast<float>(vec.x()), static_cast<float>(vec.y()), static_cast<float>(vec.z()));
 }
@@ -64,6 +80,34 @@ static bool StringContains(const std::string& name, const std::string& searchFil
     }
   }
   return true;
+}
+
+static Matrix4x4 RotationMatrix(const Vector3& axis, double angle) {
+  Matrix4x4 mat;
+  const double c = cos(angle);
+  const double s = sin(angle);
+  const double C = (1 - c);
+  mat << axis[0] * axis[0] * C + c, axis[0] * axis[1] * C - axis[2] * s, axis[0] * axis[2] * C + axis[1] * s, 0,
+    axis[1] * axis[0] * C + axis[2] * s, axis[1] * axis[1] * C + c, axis[1] * axis[2] * C - axis[0] * s, 0,
+    axis[2] * axis[0] * C - axis[1] * s, axis[2] * axis[1] * C + axis[0] * s, axis[2] * axis[2] * C + c, 0,
+    0, 0, 0, 1;
+  return mat;
+}
+
+static Matrix4x4 TranslationMatrix(const Vector3& translation) {
+  Matrix4x4 mat = Matrix4x4::Identity();
+  mat(0, 3) = translation[0];
+  mat(1, 3) = translation[1];
+  mat(2, 3) = translation[2];
+  return mat;
+}
+
+static Matrix4x4 ScaleMatrix(const Vector3& scale) {
+  Matrix4x4 mat = Matrix4x4::Identity();
+  mat(0, 0) = scale[0];
+  mat(1, 1) = scale[1];
+  mat(2, 2) = scale[2];
+  return mat;
 }
 
 static const int TIME_STAMP_TICKS_PER_SEC = 1000000;

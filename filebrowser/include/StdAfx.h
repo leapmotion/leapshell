@@ -24,6 +24,7 @@
 
 // eigen
 #include <Eigen/Dense>
+#include <Eigen/StdVector>
 #include "DataTypes.h"
 
 // stl
@@ -69,3 +70,6 @@
 #include <boost/thread/thread.hpp>
 #include <boost/thread/condition_variable.hpp>
 #include <boost/thread/mutex.hpp>
+
+// Oculus
+#include "OVR.h"

@@ -4,14 +4,16 @@
 
 const float Tile::POSITION_SMOOTH = 0.85f;
 const float Tile::SIZE_SMOOTH = 0.85f;
-const float Tile::ACTIVATION_SMOOTH = 0.925f;
-const float Tile::GRABDELTA_SMOOTH = 0.5f;
+const float Tile::HIGHLIGHT_SMOOTH = 0.85f;
+const float Tile::ACTIVATION_SMOOTH = 0.4f;
+const float Tile::GRABDELTA_SMOOTH = 0.4f;
+const float Tile::GRABDELTA_RETURN_SMOOTH = 0.95f;
 
 Tile::Tile() {
   m_positionSmoother.value = Vector3::Zero();
   m_sizeSmoother.value = Vector3::Constant(15);
-  m_highlightSmoother.value = 0.0f;
-  m_activationSmoother.value = 0.0f;
+  m_highlightSmoother.Update(0.0f, Globals::curTimeSeconds, 0.5f);
+  m_activationSmoother.Update(0.0f, Globals::curTimeSeconds, 0.5f);
   m_grabDeltaSmoother.value = Vector3::Zero();
   m_targetGrabDelta = Vector3::Zero();
   m_visible = true;
@@ -30,15 +32,15 @@ Vector3 Tile::Size() const {
 }
 
 float Tile::Highlight() const {
-  return m_highlightSmoother.value;
+  return m_highlightSmoother.value();
 }
 
 float Tile::Activation() const {
-  return m_activationSmoother.value;
+  return m_activationSmoother.value();
 }
 
 double Tile::LastActivationUpdateTime() const {
-  return m_activationSmoother.lastTimeSeconds;
+  return m_activationSmoother.lastTimeSeconds();
 }
 
 float Tile::SwitchWarmupFactor() const {

@@ -8,8 +8,8 @@ class GLBuffer {
 
 public:
 
-  GLBuffer(GLenum type);
-  void create();
+  GLBuffer();
+  void create(GLenum type);
   void bind();
   void allocate(const void* data, int count, GLenum pattern);
   void release();

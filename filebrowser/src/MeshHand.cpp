@@ -26,8 +26,7 @@ Vector3 toEulerAngles(const Eigen::Quaterniond& quat) {
   return result;
 }
 
-MeshHand::MeshHand(const std::string& name, Side side) : m_Scene(0), m_time(0), m_side(side), m_lastUpdateTime(0.0),
-  m_vertexBuffer(GL_ARRAY_BUFFER), m_normalBuffer(GL_ARRAY_BUFFER), m_colorBuffer(GL_ARRAY_BUFFER), m_indexBuffer(GL_ELEMENT_ARRAY_BUFFER)
+MeshHand::MeshHand(const std::string& name, Side side) : m_Scene(0), m_time(0), m_side(side), m_lastUpdateTime(0.0)
 {
   g_Loader.load();
   if (g_Loader.error) {
@@ -64,17 +63,7 @@ void MeshHand::Update(const Leap::Hand& hand, double timeSeconds) {
   m_Hand = hand;
   m_lastUpdateTime = timeSeconds;
   g_colorCounter++;
-}
 
-void MeshHand::SetScale(double scale) {
-  FbxDouble3 handScale = m_handScale;
-  handScale[0] *= scale;
-  handScale[1] *= scale;
-  handScale[2] *= scale;
-  m_rootNode->LclScaling.Set(handScale);
-}
-
-void MeshHand::Draw() {
   if (g_Loader.error || !m_Hand.isValid()) {
     return;
   }
@@ -154,7 +143,23 @@ void MeshHand::Draw() {
 
   FbxAMatrix globalPosition;
   updateNodeRecursive(root, globalPosition);
-  globalPosition.SetIdentity();
+}
+
+void MeshHand::SetScale(double scale) {
+  FbxDouble3 handScale = m_handScale;
+  handScale[0] *= scale;
+  handScale[1] *= scale;
+  handScale[2] *= scale;
+  m_rootNode->LclScaling.Set(handScale);
+}
+
+void MeshHand::Draw() {
+  if (g_Loader.error || !m_Hand.isValid()) {
+    return;
+  }
+
+  FbxNode* root = m_Scene->GetRootNode();
+  FbxAMatrix globalPosition;
   drawNodeRecursive(root, globalPosition);
 }
 
@@ -851,7 +856,7 @@ FbxVector4 MeshHand::getColorForNode(const std::string& name) const {
     }
   }
 
-  return FbxVector4(0.0, 0.0, 0.0, 0.0);
+  return FbxVector4(0.0, 0.0, 0.0, 1.0);
 #endif
 }
 
@@ -880,22 +885,22 @@ void MeshHand::initBuffers(FbxMesh* mesh) {
   const int colorBytes = numVertices*4*sizeof(GLfloat);
   const int indexBytes = numTriangles*3*sizeof(GLuint);
 
-  m_vertexBuffer.create();
+  m_vertexBuffer.create(GL_ARRAY_BUFFER);
   m_vertexBuffer.bind();
   m_vertexBuffer.allocate(0, vertexBytes, GL_DYNAMIC_DRAW);
   m_vertexBuffer.release();
 
-  m_normalBuffer.create();
+  m_normalBuffer.create(GL_ARRAY_BUFFER);
   m_normalBuffer.bind();
   m_normalBuffer.allocate(0, vertexBytes, GL_DYNAMIC_DRAW);
   m_normalBuffer.release();
 
-  m_colorBuffer.create();
+  m_colorBuffer.create(GL_ARRAY_BUFFER);
   m_colorBuffer.bind();
   m_colorBuffer.allocate(0, colorBytes, GL_DYNAMIC_DRAW);
   m_colorBuffer.release();
 
-  m_indexBuffer.create();
+  m_indexBuffer.create(GL_ELEMENT_ARRAY_BUFFER);
   m_indexBuffer.bind();
   m_indexBuffer.allocate(0, indexBytes, GL_DYNAMIC_DRAW);
   m_indexBuffer.release();

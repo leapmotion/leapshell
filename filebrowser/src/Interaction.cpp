@@ -4,7 +4,7 @@
 #include "Globals.h"
 
 const float Interaction::MAX_INFLUENCE_DISTANCE_SQ = 10.0f * 10.0f;
-const float Interaction::INFLUENCE_CHANGE_SPEED = 0.5f;
+const float Interaction::INFLUENCE_CHANGE_SPEED = 0.1f;
 
 Interaction::Interaction() {
   m_panForce.Update(Vector3::Zero(), 0.0, 0.5f);
@@ -31,7 +31,7 @@ void Interaction::Update(const Leap::Frame& frame) {
   }
 
   // scale the force by a constant in each direction to make sure we're not flying around the screen
-  static const Vector3 FORCE_POSITION_SCALE(-0.15, -0.15, -0.25);
+  static const Vector3 FORCE_POSITION_SCALE(-0.15, -0.15, -0.2);
   force = FORCE_POSITION_SCALE.cwiseProduct(force);
 
   // make speeding up have less lag than slowing down
@@ -44,9 +44,9 @@ void Interaction::Update(const Leap::Frame& frame) {
 }
 
 void Interaction::UpdateActiveView(View& primary, View& secondary) {
-  static const float VIEW_ACTIVATION_SMOOTH = 0.925f;
-  static const float PADDING_MULT = 2.0f;
-  static const float VELOCITY_SQ_THRESH = 200 * 200; // to prevent accidentally triggering view when scrolling
+  static const float VIEW_ACTIVATION_SMOOTH = 0.85f;
+  static const float PADDING_MULT = 1.65f;
+  static const float VELOCITY_SQ_THRESH = 150 * 150; // to prevent accidentally triggering view when scrolling
 
   Vector2 secondaryMin = secondary.GetPositionLayout()->GetContentsMinBounds();
   Vector2 secondaryMax = secondary.GetPositionLayout()->GetContentsMaxBounds();
@@ -90,7 +90,7 @@ void Interaction::UpdateView(View &view) {
   const double deltaTime = Globals::curTimeSeconds - view.LastUpdateTime();
 
   // apply the force to the view camera
-  view.ApplyVelocity(view.Activation() * m_panForce.value);
+  view.ApplyVelocity(m_panForce.value);
   
   if (view.Activation() > 0.8f) {
     updateActiveTile(view, deltaTime);
@@ -133,8 +133,8 @@ void Interaction::cleanupHandInfos(double frameTime) {
 }
 
 void Interaction::updateActiveTile(View& view, double deltaTime) {
-  const float viewActivation = view.Activation();
   for (HandInfoMap::iterator it = m_handInfos.begin(); it != m_handInfos.end(); ++it) {
+    const float grabPinch = it->second.GrabPinchStrength();
     Leap::Hand hand = it->second.Hand();
 
     // find the closest tile to the hand based on a ray cast
@@ -144,14 +144,21 @@ void Interaction::updateActiveTile(View& view, double deltaTime) {
     // increase activation for closest tile to hand
     if (closestTile && Globals::haveSeenOpenHand) {
       // only allow activating the tile if it's already highlighted
-      const float newActivation = viewActivation * closestTile->Highlight() * it->second.GrabPinchStrength();
+      const float newActivation = closestTile->Highlight() * grabPinch;
       closestTile->UpdateActivation(newActivation, Tile::ACTIVATION_SMOOTH);
-      closestTile->UpdateHighlight(std::min(viewActivation, closestTile->Highlight() + INFLUENCE_CHANGE_SPEED), Tile::ACTIVATION_SMOOTH);
+      closestTile->UpdateHighlight(1.0f, Tile::HIGHLIGHT_SMOOTH);
 
       // calculate pulling force from hand
-      const Vector3 grabDelta = it->second.GrabPinchStrength() * (closestTile->TargetGrabDelta() + deltaTime*it->second.VelocityAt((view.Position() - view.LookAt()), closestTile->Position() - view.LookAt()));
+      //Vector3 grabDelta = grabPinch * (closestTile->TargetGrabDelta() + deltaTime*it->second.VelocityAt((view.Position() - view.LookAt()), closestTile->Position() - view.LookAt()));
+      //grabDelta += (1.0f-grabPinch) * closestTile->TargetGrabDelta();
+
+      const Vector3 newDisplacement = deltaTime * it->second.VelocityAt((view.Position() - view.LookAt()), closestTile->Position() - view.LookAt());
+
+      const Vector3 grabDelta = grabPinch*(closestTile->TargetGrabDelta() + newDisplacement);
+
+      const float grabSmoothBlend = 1.0f - grabPinch*grabPinch;
       closestTile->UpdateTargetGrabDelta(grabDelta);
-      closestTile->UpdateGrabDelta(Tile::GRABDELTA_SMOOTH);
+      closestTile->UpdateGrabDelta((1.0f-grabSmoothBlend)*Tile::GRABDELTA_SMOOTH + grabSmoothBlend*Tile::GRABDELTA_RETURN_SMOOTH);
     }
   }
 }
@@ -191,10 +198,10 @@ void Interaction::updateInactiveTiles(TileVector& tiles) {
   for (TileVector::iterator it = tiles.begin(); it != tiles.end(); ++it) {
     Tile& tile = *it;
     if (tile.LastActivationUpdateTime() != Globals::curTimeSeconds) {
-      tile.UpdateActivation(std::max(0.0f, tile.Activation() - INFLUENCE_CHANGE_SPEED), Tile::ACTIVATION_SMOOTH);
-      tile.UpdateHighlight(std::max(0.0f, tile.Highlight() - INFLUENCE_CHANGE_SPEED), Tile::ACTIVATION_SMOOTH);
-      tile.UpdateTargetGrabDelta(INFLUENCE_CHANGE_SPEED * tile.TargetGrabDelta());
-      tile.UpdateGrabDelta(Tile::GRABDELTA_SMOOTH);
+      tile.UpdateActivation(0.0f, Tile::ACTIVATION_SMOOTH);
+      tile.UpdateHighlight(0.0f, Tile::HIGHLIGHT_SMOOTH);
+      tile.UpdateTargetGrabDelta(Vector3::Zero());
+      tile.UpdateGrabDelta(Tile::GRABDELTA_RETURN_SMOOTH);
     }
   }
 }
@@ -208,6 +215,14 @@ void Interaction::computeForcesFromTiles(const TileVector& tiles, ForceVector& f
       forces.push_back(Force(tile.Position(), tile.Activation() + tile.Highlight()));
     }
   }
+}
+
+float forceVelocityResponse(const Vector3& velocity) {
+  static const float LOW_WATERMARK = 100.0f; // multiplier is 0 below this
+  static const float HIGH_WATERMARK = 500.0f; // multiplier is 1 above this
+  const float ratio = static_cast<float>(velocity.norm() - LOW_WATERMARK) / (HIGH_WATERMARK - LOW_WATERMARK);
+  const float multiplier = SmootherStep(Clamp(ratio));
+  return multiplier;
 }
 
 Vector3 Interaction::forceFromHand(const HandInfo& handInfo) {
@@ -230,7 +245,9 @@ Vector3 Interaction::forceFromHand(const HandInfo& handInfo) {
     const double dot = std::abs(normVelocity.dot(hand.palmNormal().toVector3<Vector3>()));
     const double match = direction.dot(handDirection);
 
-    totalForce += warmupMultiplier * warmupMultiplier * grabMultiplier * grabMultiplier * grabMultiplier * dot * dot * match * modifiedVelocity;
+    const float velocityMult = forceVelocityResponse(velocity);
+
+    totalForce += velocityMult * warmupMultiplier * warmupMultiplier * grabMultiplier * grabMultiplier * grabMultiplier * dot * dot * match * modifiedVelocity;
   }
   return totalForce;
 }

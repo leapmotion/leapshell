@@ -34,7 +34,8 @@ PositionLayout::PositionLayout() :
   m_creationTime(Globals::curTimeSeconds),
   m_numVisibleTiles(0),
   m_contentsMin(Vector2::Zero()),
-  m_contentsMax(Vector2::Zero())
+  m_contentsMax(Vector2::Zero()),
+  m_offset(Vector2::Zero())
 {
 }
 
@@ -338,7 +339,7 @@ Vector2 BlobClusterLayout::GetCameraMaxBounds() const {
 
 // ListLayout
 
-ListLayout::ListLayout(const Vector2& offset) : m_offset(offset), m_orientation(HORIZONTAL)
+ListLayout::ListLayout() : m_orientation(HORIZONTAL)
 {
 }
 

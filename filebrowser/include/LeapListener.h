@@ -14,12 +14,14 @@ public:
   virtual void onFocusLost(const Leap::Controller&);
   std::deque<Leap::Frame> grabFrames();
   bool isConnected() const;
+  const Leap::DeviceList& getDevices() const;
 
 private:
   mutable std::mutex m_mutex;
   std::deque<Leap::Frame> m_frames;
   Leap::Frame m_lastFrame;
   bool m_isConnected;
+  Leap::DeviceList m_devices;
 };
 
 #endif // __LeapListener_h__

@@ -143,12 +143,25 @@ LeapShell::LeapShell()
   m_state(new NavigationState()),
   m_render(nullptr),
   m_navView(nullptr),
-  m_lastTextChangeTime(0.0)
+  m_lastTextChangeTime(0.0),
+  m_useOculusRender(true),
+  m_useOculusControl(false)
 {
 #if defined(CINDER_MSW)
   CoInitializeEx(nullptr, COINIT_MULTITHREADED);
 #endif
   m_leapController.addListener(m_leapListener);
+#if USE_LEAP_IMAGE_API
+  m_numImages = 0;
+  m_useDistortion = true;
+  for (int i=0; i<2; i++) {
+    m_distortionTexturesGL[i] = 0;
+    m_haveDistortionTextures[i] = false;
+  }
+  //m_overlayFov = 104.0f;
+  m_overlayFov = 104.0f;
+  m_gamma = 1.4f;
+#endif
 }
 
 LeapShell::~LeapShell()
@@ -168,8 +181,9 @@ void LeapShell::prepareSettings(Settings* settings)
   settings->setWindowSize(1024, 768);
   //settings->setBorderless(true);
   //settings->setAlwaysOnTop(true);
-  settings->setFullScreen(true);
-  settings->setFrameRate(60.0f);
+  //settings->setFullScreen(true);
+  settings->disableFrameRate();
+  ci::gl::disableVerticalSync();
 #if defined(CINDER_MSW)
   settings->enableConsoleWindow(true);
 #endif
@@ -177,8 +191,9 @@ void LeapShell::prepareSettings(Settings* settings)
 
 void LeapShell::setup()
 {
-  Globals::fontRegular = ci::gl::TextureFont::create(ci::Font(loadResource(RES_FONT_FREIGHTSANS_TTF), Globals::FONT_SIZE));
-  Globals::fontBold = ci::gl::TextureFont::create(ci::Font(loadResource(RES_FONT_FREIGHTSANSBOLD_TTF), Globals::FONT_SIZE));
+  const std::string supportedChars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz1234567890().?!,:;'\"&*=+-/\\@#_[]<>%^llflfiphridsfflffiff\303\251\303\241\303\250\303\240";
+  Globals::fontRegular = ci::gl::TextureFont::create(ci::Font(loadResource(RES_FONT_PROXIMA_NOVA_OTF), Globals::FONT_SIZE), ci::gl::TextureFont::Format(), supportedChars);
+  //Globals::fontBold = ci::gl::TextureFont::create(ci::Font(loadResource(RES_FONT_FREIGHTSANSBOLD_TTF), Globals::FONT_SIZE));
 
   // setup hand meshes
   ci::DataSourceRef leftHand = loadResource(RES_LEFT_HAND_FBX);
@@ -191,14 +206,37 @@ void LeapShell::setup()
   // load shaders
   try {
     Globals::handsShader = ci::gl::GlslProg(loadResource(RES_HANDS_VERT_GLSL), loadResource(RES_HANDS_FRAG_GLSL));
+    m_blurShader = ci::gl::GlslProgRef(new ci::gl::GlslProg(loadResource(RES_BLUR_VERT_GLSL), loadResource(RES_BLUR_FRAG_GLSL)));
+    Globals::distortionShader = ci::gl::GlslProg(loadResource(RES_DISTORTION_VERT_GLSL), loadResource(RES_DISTORTION_FRAG_GLSL));
+    Globals::graphShader = ci::gl::GlslProg(loadResource(RES_LIGHTING_VERT_GLSL), loadResource(RES_LIGHTING_FRAG_GLSL));
+#if USE_LEAP_IMAGE_API
+    Globals::undistortionShader = ci::gl::GlslProg(loadResource(RES_PASSTHROUGH_VERT_GLSL), loadResource(RES_UNDISTORTION_FRAG_GLSL));
+#endif
+    //m_textureShader = ci::gl::GlslProgRef(new ci::gl::GlslProg(loadResource(RES_PASSTHROUGH_VERT_GLSL), loadResource(RES_TEXTURE_FRAG_GLSL)));
+    //m_motionShader = ci::gl::GlslProgRef(new ci::gl::GlslProg(loadResource(RES_PASSTHROUGH_VERT_GLSL), loadResource(RES_MOTION_FRAG_GLSL)));
+    //m_postprocessShader = ci::gl::GlslProgRef(new ci::gl::GlslProg(loadResource(RES_PASSTHROUGH_VERT_GLSL), loadResource(RES_POSTPROCESS_FRAG_GLSL)));
   } catch (ci::gl::GlslProgCompileExc e) {
     std::cerr << e.what() << std::endl;
   }
 
   glEnable(GL_TEXTURE_2D);
+  //glEnable(GL_COLOR_MATERIAL);
+  //glEnable(GL_CULL_FACE);
+  glPolygonMode(GL_FRONT, GL_FILL);
 
   m_params = ci::params::InterfaceGl::create(getWindow(), "App parameters", ci::app::toPixels(ci::Vec2i(200, 400)));
   m_params->minimize();
+
+  m_params->addParam("Gravity", &m_graph.m_gravity, "min=0 max=1 step=0.001");
+  m_params->addParam("Gravity Radius", &m_graph.m_gravityRadius, "min=0 max=1000 step=10");
+  m_params->addParam("Charge", &m_graph.m_charge, "min=-1000 max=1000 step=0.1");
+  m_params->addParam("Friction", &m_graph.m_friction, "min=0 max=1 step=0.01");
+  m_params->addParam("Alpha", &m_graph.m_alpha, "min=0 max=1 step=0.01");
+  m_params->addParam("View Distance", &m_graphRadius, "min=0 max=500 step=1");
+#if USE_LEAP_IMAGE_API
+  m_params->addParam("Overlay FOV", &m_overlayFov, "min=10 max=170 step=1");
+  m_params->addParam("Gamma", &m_gamma, "min=0.1 max=2.0 step=0.1");
+#endif
 
   m_render = new Render();
   m_interaction = new Interaction();
@@ -217,15 +255,15 @@ void LeapShell::setup()
   m_view = std::shared_ptr<View>(new View(m_state));
   m_view->SetWorldView(m_view);
   m_view->SetIsNavView(false);
-  m_view->SetInactiveOpacity(0.1f);
+  m_view->SetInactiveOpacity(0.2f);
   m_state->registerView(m_view);
 
   m_navView = std::shared_ptr<View>(new View(m_state));
   m_navView->SetWorldView(m_view);
   m_navView->SetIsNavView(true);
   m_state->registerView(m_navView);
-  m_navView->SetSizeLayout(std::shared_ptr<SizeLayout>(new UniformSizeLayout(10.0)));
-  m_navView->SetPositionLayout(std::shared_ptr<PositionLayout>(new ListLayout(Vector2(0, 33))));
+  m_navView->SetSizeLayout(std::shared_ptr<SizeLayout>(new UniformSizeLayout(12.0)));
+  m_navView->SetPositionLayout(std::shared_ptr<PositionLayout>(new ListLayout()));
   m_navView->SetInactiveOpacity(0.0f);
 
   // initial sorting criteria keys TEMP HACK for 2014.04.21 demo
@@ -237,6 +275,21 @@ void LeapShell::setup()
   m_view->SetPrioritizedKeys(prioritizedKeys);
 
   unit_test_Value(); // TEMP until this is verified to work on all platforms
+
+  m_graphRadius = 300.0f;
+  m_graph.Start(Graph::RANDOM);
+
+  m_Oculus.SetHWND(getRenderer()->getHwnd());
+  
+  if (m_Oculus.Init()) {
+    std::cout << "Oculus Initialized" << std::endl;
+    m_useOculusControl = true;
+    m_useOculusRender = true;
+  } else {
+    std::cout << "Oculus Failed" << std::endl;
+    m_useOculusControl = false;
+    m_useOculusRender = false;
+  }
 }
 
 void LeapShell::shutdown()
@@ -309,14 +362,15 @@ void LeapShell::keyDown(ci::app::KeyEvent event)
     setText("Sort by Extension");
     break;
   case '9':
-    m_view->PrioritizeKey("time");
-    setText("Sort by Time");
+    //m_view->PrioritizeKey("time");
+    //setText("Sort by Time");
+    m_graph.Start(Graph::WEB);
     break;
   case '0':
-    m_view->PrioritizeKey("size");
-    setText("Sort by Size");
+    //m_view->PrioritizeKey("size");
+    //setText("Sort by Size");
+    m_graph.Start(Graph::RANDOM);
     break;
-
   case ci::app::KeyEvent::KEY_ESCAPE:
     quit();
     break;
@@ -328,6 +382,14 @@ void LeapShell::keyDown(ci::app::KeyEvent event)
     break;
   case ci::app::KeyEvent::KEY_UNKNOWN:
     break;
+  case ci::app::KeyEvent::KEY_RETURN:
+    m_useOculusRender = !m_useOculusRender;
+    break;
+#if USE_LEAP_IMAGE_API
+  case ci::app::KeyEvent::KEY_BACKSLASH:
+    m_useDistortion = !m_useDistortion;
+    break;
+#endif
   default:
     m_view->SetSearchFilter(m_view->SearchFilter() + event.getChar());
     break;
@@ -342,46 +404,314 @@ void LeapShell::update()
 {
   updateGlobals();
 
+  const double HIDDEN_OFFSET = -42;
+  const double ACTIVE_OFFSET = -30;
+  const double offset = m_navView->Activation() * (ACTIVE_OFFSET - HIDDEN_OFFSET) + HIDDEN_OFFSET;
+  m_navView->GetPositionLayout()->SetOffset(Vector2(0, offset));
+
   std::deque<Leap::Frame> frames = m_leapListener.grabFrames();
 
   if (!frames.empty()) {
+    Matrix4x4 viewTransform = Matrix4x4::Identity();
+    if (m_useOculusControl) {
+      viewTransform = getOculusBasis();// .inverse();
+      //viewTransform.row(1) *= -1;
+    }
     for (auto iter = frames.cbegin(); iter != frames.cend(); ++iter) {
       const Leap::Frame& frame = *iter;
       m_interaction->Update(frame);
+      const Leap::HandList hands = frame.hands();
+      m_hands = hands;
+      for (int i=0; i<hands.count(); i++) {
+        //const float strength = std::max(hands[i].pinchStrength(), hands[i].grabStrength());
+        const float pinchStrength = hands[i].pinchStrength();
+        const float grabStrength = hands[i].grabStrength();
+        const float strength = std::max(pinchStrength, grabStrength);
+        Vector3 pos(Vector3::Zero());
+        if (pinchStrength > grabStrength) {
+          // use index/thumb
+          Vector3 thumb = Vector3::Zero();
+          Vector3 index = Vector3::Zero();
+          const Leap::FingerList fingers = hands[i].fingers();
+          for (int j=0; j<fingers.count(); j++) {
+            if (fingers[j].type() == Leap::Finger::TYPE_THUMB) {
+              thumb = fingers[j].tipPosition().toVector3<Vector3>();
+            } else if (fingers[j].type() == Leap::Finger::TYPE_INDEX) {
+              index = fingers[j].tipPosition().toVector3<Vector3>();
+            }
+          }
+          pos = 0.5 * (thumb + index);
+        } else {
+          // use palm
+          pos = hands[i].palmPosition().toVector3<Vector3>() + Globals::LEAP_OFFSET;
+        }
+
+        pos = (viewTransform * Vector4(pos.x(), pos.z(), pos.y(), 1.0)).head<3>();
+#if 0
+        ci::Matrix33f rotMat = ci::Matrix33f::createRotation(ci::Vec3f::xAxis(), M_PI/2.0f);
+        ci::Vec3f transformed = rotMat * ToVec3f(pos);
+        transformed.x *= -1;
+        transformed.z *= -1;
+        transformed *= 2.0;
+        pos << transformed.x, transformed.y, transformed.z;
+#else
+        pos.y() *= -1;
+        pos *= 2.0;
+#endif
+        const float modifiedStrength = SmootherStep(strength*strength);
+        if (modifiedStrength > 0.1f) {
+          m_graph.UpdateAttractor(hands[i].id(), pos, modifiedStrength);
+        }
+      }
+#if USE_LEAP_IMAGE_API
+      m_images = frame.images();
+#endif
     }
   }
 
-  if (!m_state->updateChildren()) {
-    m_view->PerFrameUpdate();
-    m_navView->PerFrameUpdate();
+#if USE_LEAP_IMAGE_API
+  m_numImages = 0;
+  for (int i=0; i<m_images.count(); i++) {
+    if (!m_images[i].isValid()) {
+      continue;
+    }
+    const int id = m_images[i].id();
+    assert(id == 0 || id == 1);
+    const int width = m_images[i].width();
+    const int height = m_images[i].height();
+    const int distortionWidth = m_images[i].distortionWidth();
+    const int distortionHeight = m_images[i].distortionHeight();
+    const unsigned char* data = m_images[i].data();
+    const float* distortion = m_images[i].distortion();
+    //ci::gl::Texture::Format format;
+    //format.set
+    m_textures[id] = ci::gl::Texture(data, GL_RED, width, height);
+
+    if (m_useDistortion && !m_haveDistortionTextures[id]) {
+      glGenTextures(1, &m_distortionTexturesGL[id]);
+      glBindTexture(GL_TEXTURE_2D, m_distortionTexturesGL[id]);
+      glTexImage2D(GL_TEXTURE_2D, 0, GL_RG16F, distortionWidth/2, distortionHeight, 0, GL_RG, GL_FLOAT, (void*)distortion);
+      glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+      glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+      glBindTexture(GL_TEXTURE_2D, 0);
+      m_haveDistortionTextures[id] = true;
+    } else if (m_useDistortion && m_haveDistortionTextures[id]) {
+      glBindTexture(GL_TEXTURE_2D, m_distortionTexturesGL[id]);
+      glTexImage2D(GL_TEXTURE_2D, 0, GL_RG16F, distortionWidth/2, distortionHeight, 0, GL_RG, GL_FLOAT, (void*)distortion);
+      glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+      glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+      glBindTexture(GL_TEXTURE_2D, 0);
+    }
+
+    m_numImages++;
   }
+#endif
+
+  //if (!m_state->updateChildren()) {
+    //m_view->PerFrameUpdate();
+    //m_navView->PerFrameUpdate();
+  //}
+
+  m_graph.Update();
+  m_interaction->UpdateMeshHands(*m_handL, *m_handR);
+}
+
+Matrix4x4 LeapShell::getOculusBasis() {
+  Matrix4x4 rotation(Matrix4x4::Identity());
+  Vector3 up = Vector3(m_Oculus.m_FinalUp.x, m_Oculus.m_FinalUp.y, m_Oculus.m_FinalUp.z);
+  const Vector3 forward = Vector3(m_Oculus.m_FinalForward.x, m_Oculus.m_FinalForward.y, m_Oculus.m_FinalForward.z).normalized();
+  const Vector3 side = up.cross(forward).normalized();
+  up = side.cross(forward).normalized();
+  rotation.block<3, 3>(0, 0) << -side, -up, -forward;
+  return rotation;
+}
+
+void LeapShell::drawGraphAndHands() {
+  Matrix4x4 rotation = Matrix4x4::Identity();
+  if (m_useOculusControl) {
+    rotation = getOculusBasis();
+  }
+
+  glPushMatrix();
+#if 0
+  Matrix4x4 rotationTemp = rotation;
+  rotationTemp.row(1) *= -1;
+  glMultMatrixd(rotationTemp.data());
+  glRotated(90, 1, 0, 0);
+  glScaled(2, 2, -2);
+#else
+  ci::Matrix44f modelView = toCinder(m_Oculus.m_ModelView).inverted();
+  //modelView.setRow(1, -1 * modelView.getRow(1));
+  ci::gl::multModelView(modelView);
+  //glRotated(90, 1, 0, 0);
+  //glScaled(2, -2, -2);
+  //glScaled(2, 2, -2);
+  //glScaled(2, 2, 2);
+#endif
+  ci::gl::enableAlphaBlending();
+  //glEnable(GL_CULL_FACE);
+  glEnable(GL_DEPTH_TEST);
+  //m_render->drawHands(*m_view, *m_handL, *m_handR);
+  for (int i=0; i<m_hands.count(); i++) {
+    m_render->drawWireHand(m_hands[i]);
+  }
+  //glEnable(GL_TEXTURE_2D);
+
+  glPopMatrix();
+
+  m_graph.Draw(rotation);
+  glDisable(GL_CULL_FACE);
 }
 
 void LeapShell::draw()
 {
-  ci::gl::clear(ci::ColorA::gray(0.4f, 1.0f));
+  ci::gl::clear(ci::ColorA(0.0f, 0.0f, 0.0f, 0.0f));
   ci::gl::color(ci::ColorA::white());
 
-  m_interaction->UpdateActiveView(*m_view, *m_navView);
-  m_interaction->UpdateView(*m_view);
-  m_interaction->UpdateView(*m_navView);
-  m_interaction->UpdateMeshHands(*m_handL, *m_handR);
-  m_render->drawViewBackground(*m_view);
-  m_render->drawViewTiles(*m_view);
-  m_render->drawHands(*m_view, *m_handL, *m_handR);
-  m_render->drawViewTiles(*m_navView);
-  //m_render->drawViewBounds(*m_view, ci::ColorA(1.0f, 0.0f, 0.0f));
-  //m_render->drawViewBounds(*m_navView, ci::ColorA(0.0f, 1.0f, 0.0f));
+  const ci::Area origViewport = ci::gl::getViewport();
+  //const ci::Rectf rect(0.0f, Globals::windowHeight, Globals::windowWidth, 0.0f);
+  const ci::Rectf rect(0.0f, 0.0f, Globals::windowWidth, Globals::windowHeight);
+  const ci::Vec2i size = getWindowSize();
+  
+  ci::gl::setMatricesWindow(size);
 
-  ci::gl::setMatricesWindow(getWindowSize());
-#if 0
-  m_params->draw();
-  ci::gl::drawString("FPS: " + ci::toString(getAverageFps()), ci::Vec2f(10.0f, 10.0f), ci::ColorA::white(), ci::Font("Arial", 18));
+#if USE_LEAP_IMAGE_API
+  if (!m_useOculusRender && m_numImages > 0) {
+    glDisable(GL_DEPTH_TEST);
+    glEnable(GL_TEXTURE_2D);
+    m_textures[0].bind();
+    ci::gl::drawSolidRect(rect);
+    m_textures[0].unbind();
+    glDisable(GL_TEXTURE_2D);
+    glEnable(GL_DEPTH_TEST);
+  }
 #endif
 
-  // draw UI text strings
-  drawString(m_view->SearchFilter(), 0.05*Globals::windowWidth, 0.025*Globals::windowHeight, Globals::curTimeSeconds, 1.0f, false);
-  drawString(m_textString, Globals::windowWidth/2.0, 0.875*Globals::windowHeight, m_lastTextChangeTime, 2.0f, true);
+  if (m_useOculusControl) {
+    m_Oculus.BeginFrame();
+  }
+  if (m_useOculusRender) {
+    m_Oculus.m_HMDFbo.bindFramebuffer();
+    ci::gl::clear(ci::ColorA(0.0f, 0.0f, 0.0f, 1.0f));
+    for (int i=0; i<2; i++) {
+      m_Oculus.BeginEye(i);
+      const ci::Area area = toCinder(m_Oculus.m_EyeRenderViewport[m_Oculus.m_Eyes[i]]);
+      ci::gl::setViewport(area);
+
+#if USE_LEAP_IMAGE_API
+      ci::CameraPersp tempCam;
+      tempCam.setPerspective(m_overlayFov, static_cast<float>(area.getSize().x) / static_cast<float>(area.getSize().y), 0.1f, 10000.0f);
+      tempCam.lookAt(ci::Vec3f(0, 0, 0), ci::Vec3f(0, 0, -1), ci::Vec3f(0, 1, 0));
+
+
+      //ci::gl::setMatricesWindow(area.getSize());
+
+      ci::gl::setMatrices(tempCam);
+
+      glDisable(GL_DEPTH_TEST);
+      glEnable(GL_TEXTURE_2D);
+      ci::gl::enableAdditiveBlending();
+      const int imgIdx = (area.x1 > 0) ? 1 : 0;
+      m_textures[imgIdx].bind(0);
+      ci::gl::color(ci::ColorA::white());
+      Globals::undistortionShader.bind();
+      Globals::undistortionShader.uniform("useDistortion", m_useDistortion);
+      Globals::undistortionShader.uniform("gamma", 1.0f);
+      Globals::undistortionShader.uniform("colorTex", 0);
+      Globals::undistortionShader.uniform("distortionMap", 1);
+      Globals::undistortionShader.uniform("gamma", m_gamma);
+      glActiveTexture(GL_TEXTURE1);
+      glBindTexture(GL_TEXTURE_2D, m_distortionTexturesGL[imgIdx]);
+      glPushMatrix();
+      glTranslated(0, 0, -1);
+
+      //ci::gl::drawSolidRect(ci::Rectf(0.0f, 0.0f, area.getSize().x, area.getSize().y));
+      ci::gl::drawSolidRect(ci::Rectf(-4, -4, 4, 4));
+      glPopMatrix();
+      glBindTexture(GL_TEXTURE_2D, 0);
+      glActiveTexture(GL_TEXTURE0);
+      Globals::undistortionShader.unbind();
+      m_textures[imgIdx].unbind();
+      glDisable(GL_TEXTURE_2D);
+      glEnable(GL_DEPTH_TEST);
+      ci::gl::enableAlphaBlending();
+#endif
+
+      ci::Matrix44f modelView = toCinder(m_Oculus.m_ModelView);
+      ci::Matrix44f projection = toCinder(m_Oculus.m_Projection);
+      glMatrixMode(GL_PROJECTION);
+      glLoadMatrixf(projection.m);
+      glMatrixMode(GL_MODELVIEW);
+      glLoadMatrixf(modelView.m);
+
+      glPushMatrix();
+      glScaled(-1, 1, -1);
+      //drawGraphAndHands();
+      Matrix4x4 rotation = getOculusBasis();
+      m_graph.Draw(rotation);
+      glPopMatrix();
+
+#if USE_LEAP_IMAGE_API
+      //modelView = toCinder(m_Oculus.m_EyeTranslation);
+      //modelView.setColumn(0, -1 * modelView.getColumn(0));
+      //modelView = ci::Matrix44f::createTranslation(ci::Vec4f(imgIdx == 0 ? -20 : 20, 0, 0, 0)) * ci::Matrix44f::identity();
+      //glLoadMatrixf(modelView.m);
+      glPushMatrix();
+      glLoadIdentity();
+      //glTranslated(imgIdx > 0 ? -20 : 20, 0, 0);
+      float baseline = 40;
+      const Leap::DeviceList& devices = m_leapListener.getDevices();
+      glTranslated(imgIdx > 0 ? -baseline/2 : baseline/2, 0, 0);
+      glRotated(-90, 1, 0, 0);
+      glScaled(-1, 1, -1);
+      glScaled(2, 2, 2);
+      for (int j=0; j<m_hands.count(); j++) {
+        m_render->drawWireHand(m_hands[j]);
+      }
+      glPopMatrix();
+#endif
+      m_Oculus.EndEye(i);
+
+    }
+    m_Oculus.m_HMDFbo.unbindFramebuffer();
+    glEnable(GL_TEXTURE_2D);
+    glDisable(GL_DEPTH_TEST);
+    ci::gl::disableAlphaBlending();
+    ci::gl::setViewport(origViewport);
+    ci::gl::color(ci::ColorA::white());
+    ci::gl::setMatricesWindow(static_cast<int>(Globals::windowWidth), static_cast<int>(Globals::windowHeight));
+    m_Oculus.DistortionMeshRender();
+    glEnable(GL_DEPTH_TEST);
+  } else {
+    ci::CameraPersp cam;
+    cam.lookAt(m_graphRadius*ci::Vec3f(0, 0, -1), ci::Vec3f::zero());
+    cam.setPerspective(60.0f, static_cast<float>(Globals::aspectRatio), 0.1f, 10000.0f);
+    if (m_useOculusControl) {
+      m_Oculus.BeginEye(0);
+      ci::Matrix44f modelView = toCinder(m_Oculus.m_ModelView);
+      ci::gl::setProjection(cam);
+      glMatrixMode(GL_MODELVIEW);
+      glLoadMatrixf(modelView.m);
+    } else {
+      ci::gl::setMatrices(cam);
+    }
+    glPushMatrix();
+    glScaled(-1, 1, -1);
+    drawGraphAndHands();
+    glPopMatrix();
+    if (m_useOculusControl) {
+      m_Oculus.EndEye(0);
+    }
+  }
+
+  if (m_useOculusControl) {
+    m_Oculus.EndFrame();
+  }
+
+  ci::gl::setViewport(origViewport);
+
+  ci::gl::enableAlphaBlending();
+  drawHUDStrings();
 }
 
 void LeapShell::drawString(const std::string& str, double x, double y, double lastChangeTime, float fadeTime, bool center)
@@ -389,17 +719,24 @@ void LeapShell::drawString(const std::string& str, double x, double y, double la
   if (str.empty()) {
     return;
   }
+  //ci::gl::TextureFont::DrawOptions options;
+  //options.ligate(false);
   const float timeSinceTextChange = static_cast<float>(Globals::curTimeSeconds - lastChangeTime);
   const float textOpacity = SmootherStep(1.0f - std::min(1.0f, timeSinceTextChange/fadeTime));
+  static const ci::Vec2f shadowOffset = ci::Vec2f(3.0, 5.0f);
   if (textOpacity > 0.01f) {
     const ci::ColorA textColor = ci::ColorA(1.0f, 1.0f, 1.0f, textOpacity);
-    const ci::Vec2f textSize = Globals::fontBold->measureString(str);
+    const ci::ColorA shadowColor = ci::ColorA(0.1f, 0.1f, 0.1f, textOpacity);
+    const ci::Vec2f textSize = Globals::fontRegular->measureString(str);
     const float start = center ? -textSize.x/2.0f : 0.0f;
     const ci::Rectf textRect(start, 0.0f, start + textSize.x, 100.0f);
-    ci::gl::color(textColor);
+    const ci::Rectf shadowRect(start, 0.0f, start + textSize.x + shadowOffset.x, 100.0f);
     glPushMatrix();
     glTranslated(x, y, 0.0);
-    Globals::fontBold->drawString(str, textRect);
+    ci::gl::color(shadowColor);
+    Globals::fontRegular->drawString(str, shadowRect, shadowOffset);
+    ci::gl::color(textColor);
+    Globals::fontRegular->drawString(str, textRect);
     glPopMatrix();
   }
 }
@@ -419,6 +756,140 @@ ci::Vec2f getScaledSizeWithAspect(const ci::Vec2f& windowSize, const ci::Vec2f& 
     height = width * imageAspect;
   }
   return ci::Vec2f(width, height);
+}
+
+void LeapShell::setOrthoCamera() {
+  glMatrixMode(GL_PROJECTION);
+  glLoadIdentity();
+  glOrtho(0, Globals::windowWidth, Globals::windowHeight, 0, -1, 1);
+  glMatrixMode(GL_MODELVIEW);
+  glLoadIdentity();
+}
+
+void LeapShell::drawViewsToFBO() {
+  ci::gl::enableAlphaBlending();
+  ci::gl::color(ci::ColorA::white());
+  drawViewToFBO(m_view, m_worldFbo1, m_worldFbo2);
+  drawViewToFBO(m_navView, m_navFbo1, m_navFbo2);
+}
+
+void LeapShell::drawViewToFBO(const std::shared_ptr<View>& view, ci::gl::Fbo& fbo1, ci::gl::Fbo& fbo2) {
+  //const float radius = 200.0f;
+  const ci::Area origViewport = ci::gl::getViewport();
+  const ci::Rectf rect(0.0f, Globals::windowHeight, Globals::windowWidth, 0.0f);
+  //const ci::Rectf rect(0.0f, m_worldFboResult.getWidth(), m_worldFboResult.getHeight(), 0.0f);
+  const ci::ColorA shadowColor(0.2f, 0.2f, 0.2f, 1.0f);
+  //const ci::ColorA shadowColor = ci::ColorA::white();
+
+  //const float worldMult = (1.0f - m_view->Activation());
+  const float worldRadius = 300.0f; // *worldMult * worldMult;
+  //ci::gl::color(ci::ColorA::black());
+  fbo1.bindFramebuffer();
+  ci::gl::setViewport(fbo1.getBounds());
+  ci::gl::clear(ci::ColorA(0, 0, 0, 0));
+  ci::gl::color(ci::ColorA::white());
+  //m_render->drawViewBackground(*m_view);
+  ci::gl::color(ci::ColorA::white());
+  m_render->drawViewTiles(*view, false);
+  fbo1.unbindFramebuffer();
+
+
+  ci::gl::color(ci::ColorA::white());
+  setOrthoCamera();
+
+  const float horizSize = worldRadius / fbo2.getWidth();
+  fbo1.bindTexture();
+  fbo2.bindFramebuffer();
+  ci::gl::setViewport(fbo2.getBounds());
+  ci::gl::clear(ci::ColorA(0, 0, 0, 0));
+  m_blurShader->bind();
+  m_blurShader->uniform("color_tex", 0);
+  m_blurShader->uniform("sample_offset", ci::Vec2f(horizSize, 0.0f));
+  m_blurShader->uniform("blur_color", shadowColor);
+  m_blurShader->uniform("override_alpha", false);
+  m_blurShader->uniform("global_offset", ci::Vec2f(-0.0025f, 0.0065f));
+  ci::gl::drawSolidRect(rect);
+  m_blurShader->unbind();
+  fbo1.unbindTexture();
+  fbo2.unbindFramebuffer();
+
+
+  const float vertSize = worldRadius / fbo1.getHeight();
+  fbo2.bindTexture();
+  fbo1.bindFramebuffer();
+  ci::gl::setViewport(fbo1.getBounds());
+  ci::gl::clear(ci::ColorA(0, 0, 0, 0));
+  m_blurShader->bind();
+  m_blurShader->uniform("color_tex", 0);
+  m_blurShader->uniform("sample_offset", ci::Vec2f(0.0f, vertSize));
+  m_blurShader->uniform("blur_color", shadowColor);
+  m_blurShader->uniform("override_alpha", false);
+  m_blurShader->uniform("global_offset", ci::Vec2f(-0.0025f, 0.0065f));
+  ci::gl::drawSolidRect(rect);
+  m_blurShader->unbind();
+  fbo2.unbindTexture();
+  fbo1.unbindFramebuffer();
+
+  ci::gl::setViewport(origViewport);
+}
+
+void LeapShell::drawDropShadow(ci::gl::Fbo& fbo) {
+  //ci::gl::disableDepthWrite();
+  //ci::gl::enableAlphaBlending();
+  setOrthoCamera();
+  const ci::Rectf rect(0.0f, Globals::windowHeight, Globals::windowWidth, 0.0f);
+  ci::ColorA color = ci::ColorA::white();
+  ci::gl::color(color);
+  fbo.bindTexture();
+  //glPushMatrix();
+  //glTranslated(6, 11, 0);
+  ci::gl::drawSolidRect(rect);
+  //glPopMatrix();
+  fbo.unbindTexture();
+  //ci::gl::enableDepthWrite();
+}
+
+void LeapShell::drawWorldViewTexture() {
+  ci::gl::disableDepthWrite();
+  ci::gl::enableAlphaBlending();
+  setOrthoCamera();
+  const ci::Rectf rect(0.0f, Globals::windowHeight, Globals::windowWidth, 0.0f);
+  ci::ColorA color = ci::ColorA::white();
+  ci::gl::color(color);
+  m_worldFbo1.bindTexture();
+  glPushMatrix();
+  glTranslated(6, 11, 0);
+  ci::gl::drawSolidRect(rect);
+  glPopMatrix();
+  m_worldFbo1.unbindTexture();
+  ci::gl::enableDepthWrite();
+}
+
+void LeapShell::drawNavViewTexture() {
+  ci::gl::disableDepthWrite();
+  ci::gl::enableAlphaBlending();
+  setOrthoCamera();
+  const ci::Rectf rect(0.0f, Globals::windowHeight, Globals::windowWidth, 0.0f);
+  ci::ColorA color = ci::ColorA::white();
+  ci::gl::color(color);
+  m_navFbo1.bindTexture();
+  glPushMatrix();
+  glTranslated(6, 11, 0);
+  ci::gl::drawSolidRect(rect);
+  glPopMatrix();
+  m_navFbo1.unbindTexture();
+  ci::gl::enableDepthWrite();
+}
+
+void LeapShell::drawHUDStrings() {
+  ci::gl::setMatricesWindow(getWindowSize());
+#if 1
+  m_params->draw();
+  ci::gl::drawString("FPS: " + ci::toString(getAverageFps()), ci::Vec2f(10.0f, 10.0f), ci::ColorA::white(), ci::Font("Arial", 18));
+#endif
+
+  drawString(m_view->SearchFilter(), 0.05*Globals::windowWidth, 0.025*Globals::windowHeight, Globals::curTimeSeconds, 1.0f, false);
+  drawString(m_textString, Globals::windowWidth/2.0, 0.875*Globals::windowHeight, m_lastTextChangeTime, 2.0f, true);
 }
 
 void LeapShell::resize()
@@ -503,9 +974,30 @@ void LeapShell::resize()
 
   m_render->update_background(ci::ip::resizeCopy(surface, origArea, croppedSize));
 #endif
+
+  static const int BLUR_DOWNSCALE_FACTOR = 4;
+  const int blurWidth = static_cast<int>(Globals::windowWidth / BLUR_DOWNSCALE_FACTOR);
+  const int blurHeight = static_cast<int>(Globals::windowHeight / BLUR_DOWNSCALE_FACTOR);
+
+  ci::gl::Fbo::Format blurFormat;
+  blurFormat.setMinFilter(GL_LINEAR);
+  blurFormat.setMagFilter(GL_LINEAR);
+  blurFormat.enableMipmapping(false);
+  blurFormat.enableDepthBuffer(false);
+  blurFormat.setSamples(16);
+
+  //m_navFboResult = ci::gl::Fbo(blurWidth, blurHeight, blurFormat);
+  m_navFbo1 = ci::gl::Fbo(blurWidth, blurHeight, blurFormat);
+  m_navFbo2 = ci::gl::Fbo(blurWidth, blurHeight, blurFormat);
+
+  //m_worldFboResult = ci::gl::Fbo(blurWidth, blurHeight, blurFormat);
+  m_worldFbo1 = ci::gl::Fbo(blurWidth, blurHeight, blurFormat);
+  m_worldFbo2 = ci::gl::Fbo(blurWidth, blurHeight, blurFormat);
+
 }
 
 void LeapShell::updateGlobals() {
+  Globals::prevTimeSeconds = Globals::curTimeSeconds;
   Globals::curTimeSeconds = ci::app::getElapsedSeconds();
   Globals::windowHeight = getWindowHeight();
   Globals::windowWidth = getWindowWidth();

@@ -77,6 +77,15 @@
     <ClInclude Include="..\..\include\FileSystemNode.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\include\Graph.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\OculusVR.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\UtilGL.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\src\CinderFbxStream.cpp">
@@ -130,12 +139,48 @@
     <ClCompile Include="..\..\src\FileSystemNode.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\src\Graph.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\OculusVR.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\UtilGL.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="..\..\resources\shaders\hands-vert.glsl">
       <Filter>Shaders</Filter>
     </None>
     <None Include="..\..\resources\shaders\hands-frag.glsl">
+      <Filter>Shaders</Filter>
+    </None>
+    <None Include="..\..\resources\shaders\blur-vert.glsl">
+      <Filter>Shaders</Filter>
+    </None>
+    <None Include="..\..\resources\shaders\motion-frag.glsl">
+      <Filter>Shaders</Filter>
+    </None>
+    <None Include="..\..\resources\shaders\passthrough-vert.glsl">
+      <Filter>Shaders</Filter>
+    </None>
+    <None Include="..\..\resources\shaders\blur-frag.glsl">
+      <Filter>Shaders</Filter>
+    </None>
+    <None Include="..\..\resources\shaders\distortion-frag.glsl">
+      <Filter>Shaders</Filter>
+    </None>
+    <None Include="..\..\resources\shaders\distortion-vert.glsl">
+      <Filter>Shaders</Filter>
+    </None>
+    <None Include="..\..\resources\shaders\lighting-frag.glsl">
+      <Filter>Shaders</Filter>
+    </None>
+    <None Include="..\..\resources\shaders\lighting-vert.glsl">
+      <Filter>Shaders</Filter>
+    </None>
+    <None Include="..\..\resources\shaders\undistortion-frag.glsl">
       <Filter>Shaders</Filter>
     </None>
   </ItemGroup>

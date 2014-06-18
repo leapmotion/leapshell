@@ -45,6 +45,7 @@ public:
   const Vector2& GetContentsMinBounds() const { return m_contentsMin; }
   const Vector2& GetContentsMaxBounds() const { return m_contentsMax; }
   void SetNumVisibleTiles(int numVisibleTiles) { m_numVisibleTiles = numVisibleTiles; }
+  void SetOffset(const Vector2& offset) { m_offset = offset; }
   EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 protected:
   void animateTilePosition(Tile& tile, int idx, const Vector3& newPosition) const;
@@ -52,6 +53,7 @@ protected:
   int m_numVisibleTiles;
   Vector2 m_contentsMin;
   Vector2 m_contentsMax;
+  Vector2 m_offset;
 };
 
 /// @brief Lays tiles out in a fixed-width grid, row-major, in the given order.
@@ -155,15 +157,13 @@ private:
 class ListLayout : public PositionLayout {
 public:
   enum Orientation { HORIZONTAL, VERTICAL };
-  ListLayout(const Vector2& offset = Vector2::Zero());
+  ListLayout();
   virtual void UpdateTilePositions(const Range<TilePointerVector::iterator> &tiles, bool updatePhantomPosition = false) override;
   virtual Vector2 GetCameraMinBounds() const override;
   virtual Vector2 GetCameraMaxBounds() const override;
   void SetOrientation(Orientation orient) { m_orientation = orient; }
-  void SetOffset(const Vector2& offset) { m_offset = offset; }
   EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 private:
-  Vector2 m_offset;
   Orientation m_orientation;
 };
 

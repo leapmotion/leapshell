@@ -65,6 +65,7 @@ public:
     static const float TRANSLATION_RATIO_SMOOTH_STRENGTH = 0.95f;
     static const float GRAB_SMOOTH_STRENGTH = 0.8f;
     static const float MIN_STRENGTH_TO_GRAB = 0.95f;
+    static const float PINCH_MULT = 1.3f; // some bonus to pinch strength
 
     // calculate velocity and ratio of X-Y movement to Z movement
     m_velocity = hand.palmVelocity().toVector3<Vector3>();
@@ -73,7 +74,7 @@ public:
     m_ratioSmoother.Update(static_cast<float>(ratio), frameTime, TRANSLATION_RATIO_SMOOTH_STRENGTH);
 
     // calculate grab/pinch strength
-    const float maxGrabPinch = std::max(hand.grabStrength(), hand.pinchStrength());
+    const float maxGrabPinch = std::max(hand.grabStrength(), PINCH_MULT * hand.pinchStrength());
     const float clampedScaledStrength = std::min(1.0f, (maxGrabPinch - (1.0f-MIN_STRENGTH_TO_GRAB))/MIN_STRENGTH_TO_GRAB);
     const float grabPinchStrength = SmootherStep(clampedScaledStrength * clampedScaledStrength * clampedScaledStrength);
     m_grabSmoother.Update(grabPinchStrength, frameTime, GRAB_SMOOTH_STRENGTH);

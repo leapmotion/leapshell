@@ -8,8 +8,10 @@ class Tile {
 public:
   static const float POSITION_SMOOTH;
   static const float SIZE_SMOOTH;
+  static const float HIGHLIGHT_SMOOTH;
   static const float ACTIVATION_SMOOTH;
   static const float GRABDELTA_SMOOTH;
+  static const float GRABDELTA_RETURN_SMOOTH;
   Tile();
 
   // getters
@@ -46,8 +48,8 @@ public:
 private:
   ExponentialFilter<Vector3> m_positionSmoother;
   ExponentialFilter<Vector3> m_sizeSmoother;
-  ExponentialFilter<float> m_highlightSmoother;
-  ExponentialFilter<float> m_activationSmoother;
+  MultiExponentialFilter<float, 5> m_highlightSmoother;
+  MultiExponentialFilter<float, 5> m_activationSmoother;
   ExponentialFilter<Vector3> m_grabDeltaSmoother;
   Vector3 m_targetGrabDelta;
 

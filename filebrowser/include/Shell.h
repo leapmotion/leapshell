@@ -10,6 +10,8 @@
 #include "NavigationState.h"
 #include "Interaction.h"
 #include "FileSystemNode.h"
+#include "Graph.h"
+#include "OculusVR.h"
 #if defined(CINDER_COCOA)
 #include <boost/uuid/sha1.hpp>
 #include <mach-o/getsect.h>
@@ -39,6 +41,24 @@ private:
 
   void updateGlobals();
   void setText(const std::string& text);
+  void drawBlur();
+  void drawShadow();
+  void drawMotionBlur();
+  void drawHands();
+  void drawViewsToFBO();
+  void drawWorldViewTexture();
+  void drawNavViewTexture();
+  void drawHUDStrings();
+  void drawGraphAndHands();
+  void setOrthoCamera();
+
+  Matrix4x4 getOculusBasis();
+
+  void drawViewToFBO(const std::shared_ptr<View>& view, ci::gl::Fbo& fbo1, ci::gl::Fbo& fbo2);
+  void drawDropShadow(ci::gl::Fbo& fbo);
+
+  void drawViewBlurToFBO(View* view);
+  void drawViewBlurTexture(View* view);
 
   static void drawString(const std::string& str, double x, double y, double lastChangeTime, float fadeTime, bool center);
 
@@ -94,6 +114,40 @@ private:
   // hands
   MeshHand* m_handL;
   MeshHand* m_handR;
+
+  // blur
+  ci::gl::GlslProgRef m_blurShader;
+
+  //ci::gl::Fbo m_navFboResult;
+  ci::gl::Fbo m_navFbo1;
+  ci::gl::Fbo m_navFbo2;
+
+  //ci::gl::Fbo m_worldFboResult;
+  ci::gl::Fbo m_worldFbo1;
+  ci::gl::Fbo m_worldFbo2;
+
+  ci::gl::GlslProgRef m_textureShader;
+
+  Graph m_graph;
+  float m_graphRadius;
+
+  OculusVR m_Oculus;
+  bool m_useOculusRender;
+  bool m_useOculusControl;
+
+  Leap::HandList m_hands;
+
+#if USE_LEAP_IMAGE_API
+  Leap::ImageList m_images;
+  int m_numImages;
+  ci::gl::Texture m_textures[2];
+  ci::gl::Texture m_distortionTextures[2];
+  GLuint m_distortionTexturesGL[2];
+  bool m_useDistortion;
+  bool m_haveDistortionTextures[2];
+  float m_overlayFov;
+  float m_gamma;
+#endif
 
 };
 

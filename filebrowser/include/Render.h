@@ -8,14 +8,21 @@
 class Render {
 public:
   Render();
-  void drawViewTiles(const View& view) const;
+  void setViewMatrices(const View& view) const;
+  void drawViewTiles(const View& view, bool ignoreActivationOpacity) const;
   void drawViewBackground(const View& view) const;
   void drawHands(const View& view, MeshHand& handL, MeshHand& handR) const;
+  void drawHandsToFBO(const View& view, MeshHand& handL, MeshHand& handR) const;
   void drawViewBounds(const View& view, const ci::ColorA& color) const;
+  void drawWireHand(const Leap::Hand& hand) const;
+
+  void drawHandsTexture() const;
 
   void update_background(const ci::Surface8u& surface);
 
   EIGEN_MAKE_ALIGNED_OPERATOR_NEW
+  
+  mutable ci::CameraPersp m_camera;
 
 private:
 
@@ -24,7 +31,6 @@ private:
   static bool tileInView(const Vector2& viewSize, const Vector3& lookat, const Vector3& tilePosition);
 
   mutable ExponentialFilter<Vector2> m_parallaxSmoother;
-  mutable ci::CameraPersp m_camera;
   mutable ci::gl::TextureRef m_background;
 
 };
