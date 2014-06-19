@@ -575,17 +575,17 @@ void LeapShell::draw()
   
   ci::gl::setMatricesWindow(size);
 
-#if USE_LEAP_IMAGE_API
-  if (!m_useOculusRender && m_numImages > 0) {
-    glDisable(GL_DEPTH_TEST);
-    glEnable(GL_TEXTURE_2D);
-    m_textures[0].bind();
-    ci::gl::drawSolidRect(rect);
-    m_textures[0].unbind();
-    glDisable(GL_TEXTURE_2D);
-    glEnable(GL_DEPTH_TEST);
-  }
-#endif
+//#if USE_LEAP_IMAGE_API
+//  if (!m_useOculusRender && m_numImages > 0) {
+//    glDisable(GL_DEPTH_TEST);
+//    glEnable(GL_TEXTURE_2D);
+//    m_textures[0].bind();
+//    ci::gl::drawSolidRect(rect);
+//    m_textures[0].unbind();
+//    glDisable(GL_TEXTURE_2D);
+//    glEnable(GL_DEPTH_TEST);
+//  }
+//#endif
 
   if (m_useOculusControl) {
     m_Oculus.BeginFrame();
@@ -593,86 +593,95 @@ void LeapShell::draw()
   if (m_useOculusRender) {
     m_Oculus.m_HMDFbo.bindFramebuffer();
     ci::gl::clear(ci::ColorA(0.0f, 0.0f, 0.0f, 1.0f));
-    for (int i=0; i<2; i++) {
-      m_Oculus.BeginEye(i);
-      const ci::Area area = toCinder(m_Oculus.m_EyeRenderViewport[m_Oculus.m_Eyes[i]]);
-      ci::gl::setViewport(area);
+  }
+  int numEyes = m_useOculusRender ? 2 : 1;
+  for (int i=0; i<numEyes; i++) {
+    m_Oculus.BeginEye(i);
+    const ci::Area area = m_useOculusRender ? toCinder(m_Oculus.m_EyeRenderViewport[m_Oculus.m_Eyes[i]]) : origViewport;
+    ci::gl::setViewport(area);
 
 #if USE_LEAP_IMAGE_API
-      ci::CameraPersp tempCam;
-      tempCam.setPerspective(m_overlayFov, static_cast<float>(area.getSize().x) / static_cast<float>(area.getSize().y), 0.1f, 10000.0f);
-      tempCam.lookAt(ci::Vec3f(0, 0, 0), ci::Vec3f(0, 0, -1), ci::Vec3f(0, 1, 0));
+    ci::CameraPersp tempCam;
+    tempCam.setPerspective(m_overlayFov, static_cast<float>(area.getSize().x) / static_cast<float>(area.getSize().y), 0.1f, 10000.0f);
+    tempCam.lookAt(ci::Vec3f(0, 0, 0), ci::Vec3f(0, 0, -1), ci::Vec3f(0, 1, 0));
 
 
-      //ci::gl::setMatricesWindow(area.getSize());
+    //ci::gl::setMatricesWindow(area.getSize());
 
-      ci::gl::setMatrices(tempCam);
+    ci::gl::setMatrices(tempCam);
 
-      glDisable(GL_DEPTH_TEST);
-      glEnable(GL_TEXTURE_2D);
-      ci::gl::enableAdditiveBlending();
-      const int imgIdx = (area.x1 > 0) ? 1 : 0;
-      m_textures[imgIdx].bind(0);
-      ci::gl::color(ci::ColorA::white());
-      Globals::undistortionShader.bind();
-      Globals::undistortionShader.uniform("useDistortion", m_useDistortion);
-      Globals::undistortionShader.uniform("gamma", 1.0f);
-      Globals::undistortionShader.uniform("colorTex", 0);
-      Globals::undistortionShader.uniform("distortionMap", 1);
-      Globals::undistortionShader.uniform("gamma", m_gamma);
-      glActiveTexture(GL_TEXTURE1);
-      glBindTexture(GL_TEXTURE_2D, m_distortionTexturesGL[imgIdx]);
-      glPushMatrix();
-      glTranslated(0, 0, -1);
+    glDisable(GL_DEPTH_TEST);
+    glEnable(GL_TEXTURE_2D);
+    ci::gl::enableAdditiveBlending();
+    const int imgIdx = (area.x1 > 0) ? 1 : 0;
+    m_textures[imgIdx].bind(0);
+    ci::gl::color(ci::ColorA::white());
+    Globals::undistortionShader.bind();
+    Globals::undistortionShader.uniform("useDistortion", m_useDistortion);
+    Globals::undistortionShader.uniform("gamma", 1.0f);
+    Globals::undistortionShader.uniform("colorTex", 0);
+    Globals::undistortionShader.uniform("distortionMap", 1);
+    Globals::undistortionShader.uniform("gamma", m_gamma);
+    glActiveTexture(GL_TEXTURE1);
+    glBindTexture(GL_TEXTURE_2D, m_distortionTexturesGL[imgIdx]);
+    glPushMatrix();
+    glTranslated(0, 0, -1);
 
-      //ci::gl::drawSolidRect(ci::Rectf(0.0f, 0.0f, area.getSize().x, area.getSize().y));
-      ci::gl::drawSolidRect(ci::Rectf(-4, -4, 4, 4));
-      glPopMatrix();
-      glBindTexture(GL_TEXTURE_2D, 0);
-      glActiveTexture(GL_TEXTURE0);
-      Globals::undistortionShader.unbind();
-      m_textures[imgIdx].unbind();
-      glDisable(GL_TEXTURE_2D);
-      glEnable(GL_DEPTH_TEST);
-      ci::gl::enableAlphaBlending();
+    //ci::gl::drawSolidRect(ci::Rectf(0.0f, 0.0f, area.getSize().x, area.getSize().y));
+    ci::gl::drawSolidRect(ci::Rectf(-4, -4, 4, 4));
+    glPopMatrix();
+    glBindTexture(GL_TEXTURE_2D, 0);
+    glActiveTexture(GL_TEXTURE0);
+    Globals::undistortionShader.unbind();
+    m_textures[imgIdx].unbind();
+    glDisable(GL_TEXTURE_2D);
+    glEnable(GL_DEPTH_TEST);
+    ci::gl::enableAlphaBlending();
 #endif
 
-      ci::Matrix44f modelView = toCinder(m_Oculus.m_ModelView);
-      ci::Matrix44f projection = toCinder(m_Oculus.m_Projection);
-      glMatrixMode(GL_PROJECTION);
-      glLoadMatrixf(projection.m);
-      glMatrixMode(GL_MODELVIEW);
-      glLoadMatrixf(modelView.m);
-
-      glPushMatrix();
-      glScaled(-1, 1, -1);
-      //drawGraphAndHands();
-      Matrix4x4 rotation = getOculusBasis();
-      m_graph.Draw(rotation);
-      glPopMatrix();
-
-#if USE_LEAP_IMAGE_API
-      //modelView = toCinder(m_Oculus.m_EyeTranslation);
-      //modelView.setColumn(0, -1 * modelView.getColumn(0));
-      //modelView = ci::Matrix44f::createTranslation(ci::Vec4f(imgIdx == 0 ? -20 : 20, 0, 0, 0)) * ci::Matrix44f::identity();
-      //glLoadMatrixf(modelView.m);
-      glPushMatrix();
-      glLoadIdentity();
-      //glTranslated(imgIdx > 0 ? -20 : 20, 0, 0);
-      float baseline = 40;
-      const Leap::DeviceList& devices = m_leapListener.getDevices();
-      glTranslated(imgIdx > 0 ? -baseline/2 : baseline/2, 0, 0);
-      glRotated(-90, 1, 0, 0);
-      glScaled(-1, 1, -1);
-      glScaled(2, 2, 2);
-      for (int j=0; j<m_hands.count(); j++) {
-        m_render->drawWireHand(m_hands[j]);
-      }
-      glPopMatrix();
-#endif
-      m_Oculus.EndEye(i);
-
+    ci::Matrix44f modelView = toCinder(m_Oculus.m_ModelView);
+    ci::Matrix44f projection = toCinder(m_Oculus.m_Projection);
+    if (!m_useOculusRender) {
+      ci::CameraPersp cam;
+      cam.setPerspective(m_overlayFov, static_cast<float>(Globals::aspectRatio), 0.1f, 1000.0f);
+      projection = cam.getProjectionMatrix();
     }
+
+    glMatrixMode(GL_PROJECTION);
+    glLoadMatrixf(projection.m);
+    glMatrixMode(GL_MODELVIEW);
+    glLoadMatrixf(modelView.m);
+
+    glPushMatrix();
+    glScaled(-1, 1, -1);
+    Matrix4x4 rotation = getOculusBasis();
+    m_graph.Draw(rotation);
+    glPopMatrix();
+
+#if USE_LEAP_IMAGE_API
+    //modelView = toCinder(m_Oculus.m_EyeTranslation);
+    //modelView.setColumn(0, -1 * modelView.getColumn(0));
+    //modelView = ci::Matrix44f::createTranslation(ci::Vec4f(imgIdx == 0 ? -20 : 20, 0, 0, 0)) * ci::Matrix44f::identity();
+    //glLoadMatrixf(modelView.m);
+    glPushMatrix();
+    glLoadIdentity();
+    //glTranslated(imgIdx > 0 ? -20 : 20, 0, 0);
+    float baseline = 40;
+    const Leap::DeviceList& devices = m_leapListener.getDevices();
+    glTranslated(imgIdx > 0 ? -baseline/2 : baseline/2, 0, 0);
+    glRotated(-90, 1, 0, 0);
+    glScaled(-1, 1, -1);
+    glScaled(2, 2, 2);
+    for (int j=0; j<m_hands.count(); j++) {
+      m_render->drawWireHand(m_hands[j]);
+    }
+    glPopMatrix();
+#endif
+    m_Oculus.EndEye(i);
+
+  }
+
+  if (m_useOculusRender) {
     m_Oculus.m_HMDFbo.unbindFramebuffer();
     glEnable(GL_TEXTURE_2D);
     glDisable(GL_DEPTH_TEST);
@@ -682,26 +691,6 @@ void LeapShell::draw()
     ci::gl::setMatricesWindow(static_cast<int>(Globals::windowWidth), static_cast<int>(Globals::windowHeight));
     m_Oculus.DistortionMeshRender();
     glEnable(GL_DEPTH_TEST);
-  } else {
-    ci::CameraPersp cam;
-    cam.lookAt(m_graphRadius*ci::Vec3f(0, 0, -1), ci::Vec3f::zero());
-    cam.setPerspective(60.0f, static_cast<float>(Globals::aspectRatio), 0.1f, 10000.0f);
-    if (m_useOculusControl) {
-      m_Oculus.BeginEye(0);
-      ci::Matrix44f modelView = toCinder(m_Oculus.m_ModelView);
-      ci::gl::setProjection(cam);
-      glMatrixMode(GL_MODELVIEW);
-      glLoadMatrixf(modelView.m);
-    } else {
-      ci::gl::setMatrices(cam);
-    }
-    glPushMatrix();
-    glScaled(-1, 1, -1);
-    drawGraphAndHands();
-    glPopMatrix();
-    if (m_useOculusControl) {
-      m_Oculus.EndEye(0);
-    }
   }
 
   if (m_useOculusControl) {

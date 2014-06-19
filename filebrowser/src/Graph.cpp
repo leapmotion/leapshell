@@ -16,7 +16,7 @@ void Graph::Start(GraphType type) {
 
   m_gravity = 0.005f;
   m_flattening = 0.03f;
-  m_gravityRadius = 400.0f;
+  m_gravityRadius = 500.0f;
   m_alpha = 0.85f;
   m_friction = 0.85f;
   m_charge = -100.0f;
