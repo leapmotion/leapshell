@@ -125,6 +125,7 @@
     <ClCompile Include="..\..\src\Geometry.cpp" />
     <ClCompile Include="..\..\src\GLBuffer.cpp" />
     <ClCompile Include="..\..\src\Globals.cpp" />
+    <ClCompile Include="..\..\src\Graph.cpp" />
     <ClCompile Include="..\..\src\GraphShell.cpp" />
     <ClCompile Include="..\..\src\LeapListener.cpp" />
     <ClCompile Include="..\..\src\StdAfx.cpp">
@@ -137,6 +138,7 @@
     <ClInclude Include="..\..\include\Geometry.h" />
     <ClInclude Include="..\..\include\GLBuffer.h" />
     <ClInclude Include="..\..\include\Globals.h" />
+    <ClInclude Include="..\..\include\Graph.h" />
     <ClInclude Include="..\..\include\LeapListener.h" />
     <ClInclude Include="..\..\include\Resources.h" />
     <ClInclude Include="..\..\include\GraphShell.h" />
