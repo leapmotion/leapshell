@@ -4,6 +4,7 @@
 #include "Resources.h"
 #include "LeapListener.h"
 #include "Geometry.h"
+#include "Graph.h"
 #if defined(CINDER_COCOA)
 #include <boost/uuid/sha1.hpp>
 #include <mach-o/getsect.h>
@@ -77,6 +78,7 @@ private:
   ci::gl::Fbo m_screenFbo;
 
   Geometry m_geometry;
+  Graph m_graph;
 
 };
 

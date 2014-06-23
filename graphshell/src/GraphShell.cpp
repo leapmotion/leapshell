@@ -40,6 +40,13 @@ void GraphShell::setup()
   try {
     m_screenShader = ci::gl::GlslProg(loadResource(RES_PASSTHROUGH_VERT_GLSL), loadResource(RES_SCREEN_FRAG_GLSL));
     m_objectShader = ci::gl::GlslProg(loadResource(RES_MATERIAL_VERT_GLSL), loadResource(RES_MATERIAL_FRAG_GLSL));
+
+    m_graph.m_initialPosProg = ci::gl::GlslProg(loadResource(RES_INITIAL_POS_VERT_GLSL), loadResource(RES_INITIAL_POS_FRAG_GLSL));
+    m_graph.m_nbodyProg = ci::gl::GlslProg(loadResource(RES_NBODY_VERT_GLSL), loadResource(RES_NBODY_FRAG_GLSL));
+    m_graph.m_edgeProg = ci::gl::GlslProg(loadResource(RES_EDGE_FORCE_VERT_GLSL), loadResource(RES_EDGE_FORCE_FRAG_GLSL));
+    m_graph.m_drawEdgesProg = ci::gl::GlslProg(loadResource(RES_EDGES_VERT_GLSL), loadResource(RES_EDGES_FRAG_GLSL));
+    m_graph.m_drawVerticesProg = ci::gl::GlslProg(loadResource(RES_VERTICES_VERT_GLSL), loadResource(RES_VERTICES_FRAG_GLSL));
+
   } catch (ci::gl::GlslProgCompileExc e) {
     std::cerr << e.what() << std::endl;
   }

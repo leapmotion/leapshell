@@ -1,11 +1,8 @@
-
-precision highp float;
-
-const float xsize = #{xsize};
-const float ysize = #{ysize};
-const float xiter = #{xiter};
-const float yiter = #{yiter};
-const float ymax = #{ymax};
+//const float xsize = #{xsize};
+//const float ysize = #{ysize};
+//const float xiter = #{xiter};
+//const float yiter = #{yiter};
+//const float ymax = #{ymax};
 
 uniform sampler2D positionTexture;
 uniform sampler2D forceTexture;
@@ -13,6 +10,12 @@ uniform sampler2D forceTexture;
 uniform float xstart;
 uniform float ystart;
 uniform float dt;
+
+uniform float xsize;
+uniform float ysize;
+uniform float xiter;
+uniform float yiter;
+uniform float ymax;
 
 attribute vec2 coords;
 

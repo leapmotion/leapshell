@@ -1,6 +1,3 @@
-
-precision highp float;
-
 uniform sampler2D positionTexture;
 uniform float forceDir;
 uniform float dt;

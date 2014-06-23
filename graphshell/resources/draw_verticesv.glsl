@@ -1,6 +1,3 @@
-
-precision highp float;
-
 uniform sampler2D positionTexture;
 uniform mat4 matrix;
 uniform float pointSize;

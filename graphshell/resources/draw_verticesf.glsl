@@ -1,6 +1,3 @@
-
-precision highp float;
-
 uniform sampler2D vertTex;
 varying vec4 vColor;
 

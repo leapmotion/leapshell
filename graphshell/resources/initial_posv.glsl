@@ -1,6 +1,3 @@
-
-precision highp float;
-
 attribute vec2 coords;
 varying vec2 vCoords;
 

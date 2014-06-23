@@ -146,6 +146,16 @@
     <ClInclude Include="..\..\include\Utilities.h" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="..\..\resources\draw_edgesf.glsl" />
+    <None Include="..\..\resources\draw_edgesv.glsl" />
+    <None Include="..\..\resources\draw_verticesf.glsl" />
+    <None Include="..\..\resources\draw_verticesv.glsl" />
+    <None Include="..\..\resources\edge_forcef.glsl" />
+    <None Include="..\..\resources\edge_forcev.glsl" />
+    <None Include="..\..\resources\initial_posf.glsl" />
+    <None Include="..\..\resources\initial_posv.glsl" />
+    <None Include="..\..\resources\nbodyf.glsl" />
+    <None Include="..\..\resources\nbodyv.glsl" />
     <None Include="..\..\resources\shaders\material-frag.glsl" />
     <None Include="..\..\resources\shaders\material-vert.glsl" />
     <None Include="..\..\resources\shaders\passthrough-vert.glsl" />
