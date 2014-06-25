@@ -41,6 +41,9 @@
     <ClCompile Include="..\..\src\Graph.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\src\Interaction.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\include\DataTypes.h">
@@ -73,26 +76,11 @@
     <ClInclude Include="..\..\include\Graph.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\include\Interaction.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <None Include="..\..\resources\shaders\material-frag.glsl">
-      <Filter>Shaders</Filter>
-    </None>
-    <None Include="..\..\resources\shaders\material-vert.glsl">
-      <Filter>Shaders</Filter>
-    </None>
-    <None Include="..\..\resources\shaders\passthrough-vert.glsl">
-      <Filter>Shaders</Filter>
-    </None>
-    <None Include="..\..\resources\shaders\screen-frag.glsl">
-      <Filter>Shaders</Filter>
-    </None>
-    <None Include="..\..\resources\nbodyf.glsl">
-      <Filter>Shaders</Filter>
-    </None>
-    <None Include="..\..\resources\nbodyv.glsl">
-      <Filter>Shaders</Filter>
-    </None>
     <None Include="..\..\resources\draw_edgesf.glsl">
       <Filter>Shaders</Filter>
     </None>
@@ -115,6 +103,24 @@
       <Filter>Shaders</Filter>
     </None>
     <None Include="..\..\resources\initial_posv.glsl">
+      <Filter>Shaders</Filter>
+    </None>
+    <None Include="..\..\resources\material-frag.glsl">
+      <Filter>Shaders</Filter>
+    </None>
+    <None Include="..\..\resources\material-vert.glsl">
+      <Filter>Shaders</Filter>
+    </None>
+    <None Include="..\..\resources\nbodyf.glsl">
+      <Filter>Shaders</Filter>
+    </None>
+    <None Include="..\..\resources\nbodyv.glsl">
+      <Filter>Shaders</Filter>
+    </None>
+    <None Include="..\..\resources\passthrough-vert.glsl">
+      <Filter>Shaders</Filter>
+    </None>
+    <None Include="..\..\resources\screen-frag.glsl">
       <Filter>Shaders</Filter>
     </None>
   </ItemGroup>

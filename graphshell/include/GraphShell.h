@@ -5,6 +5,7 @@
 #include "LeapListener.h"
 #include "Geometry.h"
 #include "Graph.h"
+#include "Interaction.h"
 #if defined(CINDER_COCOA)
 #include <boost/uuid/sha1.hpp>
 #include <mach-o/getsect.h>
@@ -28,6 +29,8 @@ public:
   virtual void keyDown(ci::app::KeyEvent) override;
   virtual void keyUp(ci::app::KeyEvent) override;
   virtual void resize() override;
+
+  EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 
 private:
 
@@ -79,6 +82,13 @@ private:
 
   Geometry m_geometry;
   Graph m_graph;
+  Interaction m_interaction;
+  double m_lastDrawTime;
+  Vector3 m_translation;
+  Matrix4x4 m_rotation;
+  float m_scale;
+
+  Matrix4x4 m_transform;
 
 };
 

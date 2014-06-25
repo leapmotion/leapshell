@@ -127,6 +127,7 @@
     <ClCompile Include="..\..\src\Globals.cpp" />
     <ClCompile Include="..\..\src\Graph.cpp" />
     <ClCompile Include="..\..\src\GraphShell.cpp" />
+    <ClCompile Include="..\..\src\Interaction.cpp" />
     <ClCompile Include="..\..\src\LeapListener.cpp" />
     <ClCompile Include="..\..\src\StdAfx.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>
@@ -139,6 +140,7 @@
     <ClInclude Include="..\..\include\GLBuffer.h" />
     <ClInclude Include="..\..\include\Globals.h" />
     <ClInclude Include="..\..\include\Graph.h" />
+    <ClInclude Include="..\..\include\Interaction.h" />
     <ClInclude Include="..\..\include\LeapListener.h" />
     <ClInclude Include="..\..\include\Resources.h" />
     <ClInclude Include="..\..\include\GraphShell.h" />
@@ -154,12 +156,12 @@
     <None Include="..\..\resources\edge_forcev.glsl" />
     <None Include="..\..\resources\initial_posf.glsl" />
     <None Include="..\..\resources\initial_posv.glsl" />
+    <None Include="..\..\resources\material-frag.glsl" />
+    <None Include="..\..\resources\material-vert.glsl" />
     <None Include="..\..\resources\nbodyf.glsl" />
     <None Include="..\..\resources\nbodyv.glsl" />
-    <None Include="..\..\resources\shaders\material-frag.glsl" />
-    <None Include="..\..\resources\shaders\material-vert.glsl" />
-    <None Include="..\..\resources\shaders\passthrough-vert.glsl" />
-    <None Include="..\..\resources\shaders\screen-frag.glsl" />
+    <None Include="..\..\resources\passthrough-vert.glsl" />
+    <None Include="..\..\resources\screen-frag.glsl" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets" />
