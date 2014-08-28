@@ -1,6 +1,7 @@
 // Copyright (c) 2010 - 2013 Leap Motion. All rights reserved. Proprietary and confidential.
 #include "StdAfx.h"
 #include "LeapListener.h"
+#include "Globals.h"
 
 LeapListener::LeapListener() : m_isConnected(false)
 {
@@ -18,6 +19,9 @@ void LeapListener::onConnect(const Leap::Controller& controller)
 {
   std::unique_lock<std::mutex> lock(m_mutex);
   controller.setPolicyFlags(Leap::Controller::POLICY_BACKGROUND_FRAMES);
+#if USE_LEAP_IMAGE_API
+  controller.setPolicyFlags(Leap::Controller::POLICY_IMAGES);
+#endif
 
   m_isConnected = true;
 }
@@ -51,6 +55,8 @@ void LeapListener::onFrame(const Leap::Controller& controller)
 {
   std::unique_lock<std::mutex> lock(m_mutex);
 
+#if 0
+
   if (m_lastFrame.isValid()) {
     int history = 0;
 
@@ -63,6 +69,9 @@ void LeapListener::onFrame(const Leap::Controller& controller)
       m_frames.push_back(controller.frame(history));
     }
   }
+#else
+  m_frames.clear();
+#endif
   m_lastFrame = controller.frame();
   m_frames.push_back(m_lastFrame);
 }

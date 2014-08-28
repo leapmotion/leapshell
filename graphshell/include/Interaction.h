@@ -14,6 +14,8 @@ public:
   const Vector3& RotationVelocity() const { return m_rotationVelocity; }
   const Vector3& TransformCenter() const { return m_transformCenter; }
   float ScaleVelocity() const { return m_scaleVelocity; }
+  const Matrix4x4& Transform() const { return m_transform; }
+  const Matrix4x4& Rotation() const { return m_rotation; }
   void Draw() const;
 
 private:
@@ -22,7 +24,9 @@ private:
   void cleanupHandInfos(double frameTime);
   void calculateTransformCenter();
   void calculateInteractions();
-
+  void calculateTransforms();
+  static void drawWireHand(const Leap::Hand& hand);
+  
   typedef std::map<int, HandInfo, std::less<int>, Eigen::aligned_allocator<std::pair<int, HandInfo> > > HandInfoMap;
 
   Leap::Frame m_frame;
@@ -38,9 +42,15 @@ private:
 
   Vector3 m_translationVelocity;
   float m_scaleVelocity;
+
+  Vector3 m_translation;
+  Matrix4x4 m_rotation;
+  float m_scale;
+
+  Matrix4x4 m_transform;
+  double m_lastDrawTime;
 };
 
-#if 1
 class HandInfo {
 
 public:
@@ -57,6 +67,7 @@ public:
   const Vector3& RotationAxis() const { return m_rotationAxis; }
   float RotationAngleVelocity() const { return m_rotationAngleVelocity; }
   float ScaleVelocity() const { return m_scaleVelocity; }
+  void DrawHand() const;
   //Tile* ClosestTile() const { return m_closestTile; }
 
   const Vector3 ModifiedVelocity() const {
@@ -71,7 +82,7 @@ public:
     static const float MIN_STRENGTH_TO_GRAB = 0.95f;
 
     // calculate velocity and ratio of X-Y movement to Z movement
-    m_velocity = hand.palmVelocity().toVector3<Vector3>();
+    m_velocity = leapToWorld(hand.palmVelocity().toVector3<Vector3>(), true);
     const Vector3 normVelocity = m_velocity.normalized();
     const double ratio = normVelocity.x()*normVelocity.x() + normVelocity.y()*normVelocity.y();
     m_ratioSmoother.Update(static_cast<float>(ratio), frameTime, TRANSLATION_RATIO_SMOOTH_STRENGTH);
@@ -83,8 +94,8 @@ public:
     m_grabSmoother.Update(grabPinchStrength, frameTime, GRAB_SMOOTH_STRENGTH);
 
     // update palm position
-    m_palmPosition = hand.palmPosition().toVector3<Vector3>() + Globals::LEAP_OFFSET;
-    m_rotationAxis = hand.rotationAxis(m_hand.frame()).toVector3<Vector3>();
+    m_palmPosition = leapToWorld(hand.palmPosition().toVector3<Vector3>() + Globals::LEAP_OFFSET, false);
+    m_rotationAxis = leapToWorld(hand.rotationAxis(m_hand.frame()).toVector3<Vector3>(), true);
     m_rotationAngleVelocity = hand.rotationAngle(m_hand.frame()) / (frameTime - m_lastUpdateTime);
     m_scaleVelocity = std::log(hand.scaleFactor(m_hand.frame())) / (frameTime - m_lastUpdateTime);
     m_lastUpdateTime = frameTime;
@@ -101,6 +112,11 @@ public:
     return m_velocity * (targetDepth / depth);
   }
 
+  static Matrix4x4 oculusTransform;
+  static Vector3 oculusOffset;
+
+  static Vector3 leapToWorld(const Vector3& pos, bool vel);
+
 private:
 
   Leap::Hand m_hand;
@@ -113,92 +129,7 @@ private:
   Vector3 m_rotationAxis;
   float m_scaleVelocity;
   float m_rotationAngleVelocity;
-  //Tile* m_closestTile;
 
 };
-#else
-
-class HandInfo {
-public:
-
-  HandInfo() : m_lastUpdateTime(0.0), m_lastHandOpenChangeTime(0.0), m_handOpen(false), m_firstUpdate(true), m_lastPalmPos(Vector3::Zero()) {
-    m_translation.value = Vector3::Zero();
-    m_transRatio.value = 0.5f;
-    m_normalY.value = 0.5f;
-  }
-
-  int getNumFingers() const { return m_numFingers.FilteredCategory(); }
-  Vector3 getTranslation() const { return m_translation.value; }
-  float getTranslationRatio() const { return m_transRatio.value; }
-  float getNormalY() const { return m_normalY.value; }
-  double getLastUpdateTime() const { return m_lastUpdateTime; }
-  double getLastHandOpenChangeTime() const { return m_lastHandOpenChangeTime; }
-  bool handOpen() const { return m_handOpen; }
-  double LastUpdateTime() const { return m_lastUpdateTime; }
-
-  Vector3 getModifiedTranslation() const {
-    const float ratio = getTranslationRatio();
-    const Vector3 origTrans = getTranslation();
-    return Vector3(ratio*origTrans.x(), ratio*origTrans.y(), (1.0f-ratio)*origTrans.z());
-  }
-
-  void Update(const Leap::Hand& hand, double frameTime) {
-    static const float NUM_FINGERS_SMOOTH_STRENGTH = 0.9f;
-    static const float TRANSLATION_SMOOTH_STRENGTH = 0.5f;
-    static const float TRANSLATION_RATIO_SMOOTH_STRENGTH = 0.985f;
-    static const float NORMAL_Y_SMOOTH_STRENGTH = 0.9f;
-    static const float MIN_POINTABLE_AGE = 0.1f;
-    m_lastUpdateTime = frameTime;
-
-    // update number of fingers
-    const Leap::PointableList pointables = hand.pointables();
-    int numFingers = 0;
-    for (int i=0; i<pointables.count(); i++) {
-      if (pointables[i].isExtended() && pointables[i].timeVisible() >= MIN_POINTABLE_AGE) {
-        numFingers++;
-      }
-    }
-    m_numFingers.Update(numFingers, frameTime, NUM_FINGERS_SMOOTH_STRENGTH);
-    const int curNumFingers = m_numFingers.FilteredCategory();
-    if (curNumFingers > 2 && !m_handOpen) {
-      m_handOpen = true;
-      m_lastHandOpenChangeTime = frameTime;
-    } else if (m_handOpen && curNumFingers <= 2) {
-      m_handOpen = false;
-      m_lastHandOpenChangeTime = frameTime;
-    }
-
-    // update translation
-    const Leap::Vector temp(hand.palmPosition());
-    const Vector3 curPos(temp.x, temp.y, temp.z);
-    Vector3 translation = curPos - m_lastPalmPos;
-    if (m_firstUpdate) {
-      translation = Vector3::Zero();
-    }
-    m_lastPalmPos = curPos;
-    m_firstUpdate = false;
-    m_translation.Update(translation, frameTime, TRANSLATION_SMOOTH_STRENGTH);
-
-    // update translation ratio
-    if (translation.squaredNorm() > 0.001f) {
-      const Vector3 unitTranslation = translation.normalized();
-      const float curRatio = unitTranslation.x()*unitTranslation.x() + unitTranslation.y()*unitTranslation.y();
-      m_transRatio.Update(curRatio, frameTime, TRANSLATION_RATIO_SMOOTH_STRENGTH);
-    }
-
-    // update palm normal Y value
-    m_normalY.Update(fabs(hand.palmNormal().y), frameTime, NORMAL_Y_SMOOTH_STRENGTH);
-  }
-private:
-  bool m_firstUpdate;
-  Vector3 m_lastPalmPos;
-  CategoricalFilter<10> m_numFingers;
-  ExponentialFilter<Vector3> m_translation;
-  double m_lastUpdateTime;
-  bool m_handOpen;
-  double m_lastHandOpenChangeTime;
-};
-#endif
-
 
 #endif

@@ -43,6 +43,9 @@
 #include <climits>
 #include <stdexcept>
 
+// fbx
+#include "fbxsdk.h"
+
 // OS-specific
 #if _WIN32
 #include <Windows.h>
@@ -66,3 +69,10 @@
 #include <boost/thread/thread.hpp>
 #include <boost/thread/condition_variable.hpp>
 #include <boost/thread/mutex.hpp>
+
+// Oculus
+#include "OVR.h"
+
+// curl
+#define CURL_STATICLIB
+#include <curl/curl.h>

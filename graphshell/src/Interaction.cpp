@@ -2,10 +2,15 @@
 #include "Interaction.h"
 
 Interaction::Interaction() {
-  m_transformCenter = Vector3::Zero();
+  m_transformCenter = 1000*Vector3::UnitZ();
   m_transformVelocity = Vector3::Zero();
   m_translationVelocity = Vector3::Zero();
   m_scaleVelocity = 0.0f;
+  m_lastDrawTime = 0;
+  m_translation = Vector3::Zero();
+  m_rotation = Matrix4x4::Identity();
+  m_scale = 1.0f;
+  m_transform = Matrix4x4::Identity();
 }
 
 void Interaction::Update(const Leap::Frame& frame) {
@@ -15,6 +20,7 @@ void Interaction::Update(const Leap::Frame& frame) {
   cleanupHandInfos(timeSeconds);
   calculateTransformCenter();
   calculateInteractions();
+  calculateTransforms();
 }
 
 void Interaction::Draw() const {
@@ -24,14 +30,15 @@ void Interaction::Draw() const {
   //glTranslated(-m_transformCenter.x(), -m_transformCenter.y(), -m_transformCenter.z());
   //m_geometry.Draw(vertexAttr, normalAttr);
   glPushMatrix();
-  glScalef(-1, -1, -1);
+  //glScalef(-1, -1, -1);
   ci::ColorA color = ci::ColorA::gray(1.0f);
   ci::gl::color(color);
   ci::gl::drawSphere(ToVec3f(m_transformCenter), 7.0f, 20);
   //glPopMatrix();
   for (HandInfoMap::const_iterator it = m_handInfos.cbegin(); it != m_handInfos.cend(); ++it) {
     const HandInfo& cur = it->second;
-    const Vector3& pos = cur.PalmPosition();
+    cur.DrawHand();
+    const Vector3 pos = cur.PalmPosition();
     const double grabPinch = cur.GrabPinchStrength();
     ci::ColorA handColor = ci::ColorA(grabPinch, 0.0f, 1.0-grabPinch);
     ci::gl::color(handColor);
@@ -140,7 +147,7 @@ void Interaction::calculateInteractions() {
       m_translationVelocity += velocity * grabPinch;
       m_transformCenter = position;
 
-      m_rotationVelocity += cur.RotationAngleVelocity() * cur.RotationAxis() * grabPinch;
+      //m_rotationVelocity += cur.RotationAngleVelocity() * cur.RotationAxis() * grabPinch;
       //m_scaleVelocity += cur.ScaleVelocity();
     }
   } else {
@@ -168,4 +175,103 @@ void Interaction::calculateInteractions() {
     }
     m_translationVelocity /= totalWeight;
   }
+}
+
+void Interaction::calculateTransforms() {
+  const double deltaTime = Globals::curTimeSeconds - m_lastDrawTime;
+  const Vector3 translation = TranslationVelocity() * deltaTime;
+  const Matrix4x4 rotationInv = m_rotation;// .inverse();
+  const Vector3 transformCenter = -TransformCenter();
+
+  //m_translation += (rotationInv * Vector4(translation.x(), translation.y(), translation.z(), 0.0)).head<3>();
+  m_translation += translation;
+
+  m_transform = TranslationMatrix(translation) * m_transform;
+
+  m_scale += (ScaleVelocity() * deltaTime);
+
+  const Vector3 rotation = deltaTime * RotationVelocity();
+  const double rotationAngle = rotation.norm();
+  const Vector3 rotationAxis = rotation / rotationAngle;
+  if (abs(rotationAngle) > 0.001) {
+    const Matrix4x4 rotationMatrix = RotationMatrix(rotationAxis, -rotationAngle);
+    //m_rotation = m_rotation * rotationMatrix;
+    m_rotation = rotationMatrix * m_rotation;
+    //m_transform = TranslationMatrix(-m_translation) * m_transform;
+    m_transform = TranslationMatrix(transformCenter) * m_transform;
+    m_transform = rotationMatrix * m_transform;
+    m_transform = TranslationMatrix(-transformCenter) * m_transform;
+    //m_transform = TranslationMatrix(m_translation) * m_transform;
+  }
+
+  m_transform = TranslationMatrix(transformCenter) * m_transform;
+  m_transform = ScaleMatrix(Vector3::Constant(1.0 + ScaleVelocity() * deltaTime)) * m_transform;
+  m_transform = TranslationMatrix(-transformCenter) * m_transform;
+
+  m_lastDrawTime = Globals::curTimeSeconds;
+}
+
+Matrix4x4 HandInfo::oculusTransform = Matrix4x4::Identity();
+Vector3 HandInfo::oculusOffset = Vector3::Zero();
+
+void HandInfo::DrawHand() const {
+  const Leap::FingerList fingers = m_hand.fingers();
+  for (int i=0; i<fingers.count(); i++) {
+    for (int j=0; j<4; j++) {
+      Leap::Bone curBone = fingers[i].bone(static_cast<Leap::Bone::Type>(j));
+      const Vector3 prev = leapToWorld(curBone.prevJoint().toVector3<Vector3>(), false);
+      const Vector3 next = leapToWorld(curBone.nextJoint().toVector3<Vector3>(), false);
+
+      ci::gl::color(ci::ColorA(0.4f, 0.7f, 1.0f, 1.0f));
+      glLineWidth(3.0f);
+      glBegin(GL_LINES);
+      glVertex3d(prev.x(), prev.y(), prev.z());
+      glVertex3d(next.x(), next.y(), next.z());
+      glEnd();
+
+      ci::gl::color(ci::ColorA::gray(0.5f));
+      glLineWidth(7.0f);
+      glBegin(GL_LINES);
+      glVertex3d(prev.x(), prev.y(), prev.z());
+      glVertex3d(next.x(), next.y(), next.z());
+      glEnd();
+
+      ci::gl::color(ci::ColorA(0.4f, 1.0f, 0.7f, 1.0f));
+      glPointSize(15.0f);
+      glBegin(GL_POINTS);
+      glVertex3d(prev.x(), prev.y(), prev.z());
+      glVertex3d(next.x(), next.y(), next.z());
+      glEnd();
+    }
+  }
+}
+
+Vector3 HandInfo::leapToWorld(const Vector3& pos, bool vel) {
+  /*
+  old
+  x = right
+  y = up
+  z = back
+
+  new
+  x = right
+  y = forward
+  z = up
+  */
+
+  Vector3 result = pos;
+  //result.x() *= -1.0;
+  //result.y() *= -1.0;
+  //result.z() *= -1.0;
+
+  std::swap(result.y(), result.z());
+  result.y() *= -1;
+#if 1
+  //std::cout << "before: " << result.transpose() << std::endl;
+
+  Vector3 finalResult = (oculusTransform * Vector4(result.x(), result.y(), result.z(), vel ? 0.0 : 1.0)).head<3>();
+  //std::cout << "after: " << finalResult.transpose() << std::endl;
+  //finalResult *= 2.0;
+#endif
+  return finalResult + oculusOffset;
 }

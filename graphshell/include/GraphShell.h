@@ -6,6 +6,9 @@
 #include "Geometry.h"
 #include "Graph.h"
 #include "Interaction.h"
+#include "GraphAlt.h"
+#include "MeshHand.h"
+#include "OculusVR.h"
 #if defined(CINDER_COCOA)
 #include <boost/uuid/sha1.hpp>
 #include <mach-o/getsect.h>
@@ -34,6 +37,8 @@ public:
 
 private:
 
+  Matrix4x4 getOculusTransform();
+  Matrix4x4 getOculusRotation();
   void updateGlobals();
 
 #if defined(CINDER_COCOA)
@@ -82,14 +87,45 @@ private:
 
   Geometry m_geometry;
   Graph m_graph;
+  bool m_allowUpdate;
   Interaction m_interaction;
-  double m_lastDrawTime;
-  Vector3 m_translation;
-  Matrix4x4 m_rotation;
-  float m_scale;
 
-  Matrix4x4 m_transform;
+  // hands
+  MeshHand* m_handL;
+  MeshHand* m_handR;
 
+  GraphAlt m_graphAlt;
+  float m_graphRadius;
+
+  OculusVR m_Oculus;
+  bool m_useOculusRender;
+  bool m_useOculusControl;
+
+  Leap::HandList m_hands;
+
+  float m_yaw;
+  float m_pitch;
+  float m_dist;
+  ci::Vec2i m_mousePos;
+
+#if USE_LEAP_IMAGE_API
+  Leap::ImageList m_images;
+  int m_numImages;
+  ci::gl::Texture m_textures[8];
+  ci::gl::Texture m_distortionTextures[8];
+  GLuint m_distortionTexturesGL[8];
+  bool m_useDistortion;
+  bool m_haveDistortionTextures[8];
+  float m_overlayFov;
+  float m_gamma;
+
+  float m_redX;
+  float m_redY;
+  float m_greenX;
+  float m_greenY;
+  float m_blueX;
+  float m_blueY;
+#endif
 };
 
 #endif

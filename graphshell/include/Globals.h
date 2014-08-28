@@ -1,6 +1,9 @@
 #ifndef __Globals_h__
 #define __Globals_h__
 
+// flags
+#define USE_LEAP_IMAGE_API 1
+
 class Globals {
 public:
   // viewport info
@@ -13,6 +16,15 @@ public:
 
   // leap
   static const Vector3 LEAP_OFFSET;
+
+  // fonts
+  static const float FONT_SIZE;
+  static ci::gl::TextureFontRef fontRegular;
+
+  // shaders
+  static ci::gl::GlslProg handsShader;
+  static ci::gl::GlslProg distortionShader;
+  static ci::gl::GlslProg undistortionShader;
 
 };
 

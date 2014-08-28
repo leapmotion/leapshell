@@ -7,6 +7,7 @@ class Node {
 public:
   Node(int _id = 0) : id(_id) { }
   int id;
+  std::string name;
   std::vector<int> outEdges;
   std::vector<int> inEdges;
 };
@@ -24,13 +25,45 @@ public:
   void AddEdge(int fromId, int toId);
   void RemoveEdge(int fromId, int toId);
 
+  void reload();
+
+  void runInitialPos();
+
+  void Update();
+  void Draw(const ci::Matrix44f& matrix);
+
   ci::gl::GlslProg m_nbodyProg;
   ci::gl::GlslProg m_initialPosProg;
   ci::gl::GlslProg m_edgeProg;
   ci::gl::GlslProg m_drawVerticesProg;
   ci::gl::GlslProg m_drawEdgesProg;
 
+  float m_downsampleK;
+  float m_dtVertices;
+  float m_dtEdges;
+  float m_pointSize;
+  bool m_edgeForces;
+  bool m_vertexForces;
+  bool m_renderEdges;
+  bool m_renderVertices;
+  int m_numVertices;
+  int m_numEdges;
+
 private:
+
+  void createWebGraph();
+  void createRandomGraph(int numNodes);
+  void createProductGraph();
+
+  int retrieveOrAddNode(const std::string& name);
+
+  void split(const std::string &s, char delim, std::vector<std::string> &elems) {
+    std::stringstream ss(s);
+    std::string item;
+    while (std::getline(ss, item, delim)) {
+      elems.push_back(item);
+    }
+  }
 
   static void getPotSize(int num, int& w, int& h);
   static void getTextureIndices(int width, int height, int limit, bool keepData, std::vector<float>& coords);
@@ -42,22 +75,12 @@ private:
   void setNumEdges();
   void deleteEdgeData();
   void createEdgeData();
-  
-  void reload();
+  void updateEdgeColors();
 
-  void init();
-  void initInitialPos(ci::gl::GlslProg& shader);
-  void initNBody(ci::gl::GlslProg& shader);
-  void initEdges(ci::gl::GlslProg& shader);
-  void initDrawVertices(ci::gl::GlslProg& shader);
-  void initDrawEdges(ci::gl::GlslProg& shader);
-
-  void step();
-  void runInitialPos();
   void runNBody();
   void runEdges();
-  void drawVertices();
-  void drawEdges();
+  void drawVertices(const ci::Matrix44f& matrix);
+  void drawEdges(const ci::Matrix44f& matrix);
   void swapTargets();
 
   ci::gl::Fbo& positionTarget() {
@@ -68,26 +91,26 @@ private:
     return m_flipFlag ? m_positionTarget2 : m_positionTarget1;
   }
 
+  ci::Area getArea() {
+    return ci::Area(0, 0, m_width, m_height);
+  }
+
   NodeMap m_nodes;
+  std::map<std::string, int> m_nameCache;
 
   bool m_flipFlag;
 
-  float m_downsampleK;
-  float m_dtVertices;
-  float m_dtEdges;
-  float m_pointSize;
-  bool m_edgeForces;
-  bool m_vertexForces;
-  bool m_renderEdges;
-  bool m_renderVertices;
 
   int m_downsampleIdx;
   int m_downsample;
 
   int m_width;
   int m_height;
-  int m_numVertices;
-  int m_numEdges;
+
+  std::vector<float> m_vertCoordData;
+  std::vector<float> m_edgeCoordData;
+
+  ci::Area m_origViewport;
 
   GLBuffer m_vertCoords;
   GLBuffer m_vertColors;

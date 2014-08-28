@@ -18,3 +18,15 @@
 #define RES_INITIAL_POS_VERT_GLSL                 CINDER_RESOURCE( ../resources/, initial_posv.glsl, 111, GLSL )
 #define RES_NBODY_FRAG_GLSL                       CINDER_RESOURCE( ../resources/, nbodyf.glsl, 112, GLSL )
 #define RES_NBODY_VERT_GLSL                       CINDER_RESOURCE( ../resources/, nbodyv.glsl, 113, GLSL )
+#define RES_DISTORTION_VERT_GLSL                  CINDER_RESOURCE( ../resources/, distortion-vert.glsl, 114, GLSL )
+#define RES_DISTORTION_FRAG_GLSL                  CINDER_RESOURCE( ../resources/, distortion-frag.glsl, 115, GLSL )
+#define RES_UNDISTORTION_FRAG_GLSL                CINDER_RESOURCE( ../resources/, undistortion-frag.glsl, 116, GLSL )
+#define RES_HANDS_FRAG_GLSL                       CINDER_RESOURCE( ../resources/, hands-frag.glsl, 117, GLSL )
+#define RES_HANDS_VERT_GLSL                       CINDER_RESOURCE( ../resources/, hands-vert.glsl, 118, GLSL )
+
+// fonts
+#define RES_FONT_PROXIMA_NOVA_OTF                 CINDER_RESOURCE( ../resources/, proxima-nova.otf, 150, OTF )
+
+// hand meshes
+#define RES_LEFT_HAND_FBX                         CINDER_RESOURCE( ../resources/, models/left_hand.fbx, 160, FBX )
+#define RES_RIGHT_HAND_FBX                        CINDER_RESOURCE( ../resources/, models/right_hand.fbx, 161, FBX )
