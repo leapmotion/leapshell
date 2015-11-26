@@ -1,4 +1,8 @@
 #include "StdAfx.h"
+
+#if 0
+
+
 #include "GLBuffer.h"
 #include "OculusVR.h"
 #include "Globals.h"
@@ -332,3 +336,5 @@ void OculusVR::DistortionMeshRender() {
   m_HMDFbo.unbindTexture();
   shader.unbind();
 }
+
+#endif

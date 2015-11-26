@@ -2,7 +2,7 @@
 #define __Globals_h__
 
 // flags
-#define USE_LEAP_IMAGE_API 1
+#define USE_LEAP_IMAGE_API 0
 
 class Globals {
 public:

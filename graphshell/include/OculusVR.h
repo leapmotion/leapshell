@@ -1,4 +1,5 @@
-#ifndef __OculusVR_h__
+#if 0
+//#ifndef __OculusVR_h__
 #define __OculusVR_h__
 
 typedef struct ovrGLConfigData_s

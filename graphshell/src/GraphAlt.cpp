@@ -7,21 +7,26 @@ const float GraphAlt::EDGE_DISTANCE_SMOOTH = 0.975f;
 const float GraphAlt::HIGHLIGHT_SMOOTH = 0.95f;
 const float GraphAlt::CONTRACTION_DISTANCE_RATIO = 0.5f;
 
-void GraphAlt::Start(GraphType type) {
-  m_gravity = 0.005f;
+GraphAlt::GraphAlt() {
+  m_gravity = 0.01f;
   m_flattening = 0.05f;
-  m_gravityRadius = 500.0f;
-  m_alpha = 0.85f;
+  m_gravityRadius = 0.0f;
+  m_alpha = 0.1f;
   m_friction = 0.85f;
-  m_charge = -100.0f;
+  m_charge = 1000.0f;
   m_leap = 1.0f;
+  m_minEdgeDistance = 300.0;
+  m_extraEdgeDistance = 300.0;
+  m_weightPower = 2.5;
+}
 
+void GraphAlt::Start(GraphType type) {
   if (type == RANDOM) {
     createRandomGraph(100);
   } else if (type == WEB) {
     createWebGraph();
   } else if (type == COMPANY) {
-    createCompanyGraph();
+    createCompanyGraph2();
   } else if (type == MUSIC) {
     createMusicGraph();
   }
@@ -30,7 +35,7 @@ void GraphAlt::Start(GraphType type) {
 void GraphAlt::Update() {
   applyRelaxation();
   applyGravity();
-  applyFlattening();
+  //applyFlattening();
   applyForces();
   applyLeapForces();
   resolveConstraints();
@@ -43,7 +48,7 @@ void GraphAlt::Draw(const Matrix4x4& textTransform) const {
   ci::gl::enableDepthWrite();
   //ci::gl::enableAlphaBlending();
   ci::gl::enableAdditiveBlending();
-  //glDisable(GL_DEPTH_TEST);
+  glDisable(GL_DEPTH_TEST);
   //ci::gl::enableAdditiveBlending();
   //glEnable(GL_TEXTURE_2D);
 
@@ -57,18 +62,10 @@ void GraphAlt::Draw(const Matrix4x4& textTransform) const {
     //ci::gl::drawSphere(nodePos, radius);
 
     ci::gl::color(node.m_color);
-    glPointSize(15.0f);
+    glPointSize(10.0f);
     glBegin(GL_POINTS);
     ci::gl::vertex(nodePos);
     glEnd();
-
-    //if (node.m_activation.value > 0.001f) {
-      ci::gl::color(ci::ColorA::gray(node.m_highlight.value, 1.0f));
-      glPointSize(30.0f);
-      glBegin(GL_POINTS);
-      ci::gl::vertex(nodePos);
-      glEnd();
-    //}
   }
 #endif
 
@@ -80,11 +77,13 @@ void GraphAlt::Draw(const Matrix4x4& textTransform) const {
     glLineWidth(2.0f);
     ci::ColorA c = 0.5f * (node1.m_color + node2.m_color);
     c = edge.m_activation.value * ci::ColorA::white() + (1.0f - edge.m_activation.value)*c;
+    c.a = 0.75f * edge.m_strength;
     ci::gl::color(c);
     glBegin(GL_LINES);
     glVertex3dv(node1.m_position.data());
     glVertex3dv(node2.m_position.data());
     glEnd();
+#if 0
     //if (edge.m_activation.value > 0.001f) {
       glLineWidth(8.0f);
 #if 0
@@ -100,6 +99,7 @@ void GraphAlt::Draw(const Matrix4x4& textTransform) const {
       glVertex3dv(node2.m_position.data());
       glEnd();
     //}
+#endif
   }
 #endif
 
@@ -127,22 +127,22 @@ void GraphAlt::Draw(const Matrix4x4& textTransform) const {
     const ci::Rectf nameRect(start, 0.0f, start + nameSize.x, 200.0f);
     const Vector3& pos = node.m_position;
     const ci::Vec3f nodePos(pos.x(), pos.y(), pos.z());
-    const float ratio = node.m_weight / m_maxWeight;
+    //const float ratio = node.m_weight / m_maxWeight;
 
     glPushMatrix();
     ci::gl::translate(nodePos);
     //glScalef(1, -1, 1);
     glMultMatrixd(textTransform.data());
-    const float scale = 0.1f + 0.175f*ratio*ratio;
-    glScalef(-scale, -scale, scale);
-    ci::gl::translate(ci::Vec3f(0, 0, -100));
+    const float scale = 0.25f;// +0.175f*ratio*ratio;
+    glScalef(scale, -scale, scale);
+    ci::gl::translate(ci::Vec3f(0, 0, 0));
     ci::gl::color(ci::ColorA::white());
-    //glDisable(GL_DEPTH_TEST);
+    glDisable(GL_DEPTH_TEST);
     //glDisable(GL_CULL_FACE);
     //ci::gl::disableDepthWrite();
     Globals::fontRegular->drawString(node.m_name, nameRect);
     //ci::gl::enableDepthWrite();
-    //glEnable(GL_DEPTH_TEST);
+    glEnable(GL_DEPTH_TEST);
     //glEnable(GL_CULL_FACE);
     glPopMatrix();
   }
@@ -400,6 +400,76 @@ Hardware	Firmware";
   }
 }
 
+
+void GraphAlt::createCompanyGraph2() {
+  m_nodes.clear();
+  m_edges.clear();
+
+  std::ifstream fileInput("weights.csv");
+  std::string graph((std::istreambuf_iterator<char>(fileInput)), std::istreambuf_iterator<char>());
+
+  std::vector<std::string> lines;
+  split(graph, '\r', lines);
+  for (size_t i = 0; i<lines.size(); i++) {
+    std::vector<std::string> elements;
+    split(lines[i], ',', elements);
+    if (!elements.empty()) {
+      if (i == 0) {
+        for (size_t j = 0; j < elements.size(); j++) {
+          if (!elements[j].empty()) {
+            retrieveOrAddNode(elements[j]);
+          }
+        }
+      } else {
+        const int sourceIdx = retrieveOrAddNode(elements[0]);
+        for (size_t j = 1; j < elements.size(); j++) {
+          if (sourceIdx == j - 1) {
+            continue;
+          }
+          std::stringstream ss(elements[j]);
+          double weight = 0;
+          ss >> weight;
+          weight = std::powf(weight, m_weightPower);
+          if (weight > 0) {
+            const int destIdx = j - 1;
+            GraphEdge temp;
+            temp.m_origDistance = m_minEdgeDistance + (1.0 - weight) * m_extraEdgeDistance;
+            temp.m_contractedDistance = temp.m_origDistance * CONTRACTION_DISTANCE_RATIO;
+            temp.m_distance.Update(temp.m_origDistance, Globals::curTimeSeconds, EDGE_DISTANCE_SMOOTH);
+            temp.m_source = sourceIdx;
+            temp.m_target = destIdx;
+            temp.m_strength = weight;
+            temp.m_visited = false;
+            temp.m_activation.Update(0.0f, Globals::curTimeSeconds, 0.5f);
+            m_edges.push_back(temp);
+          }
+        }
+      }
+    }
+  }
+
+  m_maxWeight = 0.0f;
+  for (size_t i = 0; i<m_edges.size(); i++) {
+    const GraphEdge& edge = m_edges[i];
+    GraphNode& source = m_nodes[edge.m_source];
+    GraphNode& target = m_nodes[edge.m_target];
+    source.m_weight += 1.0f;
+    target.m_weight += 1.0f;
+    m_maxWeight = std::max(m_maxWeight, source.m_weight);
+    m_maxWeight = std::max(m_maxWeight, target.m_weight);
+  }
+
+  for (size_t i = 0; i<m_nodes.size(); i++) {
+    const float ratio = std::powf(m_nodes[i].m_weight / m_maxWeight, 3.0f);
+    const float hue = 0.75f * ratio;
+    m_nodes[i].m_color = ci::hsvToRGB(ci::Vec3f(hue, 1.0f, 0.9f));
+    std::stringstream ss;
+    ss << static_cast<int>(m_nodes[i].m_weight);
+    //m_nodes[i].m_name = ss.str();
+    //m_nodes[i].m_color.a = ratio;
+  }
+}
+
 void GraphAlt::createMusicGraph() {
   m_nodes.clear();
   m_edges.clear();
@@ -462,7 +532,7 @@ void GraphAlt::createMusicGraph() {
 
 Vector3 GraphAlt::getRandomPosition() const {
   Vector3 result;
-  result << ci::randFloat(-250, 250), ci::randFloat(-150, 150), ci::randFloat(m_gravityRadius-100, m_gravityRadius);
+  result << ci::randFloat(-2000, 2000), ci::randFloat(-2000, 2000), 0.0f;// ci::randFloat(m_gravityRadius - 100, m_gravityRadius);
   return result;
 }
 
@@ -514,14 +584,13 @@ void GraphAlt::applyForces() {
     for (size_t j=i+1; j<m_nodes.size(); j++) {
       GraphNode& node2 = m_nodes[j];
       const Vector3 diff = node2.m_position - node1.m_position;
-      const float diffLengthSq = static_cast<float>(diff.squaredNorm());
+      const double diffLengthSq = diff.squaredNorm();
       if (diffLengthSq < forceChargeDistanceSq) {
-        const float diffLength = std::sqrt(diffLengthSq);
-        const float bonus1 = node2.m_weight / m_maxWeight;
-        const float bonus2 = node1.m_weight / m_maxWeight;
+        const float node2Ratio = node1.Weight() / (node1.Weight() + node2.Weight());
+        const float node1Ratio = 1.0f - node2Ratio;
         const Vector3 movement = m_alpha * diff * (m_charge / diffLengthSq);
-        node1.m_desiredPosition -= (1.0f + bonus1) * movement;
-        node2.m_desiredPosition += (1.0f + bonus2) * movement;
+        node1.m_desiredPosition -= node1Ratio * movement;
+        node2.m_desiredPosition += node2Ratio * movement;
       }
     }
   }
@@ -609,8 +678,8 @@ void GraphAlt::resolveConstraints() {
   for (size_t i=0; i<m_nodes.size(); i++) {
     GraphNode& node = m_nodes[i];
     const Vector3 diff = node.m_desiredPosition - node.m_position;
+    node.m_position += m_friction * diff;
     node.m_desiredPosition = node.m_position;
-    node.m_position -= m_friction * diff;
   }
 }
 

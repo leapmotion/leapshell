@@ -7,8 +7,8 @@
 #include "Graph.h"
 #include "Interaction.h"
 #include "GraphAlt.h"
-#include "MeshHand.h"
-#include "OculusVR.h"
+//#include "MeshHand.h"
+//#include "OculusVR.h"
 #if defined(CINDER_COCOA)
 #include <boost/uuid/sha1.hpp>
 #include <mach-o/getsect.h>
@@ -31,6 +31,8 @@ public:
   virtual void mouseDrag(ci::app::MouseEvent event) override;
   virtual void keyDown(ci::app::KeyEvent) override;
   virtual void keyUp(ci::app::KeyEvent) override;
+  virtual void mouseWheel(ci::app::MouseEvent event) override;
+  
   virtual void resize() override;
 
   EIGEN_MAKE_ALIGNED_OPERATOR_NEW
@@ -91,13 +93,13 @@ private:
   Interaction m_interaction;
 
   // hands
-  MeshHand* m_handL;
-  MeshHand* m_handR;
+  //MeshHand* m_handL;
+  //MeshHand* m_handR;
 
   GraphAlt m_graphAlt;
   float m_graphRadius;
 
-  OculusVR m_Oculus;
+  //OculusVR m_Oculus;
   bool m_useOculusRender;
   bool m_useOculusControl;
 
@@ -107,6 +109,7 @@ private:
   float m_pitch;
   float m_dist;
   ci::Vec2i m_mousePos;
+  ci::Vec2f m_viewOffset;
 
 #if USE_LEAP_IMAGE_API
   Leap::ImageList m_images;

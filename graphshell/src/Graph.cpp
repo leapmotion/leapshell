@@ -17,7 +17,7 @@ Graph::Graph() {
 
   //createWebGraph();
   //createRandomGraph(3);
-  createProductGraph();
+  //createProductGraph();
 }
 
 

@@ -44,7 +44,7 @@
 #include <stdexcept>
 
 // fbx
-#include "fbxsdk.h"
+//#include "fbxsdk.h"
 
 // OS-specific
 #if _WIN32
@@ -71,8 +71,8 @@
 #include <boost/thread/mutex.hpp>
 
 // Oculus
-#include "OVR.h"
+//#include "OVR.h"
 
 // curl
-#define CURL_STATICLIB
-#include <curl/curl.h>
+//#define CURL_STATICLIB
+//#include <curl/curl.h>

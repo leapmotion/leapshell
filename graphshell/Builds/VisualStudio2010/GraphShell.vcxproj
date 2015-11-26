@@ -1,5 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<Project DefaultTargets="Build" ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+<Project DefaultTargets="Build" ToolsVersion="12.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup Label="ProjectConfigurations">
     <ProjectConfiguration Include="Debug|Win32">
       <Configuration>Debug</Configuration>
@@ -21,10 +21,12 @@
     <ConfigurationType>Application</ConfigurationType>
     <CharacterSet>Unicode</CharacterSet>
     <WholeProgramOptimization>true</WholeProgramOptimization>
+    <PlatformToolset>v120</PlatformToolset>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
     <CharacterSet>Unicode</CharacterSet>
+    <PlatformToolset>v120</PlatformToolset>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
   <ImportGroup Label="ExtensionSettings" />
@@ -49,7 +51,7 @@
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
       <Optimization>Disabled</Optimization>
-      <AdditionalIncludeDirectories>..\..\include;$(LIBRARIES_PATH)\cinder_0.8.5_vc2010\include;$(LIBRARIES_PATH)\cinder_0.8.5_vc2010\boost;$(LIBRARIES_PATH)\LeapSDK\include;$(LIBRARIES_PATH)\eigen-3.1.2;$(LIBRARIES_PATH)\fbx-sdk\include;$(LIBRARIES_PATH)\OculusSDK-0.3.2\LibOVR\Include;$(LIBRARIES_PATH)\curl-7.32.0\include;$(LIBRARIES_PATH)\openssl\include;</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\..\include;$(LIBRARIES_PATH)\cinder_0.8.6_vc2013\include;$(LIBRARIES_PATH)\cinder_0.8.6_vc2013\boost;$(LIBRARIES_PATH)\LeapSDK\include;$(LIBRARIES_PATH)\eigen-3.2.2;$(LIBRARIES_PATH)\fbx-sdk\include;$(LIBRARIES_PATH)\OculusSDK\LibOVR\Include;$(LIBRARIES_PATH)\curl-7.36.0\include;$(LIBRARIES_PATH)\openssl\include</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>WIN32;_DEBUG;_WINDOWS;NOMINMAX;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <MinimalRebuild>true</MinimalRebuild>
       <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
@@ -62,11 +64,11 @@
       <AdditionalOptions>/Zm200 %(AdditionalOptions)</AdditionalOptions>
     </ClCompile>
     <ResourceCompile>
-      <AdditionalIncludeDirectories>$(LIBRARIES_PATH)\cinder_0.8.5_vc2010\include;..\..\include</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(LIBRARIES_PATH)\cinder_0.8.6_vc2013\include;..\..\include</AdditionalIncludeDirectories>
     </ResourceCompile>
     <Link>
-      <AdditionalDependencies>kernel32.lib;cinder_d.lib;Leapd.lib;glu32.lib;libfbxsdk-mt.lib;libovrd.lib;winmm.lib;libcurl.lib;libeay32.lib;ssleay32.lib;%(AdditionalDependencies)</AdditionalDependencies>
-      <AdditionalLibraryDirectories>$(LIBRARIES_PATH)\cinder_0.8.5_vc2010\lib;$(LIBRARIES_PATH)\cinder_0.8.5_vc2010\lib\msw;$(LIBRARIES_PATH)\LeapSDK\lib\x86;$(LIBRARIES_PATH)\fbx-sdk\lib\vs2010\x86\debug;$(LIBRARIES_PATH)\OculusSDK-0.3.2\LibOVR\Lib\Win32\VS2010;%(AdditionalLibraryDirectories);$(LIBRARIES_PATH)\curl-7.32.0\lib\debug;$(LIBRARIES_PATH)\openssl\lib\debug;</AdditionalLibraryDirectories>
+      <AdditionalDependencies>kernel32.lib;cinder-v120_d.lib;Leapd.lib;glu32.lib;libovrd.lib;winmm.lib;libcurl.lib;libeay32.lib;ssleay32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>$(LIBRARIES_PATH)\cinder_0.8.6_vc2013\lib;$(LIBRARIES_PATH)\cinder_0.8.6_vc2013\lib\msw\x86;$(LIBRARIES_PATH)\LeapSDK\lib\x86;$(LIBRARIES_PATH)\fbx-sdk\lib\vs2010\x86\debug;$(LIBRARIES_PATH)\OculusSDK\LibOVR\Lib\Win32\VS2013;%(AdditionalLibraryDirectories);$(LIBRARIES_PATH)\curl-7.36.0\lib\debug;$(LIBRARIES_PATH)\openssl\lib\debug</AdditionalLibraryDirectories>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <SubSystem>Windows</SubSystem>
       <RandomizedBaseAddress>false</RandomizedBaseAddress>
@@ -80,7 +82,7 @@
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <ClCompile>
-      <AdditionalIncludeDirectories>..\..\include;$(LIBRARIES_PATH)\cinder_0.8.5_vc2010\include;$(LIBRARIES_PATH)\cinder_0.8.5_vc2010\boost;$(LIBRARIES_PATH)\LeapSDK\include;$(LIBRARIES_PATH)\eigen-3.1.2;$(LIBRARIES_PATH)\fbx-sdk\include;$(LIBRARIES_PATH)\OculusSDK-0.3.2\LibOVR\Include;$(LIBRARIES_PATH)\curl-7.32.0\include;$(LIBRARIES_PATH)\openssl\include;</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\..\include;$(LIBRARIES_PATH)\cinder_0.8.6_vc2013\include;$(LIBRARIES_PATH)\cinder_0.8.6_vc2013\boost;$(LIBRARIES_PATH)\LeapSDK\include;$(LIBRARIES_PATH)\eigen-3.2.2;$(LIBRARIES_PATH)\fbx-sdk\include;$(LIBRARIES_PATH)\OculusSDK\LibOVR\Include;$(LIBRARIES_PATH)\openssl\include</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>WIN32;NDEBUG;_WINDOWS;NOMINMAX;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
       <PrecompiledHeader>Use</PrecompiledHeader>
@@ -98,11 +100,11 @@
       <LinkLibraryDependencies>true</LinkLibraryDependencies>
     </ProjectReference>
     <ResourceCompile>
-      <AdditionalIncludeDirectories>$(LIBRARIES_PATH)\cinder_0.8.5_vc2010\include;..\..\include</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(LIBRARIES_PATH)\cinder_0.8.6_vc2013\include;..\..\include</AdditionalIncludeDirectories>
     </ResourceCompile>
     <Link>
-      <AdditionalDependencies>kernel32.lib;user32.lib;gdi32.lib;winspool.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;comdlg32.lib;advapi32.lib;cinder.lib;Leap.lib;glu32.lib;libfbxsdk-mt.lib;libovr.lib;winmm.lib;libcurl.lib;libeay32.lib;ssleay32.lib;%(AdditionalDependencies)</AdditionalDependencies>
-      <AdditionalLibraryDirectories>$(LIBRARIES_PATH)\cinder_0.8.5_vc2010\lib;$(LIBRARIES_PATH)\cinder_0.8.5_vc2010\lib\msw;$(LIBRARIES_PATH)\LeapSDK\lib\x86;$(LIBRARIES_PATH)\fbx-sdk\lib\vs2010\x86\release;$(LIBRARIES_PATH)\OculusSDK-0.3.2\LibOVR\Lib\Win32\VS2010;$(LIBRARIES_PATH)\curl-7.32.0\lib\release;$(LIBRARIES_PATH)\openssl\lib\release;</AdditionalLibraryDirectories>
+      <AdditionalDependencies>kernel32.lib;user32.lib;gdi32.lib;winspool.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;comdlg32.lib;advapi32.lib;cinder-v120.lib;Leap.lib;glu32.lib;winmm.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>$(LIBRARIES_PATH)\cinder_0.8.6_vc2013\lib;$(LIBRARIES_PATH)\cinder_0.8.6_vc2013\lib\msw\x86;$(LIBRARIES_PATH)\LeapSDK\lib\x86;$(LIBRARIES_PATH)\curl-7.36.0\lib\release;$(LIBRARIES_PATH)\openssl\lib\release</AdditionalLibraryDirectories>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <GenerateMapFile>true</GenerateMapFile>
       <SubSystem>Windows</SubSystem>
@@ -122,7 +124,6 @@
     <ResourceCompile Include="Resources.rc" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="..\..\src\CinderFbxStream.cpp" />
     <ClCompile Include="..\..\src\Geometry.cpp" />
     <ClCompile Include="..\..\src\GLBuffer.cpp" />
     <ClCompile Include="..\..\src\Globals.cpp" />
@@ -131,8 +132,6 @@
     <ClCompile Include="..\..\src\GraphShell.cpp" />
     <ClCompile Include="..\..\src\Interaction.cpp" />
     <ClCompile Include="..\..\src\LeapListener.cpp" />
-    <ClCompile Include="..\..\src\MeshHand.cpp" />
-    <ClCompile Include="..\..\src\OculusVR.cpp" />
     <ClCompile Include="..\..\src\Request.cpp" />
     <ClCompile Include="..\..\src\StdAfx.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>
@@ -141,7 +140,6 @@
     <ClCompile Include="..\..\src\Value.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="..\..\include\CinderFbxStream.h" />
     <ClInclude Include="..\..\include\DataTypes.h" />
     <ClInclude Include="..\..\include\Geometry.h" />
     <ClInclude Include="..\..\include\GLBuffer.h" />
@@ -150,8 +148,6 @@
     <ClInclude Include="..\..\include\GraphAlt.h" />
     <ClInclude Include="..\..\include\Interaction.h" />
     <ClInclude Include="..\..\include\LeapListener.h" />
-    <ClInclude Include="..\..\include\MeshHand.h" />
-    <ClInclude Include="..\..\include\OculusVR.h" />
     <ClInclude Include="..\..\include\Request.h" />
     <ClInclude Include="..\..\include\Resources.h" />
     <ClInclude Include="..\..\include\GraphShell.h" />

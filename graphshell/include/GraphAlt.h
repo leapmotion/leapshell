@@ -63,6 +63,7 @@ typedef std::vector<GraphEdge> GraphEdgeVector;
 class GraphAlt {
 public:
 
+  GraphAlt();
   enum GraphType { RANDOM, WEB, COMPANY, MUSIC };
 
   void Start(GraphType type);
@@ -72,18 +73,22 @@ public:
   //void AddAttractor(const Vector3& position, float strength);
   void UpdateAttractor(int id, const Vector3& position, float strength);
 
-  float m_gravity;
-  float m_gravityRadius;
-  float m_flattening;
-  float m_alpha;
-  float m_friction;
-  float m_charge;
-  float m_leap;
+  double m_gravity;
+  double m_gravityRadius;
+  double m_flattening;
+  double m_alpha;
+  double m_friction;
+  double m_charge;
+  double m_leap;
+  double m_minEdgeDistance;
+  double m_extraEdgeDistance;
+  double m_weightPower;
 
 private:
   void createRandomGraph(int numNodes);
   void createWebGraph();
   void createCompanyGraph();
+  void createCompanyGraph2();
   void createMusicGraph();
   Vector3 getRandomPosition() const;
   void applyRelaxation();

@@ -1,6 +1,6 @@
 // Copyright (c) 2010 - 2014 Leap Motion. All rights reserved. Proprietary and confidential.
 #pragma once
-#include <cinder/CinderResources.h>
+#include "cinder/CinderResources.h"
 
 // shaders
 
@@ -27,6 +27,3 @@
 // fonts
 #define RES_FONT_PROXIMA_NOVA_OTF                 CINDER_RESOURCE( ../resources/, proxima-nova.otf, 150, OTF )
 
-// hand meshes
-#define RES_LEFT_HAND_FBX                         CINDER_RESOURCE( ../resources/, models/left_hand.fbx, 160, FBX )
-#define RES_RIGHT_HAND_FBX                        CINDER_RESOURCE( ../resources/, models/right_hand.fbx, 161, FBX )

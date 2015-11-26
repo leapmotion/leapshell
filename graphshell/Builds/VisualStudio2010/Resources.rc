@@ -1,6 +1,6 @@
 #include "../include/Resources.h"
 
-1	ICON	"..\\resources\\cinder_app_icon.ico"
+//1	ICON	"..\\resources\\cinder_app_icon.ico"
 
 RES_PASSTHROUGH_VERT_GLSL
 RES_MATERIAL_VERT_GLSL
@@ -22,5 +22,3 @@ RES_UNDISTORTION_FRAG_GLSL
 RES_HANDS_FRAG_GLSL
 RES_HANDS_VERT_GLSL
 RES_FONT_PROXIMA_NOVA_OTF
-RES_LEFT_HAND_FBX
-RES_RIGHT_HAND_FBX
